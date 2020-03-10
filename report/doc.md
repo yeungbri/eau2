@@ -1,5 +1,4 @@
 # Introduction
-
 eau2 is a distributed key value store. It can store key value pairs and retrieve keys from any node in the system. Applications that run on top of each key value store have access to all values in the system.
 
 # Architecture
