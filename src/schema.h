@@ -1,7 +1,6 @@
 /*
  * Authors: Brian Yeung, Daniel Gao
  * Emails: yeung.bri@husky.neu.edu, gao.d@husky.neu.edu
- * CS4500 Assignment 4
  */
 
 #pragma once

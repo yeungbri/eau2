@@ -5,4 +5,3 @@ run:
 	./eau2
 
 test:
-	g++ -std=c++17 -Wall -o  test/personal_test_suite.cpp  
