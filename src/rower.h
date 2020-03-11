@@ -36,6 +36,10 @@ public:
   {
     return;
   }
+
+  virtual Rower* clone() {
+    return;
+  }
 };
 
 class PrintRower : public Rower

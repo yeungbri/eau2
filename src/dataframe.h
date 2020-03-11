@@ -3,7 +3,7 @@
  * Emails: yeung.bri@husky.neu.edu, gao.d@husky.neu.edu
  */
 
-//lang::CwC
+//lang::Cpp
 
 #pragma once
 
@@ -27,8 +27,8 @@ class DataFrame
 {
 public:
   Schema &_schema;
-  std::vector<Column> _columns;
-  std::vector<Row> _rows;
+  std::vector<Column*> _columns;
+  std::vector<Row*> _rows;
   static const int THREAD_COUNT = 4;
 
   /** Create a data frame with the same columns as the given df but with no rows or rownames */
@@ -37,18 +37,18 @@ public:
     Schema* schema = new Schema(df.get_schema());
     int schema_rows = schema->length();
     for (size_t i=0; i<schema_rows; i++) {
-      schema->_rows.erase(i);
+      schema->_rows.erase(schema->_rows.begin() + i);
     }
     _schema = *schema;
-    _columns = std::vector<Column>(df._columns);
-    _rows = std::vector<Row>(0);
+    _columns = std::vector<Column*>(df._columns);
+    _rows = std::vector<Row*>(0);
   }
 
   /** Create a data frame from a schema and columns. All columns are created
     * empty. */
   DataFrame(Schema &schema) : _schema(schema)
   {
-    _columns = std::vector<Column>(_schema.width());
+    _columns = std::vector<Column*>(_schema.width());
     for (size_t i = 0; i < _schema.width(); ++i)
     {
       Column *col;
@@ -71,7 +71,7 @@ public:
       }
       _columns.push_back(col);
     }
-    _rows = std::vector<Row>(_schema.length());
+    _rows = std::vector<Row*>(_schema.length());
     for (size_t i = 0; i < _schema.length(); ++i)
     {
       Row *row = new Row(_schema, nullptr);
@@ -79,7 +79,10 @@ public:
     }
   }
 
-  virtual ~DataFrame() { }
+  virtual ~DataFrame() {
+    _columns.clear();
+    _rows.clear();
+  }
 
   /** Returns the dataframe's schema. Modifying the schema after a dataframe
     * has been created in undefined. */
@@ -102,16 +105,16 @@ public:
         switch (_schema.col_type(i))
         {
         case 'B':
-          _rows->get(i)->push_back(static_cast<BoolColumn *>(col)->get(i));
+          _rows.at(i)->push_back(static_cast<BoolColumn *>(col)->get(i));
           break;
         case 'I':
-          _rows->get(i)->push_back(static_cast<IntColumn *>(col)->get(i));
+          _rows.at(i)->push_back(static_cast<IntColumn *>(col)->get(i));
           break;
         case 'F':
-          _rows->get(i)->push_back(static_cast<FloatColumn *>(col)->get(i));
+          _rows.at(i)->push_back(static_cast<FloatColumn *>(col)->get(i));
           break;
         case 'S':
-          _rows->get(i)->push_back(static_cast<StringColumn *>(col)->get(i));
+          _rows.at(i)->push_back(static_cast<StringColumn *>(col)->get(i));
           break;
         }
       }
@@ -122,34 +125,32 @@ public:
    *  columns out of bounds, or request the wrong type is undefined.*/
   int get_int(size_t col, size_t row)
   {
-    auto tempRow = _rows->get(row);
-    auto tempCol = tempRow->get_int(col);
-    return _rows->get(row)->get_int(col);
+    return _rows.at(row)->get_int(col);
   }
 
   bool get_bool(size_t col, size_t row)
   {
-    return _rows->get(row)->get_bool(col);
+    return _rows.at(row)->get_bool(col);
   }
 
   float get_float(size_t col, size_t row)
   {
-    return _rows->get(row)->get_float(col);
+    return _rows.at(row)->get_float(col);
   }
 
-  String *get_string(size_t col, size_t row)
+  std::string get_string(size_t col, size_t row)
   {
-    return _rows->get(row)->get_string(col);
+    return _rows.at(row)->get_string(col);
   }
 
   /** Return the offset of the given column name or -1 if no such col. */
-  int get_col(String &col)
+  int get_col(std::string &col)
   {
     return _schema.col_idx(col.c_str());
   }
 
   /** Return the offset of the given row name or -1 if no such row. */
-  int get_row(String &row)
+  int get_row(std::string &row)
   {
     return _schema.row_idx(row.c_str());
   }
@@ -159,26 +160,26 @@ public:
     * bound, the result is undefined. */
   void set(size_t col, size_t row, int val)
   {
-    static_cast<IntColumn *>(_columns->get(col))->set(row, val);
-    _rows->get(row)->set(col, val);
+    static_cast<IntColumn *>(_columns.at(col))->set(row, val);
+    _rows.at(row)->set(col, val);
   }
 
   void set(size_t col, size_t row, bool val)
   {
-    static_cast<BoolColumn *>(_columns->get(col))->set(row, val);
-    _rows->get(row)->set(col, val);
+    static_cast<BoolColumn *>(_columns.at(col))->set(row, val);
+    _rows.at(row)->set(col, val);
   }
 
   void set(size_t col, size_t row, float val)
   {
-    static_cast<FloatColumn *>(_columns->get(col))->set(row, val);
-    _rows->get(row)->set(col, val);
+    static_cast<FloatColumn *>(_columns.at(col))->set(row, val);
+    _rows.at(row)->set(col, val);
   }
 
-  void set(size_t col, size_t row, String *val)
+  void set(size_t col, size_t row, std::string val)
   {
-    static_cast<StringColumn *>(_columns->get(col))->set(row, val);
-    _rows->get(row)->set(col, val);
+    static_cast<StringColumn *>(_columns.at(col))->set(row, val);
+    _rows.at(row)->set(col, val);
   }
 
   /** Set the fields of the given row object with values from the columns at
@@ -187,7 +188,7 @@ public:
     */
   void fill_row(size_t idx, Row &row)
   {
-    Row *source = _rows->get(idx);
+    Row *source = _rows.at(idx);
     for (size_t i = 0; i < source->width(); ++i)
     {
       switch (_schema.col_type(i))
@@ -213,23 +214,23 @@ public:
   void add_row(Row &row)
   {
     Row *newRow = new Row(row);
-    _rows->push_back(newRow);
+    _rows.push_back(newRow);
     _schema.add_row(row._name);
     for (size_t i = 0; i < ncols(); ++i)
     {
       switch (row.col_type(i))
       {
       case 'B':
-        _columns->get(i)->push_back(row.get_bool(i));
+        _columns.at(i)->push_back(row.get_bool(i));
         break;
       case 'I':
-        _columns->get(i)->push_back(row.get_int(i));
+        _columns.at(i)->push_back(row.get_int(i));
         break;
       case 'F':
-        _columns->get(i)->push_back(row.get_float(i));
+        _columns.at(i)->push_back(row.get_float(i));
         break;
       case 'S':
-        _columns->get(i)->push_back(row.get_string(i));
+        _columns.at(i)->push_back(row.get_string(i));
         break;
       }
     }
@@ -238,13 +239,13 @@ public:
   /** The number of rows in the dataframe. */
   size_t nrows()
   {
-    return _rows->length();
+    return _rows.size();
   }
 
   /** The number of columns in the dataframe.*/
   size_t ncols()
   {
-    return _columns->length();
+    return _columns.size();
   }
 
     /**
@@ -254,7 +255,7 @@ public:
   {
     for (size_t i = start; i < nrows(); i += THREAD_COUNT)
     {
-      r.accept(*_rows->get(i));
+      r.accept(*_rows.at(i));
     }
   }
 
@@ -312,7 +313,7 @@ public:
   {
     for (size_t i = 0; i < _schema.length(); ++i)
     {
-      r.accept(*(_rows->get(i)));
+      r.accept(*(_rows.at(i)));
     }
   }
 
@@ -323,7 +324,7 @@ public:
     DataFrame *df = new DataFrame(*this);
     for (size_t i = 0; i < nrows(); i++)
     {
-      Row &currRow = *(_rows->get(i));
+      Row &currRow = *(_rows.at(i));
       if (r.accept(currRow))
       {
         df->add_row(currRow);
@@ -337,9 +338,9 @@ public:
   {
     Rower *rower = new PrintRower();
 
-    for (size_t i = 0; i < _rows->length(); ++i)
+    for (size_t i = 0; i < _rows.size(); ++i)
     {
-      Row *row = _rows->get(i);
+      Row *row = _rows.at(i);
       rower->accept(*row);
     }
   }
