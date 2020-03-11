@@ -9,6 +9,7 @@
 #include "schema.h"
 #include "fielder.h"
 #include <string>
+#include <vector>
 
 static size_t DEFAULT_ROW_SIZE = 10;
 
@@ -43,10 +44,11 @@ public:
       int ival;
       float fval;
       bool bval;
-      std::string sval;
+      char* sval;
     } val;
   };
-  struct Data **_elements;
+
+  std::vector<struct Data *> _elements;
 
   /** Build a row following a schema. */
   Row(Schema &scm, std::string name) : Row(scm)
@@ -58,21 +60,17 @@ public:
   {
     _schema = scm;
     _length = scm.width();
-    _capacity = DEFAULT_ROW_SIZE;
-    _elements = new struct Data *[DEFAULT_ROW_SIZE];
     for (size_t i = 0; i < _length; i++)
     {
-      _elements[i] = new struct Data();
+      _elements.push_back(new struct Data());
     }
   }
 
   Row(Row &row)
   {
     _schema = row._schema;
-    _capacity = row._capacity;
     _length = row._length;
     _idx = row._idx;
-    _elements = new struct Data *[_capacity];
     for (size_t i = 0; i < _length; ++i)
     {
       struct Data *element = new struct Data();
