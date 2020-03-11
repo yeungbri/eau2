@@ -6,7 +6,8 @@
 #pragma once
 
 #include <iostream>
-#include "array.h"
+#include <vector>
+#include <string>
 
 /*************************************************************************
  * Schema::
@@ -23,9 +24,9 @@ public:
   {
     if (this != &from)
     {
-      StringArray *fromTypes = new StringArray(*from._types);
-      StringArray *fromRows = new StringArray(*from._rows);
-      StringArray *fromCols = new StringArray(*from._cols);
+      std::vector<std::string> fromTypes(from._types);
+      std::vector<std::string> fromRows(from._rows);
+      std::vector<std::string> fromCols(from._cols);
       this->_types = fromTypes;
       this->_rows = fromRows;
       this->_cols = fromCols;
@@ -33,12 +34,7 @@ public:
   }
 
   /** Create an empty schema **/
-  Schema()
-  {
-    _types = new StringArray();
-    _rows = new StringArray();
-    _cols = new StringArray();
-  }
+  Schema() = default; 
 
   /** Create a schema from a string of types. A string that contains
     * characters other than those identifying the four type results in
@@ -53,8 +49,8 @@ public:
         char *type = new char[2];
         type[0] = types[i];
         type[1] = '\0';
-        _types->push_back(new String(type));
-        _cols->push_back(nullptr);
+        _types.push_back(type);
+        _cols.push_back(nullptr);
       }
     }
   }
@@ -146,7 +142,7 @@ public:
   }
 
 public:
-  StringArray *_types;
-  StringArray *_rows;
-  StringArray *_cols;
+  std::vector<std::string> _types;
+  std::vector<std::string> _rows;
+  std::vector<std::string> _cols;
 };
