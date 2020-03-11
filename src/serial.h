@@ -3,11 +3,10 @@
  * Emails: yeung.bri@husky.neu.edu, gao.d@husky.neu.edu
  */
 
-// lang::Cpp
+//lang::Cpp
 
 #pragma once
 #include "string.h"
-#include "map.h"
 #include "serializable.h"
 
 /**
