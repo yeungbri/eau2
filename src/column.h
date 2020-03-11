@@ -3,7 +3,7 @@
  * Emails: yeung.bri@husky.neu.edu, gao.d@husky.neu.edu
  */
 
-//lang::CwC
+//lang::Cpp
 
 #pragma once
 #include <cstdarg>
@@ -82,7 +82,9 @@ public:
     va_end(bools);
   }
 
-  virtual ~BoolColumn() { }
+  virtual ~BoolColumn() { 
+    _arr.clear();
+  }
 
   bool get(size_t idx)
   {
@@ -140,7 +142,9 @@ public:
     va_end(ints);
   }
 
-  virtual ~IntColumn() { }
+  virtual ~IntColumn() {
+    _arr.clear();
+  }
 
   int get(size_t idx)
   {
@@ -199,7 +203,9 @@ public:
     va_end(floats);
   }
 
-  virtual ~FloatColumn() { }
+  virtual ~FloatColumn() {
+    _arr.clear();
+  }
 
   float get(size_t idx)
   {
@@ -258,7 +264,9 @@ public:
     va_end(strings);
   }
 
-  virtual ~StringColumn() { }
+  virtual ~StringColumn() {
+    _arr.clear();
+  }
 
   std::string get(size_t idx)
   {

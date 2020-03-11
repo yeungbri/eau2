@@ -3,11 +3,10 @@
  * Emails: yeung.bri@husky.neu.edu, gao.d@husky.neu.edu
  */
 
-// lang::CwC
+//lang::CwC
 
 #pragma once
 #include "string.h"
-#include "object.h"
 #include <netinet/in.h>
 #include "serial.h"
 

@@ -3,7 +3,7 @@
  * Emails: yeung.bri@husky.neu.edu, gao.d@husky.neu.edu
  */
 
-//lang::CwC
+//lang::Cpp
 
 #pragma once
 
@@ -14,7 +14,7 @@
  * Fielder::
  * A field vistor invoked by Row.
  */
-class Fielder : public Object
+class Fielder
 {
 public:
   /** Called before visiting a row, the argument is the row offset in the
@@ -25,7 +25,7 @@ public:
   virtual void accept(bool b) = 0;
   virtual void accept(float f) = 0;
   virtual void accept(int i) = 0;
-  virtual void accept(String *s) = 0;
+  virtual void accept(std::string s) = 0;
 
   /** Called when all fields have been seen. */
   virtual void done() = 0;
@@ -60,7 +60,7 @@ public:
     _sys.p(i);
   }
 
-  virtual void accept(String *s)
+  virtual void accept(std::string *s)
   {
     _sys.p(s);
   }
