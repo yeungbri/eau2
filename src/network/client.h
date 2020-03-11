@@ -6,12 +6,12 @@
 
 #pragma once
 #include "util/network.h"
-#include "util/string.h"
-#include "util/string_array.h"
-#include "util/int_array.h"
 #include "util/message.h"
+#include "util/helper.h"
 #include <thread>
 #include <chrono>
+#include <vector>
+#include <string>
 
 /**
  * A network client wrapper over C POSIX functions. This client is able to
@@ -23,7 +23,7 @@ class Client
 {
 public:
   int _sock = -1;                      // The socket connected to by this client.
-  StringArray _client_adr;             // addresses of connected clients as "IP:PORT"
+  std::vector<std::string> _client_adr;// addresses of connected clients as "IP:PORT"
   const char* _serverIp;               // the rendezvous server ip
   int _serverPort;                     // the rendezvous client ip
   const char* _ip;                     // this client's ip
@@ -84,17 +84,15 @@ public:
    */
   int _sendTeardownMsg()
   {
-    StrBuff buff;
-    buff = buff.c(TEARDOWN);
-    buff = buff.c("\n");
-    buff = buff.c(_ip);
-    buff = buff.c(":");
-    buff = buff.c(_port);
-    buff = buff.c("\n");
-    String* tearDown = buff.get();
-    size_t length = tearDown->size();
+    std::string teardown = TEARDOWN;
+    teardown.append("\n");
+    teardown.append(_ip);
+    teardown.append(":");
+    teardown.append(std::to_string(_port));
+    teardown.append("\n");
+    size_t length = teardown.length();
     _teardown = true;
-    assert(_n.sendMsg(_sock, tearDown->c_str(), length) >= 0);
+    assert(_n.sendMsg(_sock, teardown.c_str(), length) >= 0);
     printf("Client %s:%d has shut down.\n", _ip, _port);
     return 0;
   }
@@ -106,18 +104,16 @@ public:
    */
   int sendDirectMessage(const char* ip, int port, const char* msg)
   {
-    StrBuff buff;
-    buff = buff.c(DIRECTMSG);
-    buff = buff.c("\n");
-    buff = buff.c(ip);
-    buff = buff.c(":");
-    buff = buff.c(port);
-    buff = buff.c("\n");
-    buff = buff.c(msg);
-    buff = buff.c("\n");
-    String* directMsg = buff.get();
-    size_t length = directMsg->size();
-    return _n.sendMsg(_sock, directMsg->c_str(), length);
+    std::string directMsg = DIRECTMSG;
+    directMsg += "\n";
+    directMsg += ip;
+    directMsg += ":";
+    directMsg += port;
+    directMsg += "\n";
+    directMsg += msg;
+    directMsg += "\n";
+    size_t length = directMsg.length();
+    return _n.sendMsg(_sock, directMsg.c_str(), length);
   }
 
   /**
@@ -149,27 +145,26 @@ public:
     _client_adr.clear();
 
     // re-init it all
-    size_t numClients = portToInt(tokens[1]);
+    size_t numClients = std::stoi(tokens[1]);
     for (size_t i = 2; i < numClients + 2; ++i)
     {
       char** addr = str_split(tokens[i], ':');
       char* ip = addr[0];
-      int port = portToInt(addr[1]);
+      int port = std::stoi(addr[1]);
       if (strcmp(ip, _ip) == 0 && port == _port)
       {
         continue;
       }
-      StrBuff addrBuff;
-      addrBuff = addrBuff.c(ip);
-      addrBuff = addrBuff.c(":");
-      addrBuff = addrBuff.c(port);
-      _client_adr.push_back(addrBuff.get());
+      std::string address = ip;
+      address += ":";
+      address += std::to_string(port);
+      _client_adr.push_back(address);
 
     }
     printf("Available addresses:\n");
-    for (size_t i = 0; i < _client_adr.length(); ++i)
+    for (size_t i = 0; i < _client_adr.size(); ++i)
     {
-      printf("%s\n", _client_adr.get(i)->c_str());
+      printf("%s\n", _client_adr.at(i).c_str());
     }
   }
 
@@ -202,15 +197,13 @@ public:
    */
   int _sendRegisterMsg()
   {
-    StrBuff buff;
-    buff = buff.c(REGISTER);
-    buff = buff.c("\n");
-    buff = buff.c(_ip);
-    buff = buff.c(":");
-    buff = buff.c(_port);
-    buff = buff.c("\n");
-    String* registerMsg = buff.get();
-    size_t length = registerMsg->size();
-    return _n.sendMsg(_sock, registerMsg->c_str(), length);
+    std::string registerMsg = REGISTER;
+    registerMsg += "\n";
+    registerMsg += _ip;
+    registerMsg += ":";
+    registerMsg += std::to_string(_port);
+    registerMsg += "\n";
+    size_t length = registerMsg.length();
+    return _n.sendMsg(_sock, registerMsg.c_str(), length);
   }
 };

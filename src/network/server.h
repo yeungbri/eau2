@@ -6,10 +6,11 @@
 
 #include "util/network.h"
 #include "util/message.h"
-#include "util/string_array.h"
-#include "util/int_array.h"
+#include "util/helper.h"
 #include <thread>
 #include <chrono>
+#include <vector>
+#include <string>
 
 /**
  * A server wrapper around C POSIX TCP functions. This server is able to
@@ -18,9 +19,9 @@
  */
 class Server
 {
-public:
-  IntArray _clients;        // sockets of connected clients
-  StringArray _client_adr;  // addresses of connected clients as "IP:PORT"
+private:
+  std::vector<int> _clients;        // sockets of connected clients
+  std::vector<std::string> _client_adr;  // addresses of connected clients as "IP:PORT"
   int _server;              // this own server's socket
   struct pollfd _fds[1024]; // file descriptors. supports 1024 clients connecting to this server
   int _nfds = 0;            // number of file descriptors (clients)
@@ -61,9 +62,9 @@ public:
       _teardown = true;
       _client_adr.clear();
       _broadcastShutdown();
-      for (size_t i = 0; i < _clients.length(); ++i)
+      for (size_t i = 0; i < _clients.size(); ++i)
       {
-        close(_clients.get(i));
+        close(_clients.at(i));
       }
       close(_server);
     }
@@ -74,11 +75,9 @@ public:
    */
   void _processRegistration(char **tokens, int client)
   {
-    StrBuff buff;
-    buff = buff.c(tokens[1]);
-    _client_adr.push_back(buff.get());
-    _fds[_client_adr.length() - 1].fd = client;
-    _fds[_client_adr.length() - 1].events = POLLIN;
+    _client_adr.push_back(tokens[1]);
+    _fds[_client_adr.size() - 1].fd = client;
+    _fds[_client_adr.size() - 1].events = POLLIN;
     ++_nfds;
     _broadcastToClients();
   }
@@ -161,23 +160,21 @@ public:
    */
   void _broadcastToClients()
   {
-    StrBuff buff;
-    size_t numClients = _client_adr.length();
-    buff = buff.c(BROADCAST);
-    buff = buff.c("\n");
-    buff = buff.c(numClients);
-    buff = buff.c("\n");
+    size_t numClients = _client_adr.size();
+    std::string broadcast = BROADCAST;
+    broadcast += "\n";
+    broadcast += numClients;
+    broadcast += "\n";
     for (size_t j = 0; j < numClients; ++j)
     {
-      buff = buff.c(_client_adr.get(j)->c_str());
-      buff = buff.c("\n");
+      broadcast += _client_adr.at(j);
+      broadcast += "\n";
     }
-    const char *msg = buff.get()->c_str();
 
     for (size_t i = 0; i < numClients; ++i)
     {
-      printf("SENDING FROM SERVER:\n%s\n", msg);
-      _n.sendMsg(_clients.get(i), msg, strlen(msg));
+      printf("SENDING FROM SERVER:\n%s\n", broadcast);
+      _n.sendMsg(_clients.at(i), broadcast.c_str(), broadcast.length());
     }
   }
 
@@ -187,14 +184,12 @@ public:
    */
   void _broadcastShutdown()
   {
-    StrBuff buff;
-    buff = buff.c(SHUTDOWN);
-    buff = buff.c("\n");
-    const char* msg = buff.get()->c_str();
-    for (size_t i = 0; i < _clients.length(); ++i)
+    std::string shutdown = SHUTDOWN;
+    shutdown += "\n";
+    for (size_t i = 0; i < _clients.size(); ++i)
     {
-      printf("SENDING FROM SERVER:\n%s\n", msg);
-      _n.sendMsg(_clients.get(i), msg, strlen(msg));
+      printf("SENDING FROM SERVER:\n%s\n", shutdown);
+      _n.sendMsg(_clients.at(i), shutdown.c_str(), shutdown.length());
     }
   }
 
@@ -204,20 +199,17 @@ public:
    */
   void _processDM(char **tokens)
   {
-    StrBuff buff;
-    buff = buff.c(tokens[1]);
-    String *address = buff.get();
-    int idx = _client_adr.index_of(address);
-    if (idx >= 0)
+    std::string address = tokens[1];
+    auto itr = std::find_if(_client_adr.begin(), _client_adr.end(), address);
+    if (itr != _client_adr.cend())
     {
-      int sock = _clients.get(idx);
-      StrBuff msg;
-      msg = msg.c(tokens[0]);
-      msg = msg.c("\n");
-      msg = msg.c(tokens[2]);
-      const char *payload = msg.get()->c_str();
-      _n.sendMsg(sock, payload, strlen(payload) + 1); // +1 to account for null
-    }
+      int idx = std::distance(_client_adr.begin(), itr);
+      int sock = _clients.at(idx);
+      std::string msg = tokens[0];
+      msg += "\n";
+      msg += tokens[2];
+      _n.sendMsg(sock, msg.c_str(), msg.length() + 1); // +1 to account for null
+    } 
     else
     {
       printf("Server can't send to requested address because it does not exist.\n");
@@ -231,16 +223,15 @@ public:
    */
   void _processTeardown(char **tokens)
   {
-    StrBuff buff;
-    buff = buff.c(tokens[1]);
-    String *address = buff.get();
-    int idx = _client_adr.index_of(address);
-    if (idx >= 0)
+    std::string address = tokens[1];
+    auto itr = std::find_if(_client_adr.begin(), _client_adr.end(), address);
+    if (itr != _client_adr.cend())
     {
-      int sock = _clients.get(idx);
+      int idx = std::distance(_client_adr.begin(), itr);
+      int sock = _clients.at(idx);
       assert(close(sock) == 0);
-      _clients.remove(idx);
-      _client_adr.remove(idx);
+      _clients.erase(_clients.begin() + idx);
+      _client_adr.erase(itr);
       _broadcastToClients();
     }
     else

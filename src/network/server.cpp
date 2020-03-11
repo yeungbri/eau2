@@ -49,7 +49,7 @@ int main(int argc, char** argv)
   }
   char** tokens = str_split(address, ':');
   char* ip = tokens[0];
-  int port = portToInt(tokens[1]);
+  int port = std::stoi(tokens[1]);
 
   // ip is a const char*, and port is an int
   Server server(ip, port);

@@ -27,20 +27,18 @@ void sendPrototypeDMs(Client* client, const char* ip, int port)
   while (i < 4)
   {
     std::this_thread::sleep_for(std::chrono::milliseconds(2000));
-    StrBuff buff;
-    buff = buff.c(i);
-    buff = buff.c(" - Hello from ");
-    buff = buff.c(ip);
-    buff = buff.c(":");
-    buff = buff.c(port);
-    const char* dm = buff.get()->c_str();
+    std::string dm = std::to_string(i);
+    dm += " - Hello from ";
+    dm += ip;
+    dm += ":";
+    dm += std::to_string(port);
     if (port != 8081)
     {
-      client->sendDirectMessage("127.0.0.1", 8081, dm);
+      client->sendDirectMessage("127.0.0.1", 8081, dm.c_str());
     }
     if (port != 8082)
     {
-      client->sendDirectMessage("127.0.0.1", 8082, dm);
+      client->sendDirectMessage("127.0.0.1", 8082, dm.c_str());
     }
     ++i;
   }
@@ -73,7 +71,7 @@ int main(int argc, char** argv)
   }
   char** tokens = str_split(address, ':');
   char* ip = tokens[0];
-  int port = portToInt(tokens[1]);
+  int port = std::stoi(tokens[1]);
   
   Client client("127.0.0.1", 8080, ip, port);
   client.start();
