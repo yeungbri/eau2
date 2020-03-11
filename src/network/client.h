@@ -24,9 +24,9 @@ class Client
 public:
   int _sock = -1;                      // The socket connected to by this client.
   std::vector<std::string> _client_adr;// addresses of connected clients as "IP:PORT"
-  const char* _serverIp;               // the rendezvous server ip
+  std::string _serverIp;               // the rendezvous server ip
   int _serverPort;                     // the rendezvous client ip
-  const char* _ip;                     // this client's ip
+  std::string _ip;                     // this client's ip
   int _port;                           // this client's port
   Network _n;                          // contains network helper functions
   bool _teardown = false;              // if true, tear this client down
@@ -42,7 +42,7 @@ public:
    * specified port. Uses assert to check successful initialization. Sets
    * this client's _sock to the _sock obtained by this constructor.
    */
-  Client(const char* serverIp, int serverPort, const char* ip, int port)
+  Client(std::string serverIp, int serverPort, std::string ip, int port)
   {
     _ip = ip;
     _port = port;
@@ -57,7 +57,7 @@ public:
   ~Client()
   {
     stop();
-    printf("Client exited.\n");
+    printf("Client %s:%d has exited.\n", _ip.c_str(), _port);
   }
 
   /**
@@ -65,7 +65,7 @@ public:
    */
   void start()
   {
-    assert(_sendRegisterMsg() > 0);
+    _sendRegisterMsg();
   }
 
   /**
@@ -74,7 +74,7 @@ public:
   void stop()
   {
     _sendTeardownMsg();
-    assert(close(_sock) == 0);
+    close(_sock);
   }
 
   /**
@@ -92,8 +92,7 @@ public:
     teardown.append("\n");
     size_t length = teardown.length();
     _teardown = true;
-    assert(_n.sendMsg(_sock, teardown.c_str(), length) >= 0);
-    printf("Client %s:%d has shut down.\n", _ip, _port);
+    _n.sendMsg(_sock, teardown.c_str(), length);
     return 0;
   }
 
@@ -102,18 +101,18 @@ public:
    * is routed through the server that serves this client. Prints a message if
    * this fails - does not crash since the other client may be temporarily down.
    */
-  int sendDirectMessage(const char* ip, int port, const char* msg)
+  void sendDirectMessage(std::string ip, int port, std::string msg)
   {
     std::string directMsg = DIRECTMSG;
     directMsg += "\n";
     directMsg += ip;
     directMsg += ":";
-    directMsg += port;
+    directMsg += std::to_string(port);
     directMsg += "\n";
     directMsg += msg;
     directMsg += "\n";
     size_t length = directMsg.length();
-    return _n.sendMsg(_sock, directMsg.c_str(), length);
+    _n.sendMsg(_sock, directMsg.c_str(), length);
   }
 
   /**
@@ -149,9 +148,9 @@ public:
     for (size_t i = 2; i < numClients + 2; ++i)
     {
       char** addr = str_split(tokens[i], ':');
-      char* ip = addr[0];
+      std::string ip = addr[0];
       int port = std::stoi(addr[1]);
-      if (strcmp(ip, _ip) == 0 && port == _port)
+      if (ip == _ip && port == _port)
       {
         continue;
       }
@@ -174,28 +173,28 @@ public:
   void _processMsg(char* msg, size_t length)
   {
     char** tokens = str_split(msg, '\n');
-    const char* msgType = tokens[0];
-    if (strcmp(msgType, DIRECTMSG) == 0)
+    std::string msgType = tokens[0];
+    if (msgType == DIRECTMSG)
     {
       printf("RECEIVED DM (CLIENT):\n%s\n", tokens[1]);
-    } else if (strcmp(msgType, BROADCAST) == 0)
+    } else if (msgType == BROADCAST)
     {
       _processBroadcast(tokens);
-    } else if (strcmp(msgType, SHUTDOWN) == 0)
+    } else if (msgType == SHUTDOWN)
     {
       _teardown = true;
       stop();
     }
     else
     {
-      printf("Unknown message type received by client: %s\n", msgType);
+      printf("Unknown message type received by client: %s\n", msgType.c_str());
     }
   }
 
   /**
    * Sends a message to the server requesting it to register this client in it.
    */
-  int _sendRegisterMsg()
+  void _sendRegisterMsg()
   {
     std::string registerMsg = REGISTER;
     registerMsg += "\n";
@@ -204,6 +203,6 @@ public:
     registerMsg += std::to_string(_port);
     registerMsg += "\n";
     size_t length = registerMsg.length();
-    return _n.sendMsg(_sock, registerMsg.c_str(), length);
+    _n.sendMsg(_sock, registerMsg.c_str(), length);
   }
 };

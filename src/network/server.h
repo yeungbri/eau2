@@ -75,7 +75,7 @@ public:
    */
   void _processRegistration(char **tokens, int client)
   {
-    _client_adr.push_back(tokens[1]);
+    _client_adr.push_back(std::string(tokens[1]));
     _fds[_client_adr.size() - 1].fd = client;
     _fds[_client_adr.size() - 1].events = POLLIN;
     ++_nfds;
@@ -113,7 +113,7 @@ public:
         _n.readMsg(client, buffer, length, _teardown);
         // assumes client will correctly send registration message as "<ACTION>:IP:PORT"
         char **tokens = str_split(buffer, '\n'); // tokens[0] = <ACTION>, tokens[1] = IP, TOKENS[2] = PORT
-        if (strcmp(tokens[0], REGISTER) == 0)
+        if (REGISTER == tokens[0])
         {
           _processRegistration(tokens, client);
         }
@@ -141,11 +141,11 @@ public:
           char buffer[length];
           _n.readMsg(_fds[i].fd, buffer, length, _teardown);
           char **tokens = str_split(buffer, '\n');
-          if (strcmp(tokens[0], DIRECTMSG) == 0)
+          if (DIRECTMSG == tokens[0])
           {
             _processDM(tokens);
           }
-          else if (strcmp(tokens[0], TEARDOWN) == 0)
+          else if (TEARDOWN == tokens[0])
           {
             _processTeardown(tokens);
           }
@@ -163,7 +163,7 @@ public:
     size_t numClients = _client_adr.size();
     std::string broadcast = BROADCAST;
     broadcast += "\n";
-    broadcast += numClients;
+    broadcast += std::to_string(numClients);
     broadcast += "\n";
     for (size_t j = 0; j < numClients; ++j)
     {
@@ -173,7 +173,7 @@ public:
 
     for (size_t i = 0; i < numClients; ++i)
     {
-      printf("SENDING FROM SERVER:\n%s\n", broadcast);
+      printf("SENDING FROM SERVER:\n%s\n", broadcast.c_str());
       _n.sendMsg(_clients.at(i), broadcast.c_str(), broadcast.length());
     }
   }
@@ -188,7 +188,7 @@ public:
     shutdown += "\n";
     for (size_t i = 0; i < _clients.size(); ++i)
     {
-      printf("SENDING FROM SERVER:\n%s\n", shutdown);
+      printf("SENDING FROM SERVER:\n%s\n", shutdown.c_str());
       _n.sendMsg(_clients.at(i), shutdown.c_str(), shutdown.length());
     }
   }
@@ -200,7 +200,7 @@ public:
   void _processDM(char **tokens)
   {
     std::string address = tokens[1];
-    auto itr = std::find_if(_client_adr.begin(), _client_adr.end(), address);
+    auto itr = std::find(_client_adr.begin(), _client_adr.end(), address);
     if (itr != _client_adr.cend())
     {
       int idx = std::distance(_client_adr.begin(), itr);
@@ -224,7 +224,7 @@ public:
   void _processTeardown(char **tokens)
   {
     std::string address = tokens[1];
-    auto itr = std::find_if(_client_adr.begin(), _client_adr.end(), address);
+    auto itr = std::find(_client_adr.begin(), _client_adr.end(), address);
     if (itr != _client_adr.cend())
     {
       int idx = std::distance(_client_adr.begin(), itr);

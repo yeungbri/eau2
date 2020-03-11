@@ -10,6 +10,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <cerrno>
+#include <string>
 #include <cassert>
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -26,21 +27,20 @@ public:
   /**
    * Sends the given message with the given length to the server of this client.
    */
-  int sendMsg(int sock, const char* msg, size_t length)
+  void sendMsg(int sock, std::string msg, size_t length)
   {
     int sendResult = send(sock, &length, sizeof(length), 0);
-    if (sendResult < 0)
+    if (sendResult < 0 && errno != EBADF)
     {
       printf("Send Length of Message Failed: %s\n", strerror(errno));
       assert(false);
     }
-    sendResult = send(sock, msg, length, 0);
-    if (sendResult < 0)
+    sendResult = send(sock, msg.c_str(), length, 0);
+    if (sendResult < 0 && errno != EBADF)
     {
       printf("Send Message Failed: %s\n", strerror(errno));
       assert(false);
     }
-    return sendResult;
   }
 
   /**
@@ -103,14 +103,14 @@ public:
   /**
    * Connects to a socket and returns the socket.
    */
-  int connectToSocket(const char* ip, int port)
+  int connectToSocket(std::string ip, int port)
   {
     struct sockaddr_in server;
     int socket_fd = socket(AF_INET, SOCK_STREAM, 0);
     assert(socket_fd >= 0);
     server.sin_family = AF_INET;
     server.sin_port = htons(port);
-    assert(inet_pton(AF_INET, ip, &server.sin_addr) > 0);
+    assert(inet_pton(AF_INET, ip.c_str(), &server.sin_addr) > 0);
     if (connect(socket_fd, (struct sockaddr *)&server, sizeof(server)) < 0)
     {
       printf("Connect failed for socket %d, error: %s\n", socket_fd, strerror(errno));
@@ -122,7 +122,7 @@ public:
   /**
    * Binds to a socket and returns the socket bound.
    */
-  int bindToSocket(const char* ip, int port)
+  int bindToSocket(std::string ip, int port)
   {
     struct sockaddr_in adr;
     int opt = 1;
@@ -130,7 +130,7 @@ public:
     assert(server_fd >= 0);
     assert(setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, &opt, sizeof(opt)) != 0);
     adr.sin_family = AF_INET;
-    assert(inet_pton(AF_INET, ip, &adr.sin_addr) > 0);
+    assert(inet_pton(AF_INET, ip.c_str(), &adr.sin_addr) > 0);
     adr.sin_port = htons(port);
     if (bind(server_fd, (struct sockaddr *)&adr, sizeof(adr)) < 0)
     {

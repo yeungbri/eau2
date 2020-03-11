@@ -6,9 +6,11 @@
 
 #pragma once
 
+#include <string>
+
 // Possible types of messages that a client may send to a server
-const char* REGISTER = "Register";
-const char* DIRECTMSG = "DirectMsg";
-const char* TEARDOWN = "TearDown";
-const char* BROADCAST = "Broadcast";
-const char* SHUTDOWN = "ShutDown";
+std::string REGISTER = "Register";
+std::string DIRECTMSG = "DirectMsg";
+std::string TEARDOWN = "TearDown";
+std::string BROADCAST = "Broadcast";
+std::string SHUTDOWN = "ShutDown";
