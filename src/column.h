@@ -253,7 +253,7 @@ public:
     va_start(strings, n);
     for (int i = 0; i < n; i++)
     {
-      _arr.push_back(va_arg(strings, std::string));
+      _arr.push_back(std::string(va_arg(strings, const char*)));
     }
     va_end(strings);
   }
