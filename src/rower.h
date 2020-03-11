@@ -8,7 +8,6 @@
 #pragma once
 #include "row.h"
 #include "fielder.h"
-#include "object.h"
 #include "helper.h"
 
 /*******************************************************************************
@@ -17,7 +16,7 @@
  *  is that this class should subclassed and the accept() method be given
  *  a meaningful implementation. Rowers can be cloned for parallel execution.
  */
-class Rower : public Object
+class Rower
 {
 public:
   /** This method is called once per row. The row object is on loan and
@@ -68,23 +67,21 @@ public:
 class StringSearchRower : public Rower
 {
 public:
-  String* _search_str;
+  std::string _search_str;
   Sys _sys;
 
   StringSearchRower(const char* search_str) : _sys() {
-    _search_str = new String(search_str);
+    _search_str = std::string(search_str);
   }
 
-  virtual ~StringSearchRower() {
-    delete _search_str;
-  }
+  virtual ~StringSearchRower() { }
 
   virtual bool accept(Row& r)
   {
     for (size_t i = 0; i < r.width(); ++i)
     {
       if (r.col_type(i) == 'S') {
-        if (r.get_string(i)->equals(_search_str)) {
+        if (r.get_string(i) == _search_str) {
           return true;
         }
       }

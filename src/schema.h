@@ -16,7 +16,7 @@
  * optionally columns and rows can be named by strings.
  * The valid types are represented by the chars 'S', 'B', 'I' and 'F'.
  */
-class Schema : public Object
+class Schema 
 {
 public:
   /** Copying constructor */
@@ -66,41 +66,41 @@ public:
   /** Add a column of the given type and name (can be nullptr), name
     * is external. Names are expectd to be unique, duplicates result
     * in undefined behavior. */
-  void add_column(char typ, String *name)
+  void add_column(char typ, std::string name)
   {
     char *type = new char[2];
     type[0] = typ;
     type[1] = '\0';
-    _types->push_back(new String(type));
-    _cols->push_back(name);
+    _types.push_back(type);
+    _cols.push_back(name);
   }
 
   /** Add a row with a name (possibly nullptr), name is external.  Names are
    *  expectd to be unique, duplicates result in undefined behavior. */
-  void add_row(String *name)
+  void add_row(std::string name)
   {
-    _rows->push_back(name);
+    _rows.push_back(name);
   }
 
   /** Return name of row at idx; nullptr indicates no name. An idx >= width
     * is undefined. */
-  String *row_name(size_t idx)
+  std::string row_name(size_t idx)
   {
-    return _rows->get(idx);
+    return _rows.at(idx);
   }
 
   /** Return name of column at idx; nullptr indicates no name given.
     *  An idx >= width is undefined.*/
-  String *col_name(size_t idx)
+  std::string col_name(size_t idx)
   {
-    return _cols->get(idx);
+    return _cols.at(idx);
   }
 
   /** Return type of column at idx. An idx >= width is undefined. */
   char col_type(size_t idx)
   {
-    String *str_type = _types->get(idx);
-    return str_type->c_str()[0];
+    std::string str_type = _types.at(idx);
+    return str_type.c_str()[0];
   }
 
   /** Given a column name return its index, or -1. */
@@ -108,7 +108,7 @@ public:
   {
     for (size_t i = 0; i < width(); ++i)
     {
-      if (_cols->get(i) && strcmp(_cols->get(i)->c_str(), name) == 0)
+      if (_cols.at(i) == name)
       {
         return i;
       }
@@ -121,7 +121,7 @@ public:
   {
     for (size_t i = 0; i < length(); ++i)
     {
-      if (strcmp(_rows->get(i)->c_str(), name) == 0)
+      if (_rows.at(i) == name)
       {
         return i;
       }
@@ -132,13 +132,13 @@ public:
   /** The number of columns */
   size_t width()
   {
-    return _types->length();
+    return _types.size();
   }
 
   /** The number of rows */
   size_t length()
   {
-    return _rows->length();
+    return _rows.size();
   }
 
 public:

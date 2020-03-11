@@ -8,7 +8,7 @@
 #pragma once
 
 #include "helper.h"
-#include "string.h"
+#include <string>
 
 /*****************************************************************************
  * Fielder::

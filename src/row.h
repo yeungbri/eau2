@@ -3,12 +3,12 @@
  * Emails: yeung.bri@husky.neu.edu, gao.d@husky.neu.edu
  */
 
-//lang::CwC
+//lang::Cpp
 
 #pragma once
 #include "schema.h"
 #include "fielder.h"
-#include "string.h"
+#include <string>
 
 static size_t DEFAULT_ROW_SIZE = 10;
 
@@ -20,14 +20,14 @@ static size_t DEFAULT_ROW_SIZE = 10;
  * read/write complete rows. Internally a dataframe hold data in columns.
  * Rows have pointer equality.
  */
-class Row : public Object
+class Row
 {
 public:
   Schema _schema; // External Schema
   size_t _length;
   size_t _capacity;
   size_t _idx; // Not our responsibility
-  String *_name;
+  std::string _name;
 
   // Attribution: https://stackoverflow.com/a/18577481/12602247 at 2/11 7:52PM
   struct Data
@@ -43,13 +43,13 @@ public:
       int ival;
       float fval;
       bool bval;
-      String *sval;
+      std::string sval;
     } val;
   };
   struct Data **_elements;
 
   /** Build a row following a schema. */
-  Row(Schema &scm, String* name) : Row(scm)
+  Row(Schema &scm, std::string name) : Row(scm)
   {
     _name = name;
   }
@@ -123,12 +123,12 @@ public:
   }
 
   /** Acquire ownership of the string. */
-  void set(size_t col, String *val)
+  void set(size_t col, std::string val)
   {
     if (_schema.col_type(col) == 'S')
     {
       _elements[col]->type = Data::is_string;
-      _elements[col]->val.sval = new String(*val);
+      _elements[col]->val.sval = std::string(val);
     }
   }
 
@@ -161,7 +161,7 @@ public:
     return _elements[col]->val.fval;
   }
 
-  String *get_string(size_t col)
+  std::string get_string(size_t col)
   {
     return _elements[col]->val.sval;
   }
@@ -278,7 +278,7 @@ public:
     _length++;
   }
 
-  void push_back(String *s)
+  void push_back(std::string s)
   {
     if (_length == _capacity)
     {

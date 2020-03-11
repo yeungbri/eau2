@@ -8,9 +8,6 @@
 #pragma once
 
 #include <thread>
-#include "object.h"
-#include "string.h"
-#include "array.h"
 #include "helper.h"
 #include "schema.h"
 #include "column.h"
@@ -26,12 +23,12 @@
  * holds values of the same type (I, S, B, F). A dataframe has a schema that
  * describes it.
  */
-class DataFrame : public Object
+class DataFrame
 {
 public:
   Schema &_schema;
-  ColumnArray *_columns;
-  RowArray *_rows;
+  std::vector<Column> _columns;
+  std::vector<Row> _rows;
   static const int THREAD_COUNT = 4;
 
   /** Create a data frame with the same columns as the given df but with no rows or rownames */
@@ -40,18 +37,18 @@ public:
     Schema* schema = new Schema(df.get_schema());
     int schema_rows = schema->length();
     for (size_t i=0; i<schema_rows; i++) {
-      schema->_rows->remove(i);
+      schema->_rows.erase(i);
     }
     _schema = *schema;
-    _columns = new ColumnArray(*df._columns);
-    _rows = new RowArray(0);
+    _columns = std::vector<Column>(df._columns);
+    _rows = std::vector<Row>(0);
   }
 
   /** Create a data frame from a schema and columns. All columns are created
     * empty. */
   DataFrame(Schema &schema) : _schema(schema)
   {
-    _columns = new ColumnArray(_schema.width());
+    _columns = std::vector<Column>(_schema.width());
     for (size_t i = 0; i < _schema.width(); ++i)
     {
       Column *col;
@@ -72,21 +69,17 @@ public:
       default:
         throw std::runtime_error("bad column type!");
       }
-      _columns->push_back(col);
+      _columns.push_back(col);
     }
-    _rows = new RowArray(_schema.length());
+    _rows = std::vector<Row>(_schema.length());
     for (size_t i = 0; i < _schema.length(); ++i)
     {
       Row *row = new Row(_schema, nullptr);
-      _rows->push_back(row);
+      _rows.push_back(row);
     }
   }
 
-  virtual ~DataFrame()
-  {
-    delete _columns;
-    delete _rows;
-  }
+  virtual ~DataFrame() { }
 
   /** Returns the dataframe's schema. Modifying the schema after a dataframe
     * has been created in undefined. */
@@ -98,12 +91,12 @@ public:
   /** Adds a column this dataframe, updates the schema, the new column
     * is external, and appears as the last column of the dataframe, the
     * name is optional and external. A nullptr colum is undefined. */
-  void add_column(Column *col, String *name)
+  void add_column(Column *col, std::string name)
   {
     if (col)
     {
       _schema.add_column(col->get_type(), name);
-      _columns->push_back(col);
+      _columns.push_back(col);
       for (size_t i = 0; i < nrows(); ++i)
       {
         switch (_schema.col_type(i))

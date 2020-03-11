@@ -7,8 +7,8 @@
 
 #pragma once
 #include <cstdarg>
-#include "array.h"
 #include <iostream>
+#include <vector>
 
 class IntColumn;
 class BoolColumn;
@@ -21,7 +21,7 @@ class StringColumn;
  * This abstract class defines methods overriden in subclasses. There is
  * one subclass per element type. Columns are mutable, equality is pointer
  * equality. */
-class Column : public Object
+class Column
 {
 public:
   virtual ~Column() = default;
@@ -46,7 +46,7 @@ public:
   virtual void push_back(int val) {}
   virtual void push_back(bool val) {}
   virtual void push_back(float val) {}
-  virtual void push_back(String *val) {}
+  virtual void push_back(std::string val) {}
 
   /** Returns the number of elements in the column. */
   virtual size_t size() = 0;
@@ -68,7 +68,7 @@ public:
 
   BoolColumn(size_t size)
   {
-    _arr = new BoolArray(size);
+    _arr = std::vector<bool>(size);
   }
 
   BoolColumn(int n, ...) : BoolColumn(size_t(n))
@@ -77,19 +77,16 @@ public:
     va_start(bools, n);
     for (int i = 0; i < n; i++)
     {
-      _arr->push_back(bool(va_arg(bools, int)));
+      _arr.push_back(bool(va_arg(bools, int)));
     }
     va_end(bools);
   }
 
-  virtual ~BoolColumn()
-  {
-    delete _arr;
-  }
+  virtual ~BoolColumn() { }
 
   bool get(size_t idx)
   {
-    return _arr->get(idx);
+    return _arr.at(idx);
   }
 
   BoolColumn *as_bool()
@@ -100,12 +97,12 @@ public:
   /** Set value at idx. An out of bound idx is undefined.  */
   void set(size_t idx, bool val)
   {
-    _arr->set(idx, val);
+    _arr.assign(idx, val);
   }
 
   virtual size_t size()
   {
-    return _arr->length();
+    return _arr.size();
   }
 
   virtual char get_type() {
@@ -113,7 +110,7 @@ public:
   }
 
 public:
-  BoolArray *_arr;
+  std::vector<bool> _arr;
 };
 
 /*************************************************************************
@@ -129,7 +126,7 @@ public:
 
   IntColumn(size_t size)
   {
-    _arr = new IntArray(size);
+    _arr = std::vector<int>(size);
   }
 
   IntColumn(int n, ...) : IntColumn(size_t(n))
@@ -138,19 +135,16 @@ public:
     va_start(ints, n);
     for (int i = 0; i < n; i++)
     {
-      _arr->push_back(va_arg(ints, int));
+      _arr.push_back(va_arg(ints, int));
     }
     va_end(ints);
   }
 
-  virtual ~IntColumn()
-  {
-    delete _arr;
-  }
+  virtual ~IntColumn() { }
 
   int get(size_t idx)
   {
-    return _arr->get(idx);
+    return _arr.at(idx);
   }
 
   IntColumn *as_int()
@@ -161,12 +155,12 @@ public:
   /** Set value at idx. An out of bound idx is undefined.  */
   void set(size_t idx, int val)
   {
-    _arr->set(idx, val);
+    _arr.assign(idx, val);
   }
 
   size_t size()
   {
-    return _arr->length();
+    return _arr.size();
   }
 
   virtual char get_type() {
@@ -174,7 +168,7 @@ public:
   }
 
 public:
-  IntArray *_arr;
+  std::vector<int> _arr;
 };
 
 /*************************************************************************
@@ -190,7 +184,7 @@ public:
 
   FloatColumn(size_t size)
   {
-    _arr = new FloatArray(size);
+    _arr = std::vector<float>(size);
   }
 
   FloatColumn(int n, ...) : FloatColumn(size_t(n))
@@ -200,19 +194,16 @@ public:
     for (int i = 0; i < n; i++)
     {
       double val = va_arg(floats, double);
-      _arr->push_back((float) val);
+      _arr.push_back((float) val);
     }
     va_end(floats);
   }
 
-  virtual ~FloatColumn()
-  {
-    delete _arr;
-  }
+  virtual ~FloatColumn() { }
 
   float get(size_t idx)
   {
-    return _arr->get(idx);
+    return _arr.at(idx);
   }
 
   FloatColumn *as_float()
@@ -223,12 +214,12 @@ public:
   /** Set value at idx. An out of bound idx is undefined.  */
   void set(size_t idx, float val)
   {
-    _arr->set(idx, val);
+    _arr.assign(idx, val);
   }
 
   size_t size()
   {
-    return _arr->length();
+    return _arr.size();
   }
 
   virtual char get_type() {
@@ -236,7 +227,7 @@ public:
   }
 
 public:
-  FloatArray *_arr;
+  std::vector<float> _arr;
 };
 
 /*************************************************************************
@@ -253,7 +244,7 @@ public:
 
   StringColumn(size_t size)
   {
-    _arr = new StringArray(size);
+    _arr = std::vector<std::string>(size);
   }
 
   StringColumn(int n, ...) : StringColumn(size_t(n))
@@ -262,19 +253,16 @@ public:
     va_start(strings, n);
     for (int i = 0; i < n; i++)
     {
-      _arr->push_back(va_arg(strings, String *));
+      _arr.push_back(va_arg(strings, std::string));
     }
     va_end(strings);
   }
 
-  virtual ~StringColumn()
-  {
-    delete _arr;
-  }
+  virtual ~StringColumn() { }
 
-  String *get(size_t idx)
+  std::string get(size_t idx)
   {
-    return _arr->get(idx);
+    return _arr.at(idx);
   }
 
   StringColumn *as_string()
@@ -283,14 +271,14 @@ public:
   }
 
   /** Set value at idx. An out of bound idx is undefined.  */
-  void set(size_t idx, String *val)
+  void set(size_t idx, std::string val)
   {
-    _arr->set(idx, val);
+    _arr.assign(idx, val);
   }
 
   size_t size()
   {
-    return _arr->length();
+    return _arr.size();
   }
 
   char get_type() {
@@ -298,5 +286,5 @@ public:
   }
 
 public:
-  StringArray *_arr;
+  std::vector<std::string> _arr;
 };
