@@ -5,8 +5,7 @@ run:
 	./eau2
 
 test:
-	# cmake ./tests/
-	g++ -std=c++17 -Wall -o tests/dataframe_tests tests/dataframe_tests.cpp
+	cd ./tests; cmake .; make dataframe_tests && ./dataframe_tests
 
 clean:
 	rm -f tests/CMakeCache.txt
