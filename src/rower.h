@@ -180,8 +180,8 @@ public:
     for (size_t i = 0; i < r.width(); ++i)
     {
       if (r.col_type(i) == 'S') {
-        char* str = r.get_string(i)->c_str();
-        for (size_t j=0; j<strlen(str); j++) {
+        std::string str = r.get_string(i);
+        for (size_t j=0; j<str.length(); j++) {
           if (str[j] == _search_char) {
             _count++;
           }

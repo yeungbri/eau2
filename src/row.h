@@ -82,7 +82,7 @@ public:
 
   virtual ~Row()
   {
-    delete[] _elements;
+    _elements.clear();
   }
 
   /** Setters: set the given column with the given value. Setting a column with
@@ -126,7 +126,7 @@ public:
     if (_schema.col_type(col) == 'S')
     {
       _elements[col]->type = Data::is_string;
-      _elements[col]->val.sval = std::string(val);
+      _elements[col]->val.sval = strdup(val.c_str());
     }
   }
 
@@ -282,7 +282,7 @@ public:
     {
       _grow();
     }
-    _elements[_length]->val.sval = s;
+    _elements[_length]->val.sval = strdup(s.c_str());
     _length++;
   }
 };
