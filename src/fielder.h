@@ -60,9 +60,9 @@ public:
     _sys.p(i);
   }
 
-  virtual void accept(std::string *s)
+  virtual void accept(std::string s)
   {
-    _sys.p(s);
+    _sys.p(s.c_str());
   }
 
   virtual void done()
