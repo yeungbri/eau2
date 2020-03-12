@@ -5,3 +5,4 @@ run:
 	./eau2
 
 test:
+	g++ -std=c++17 -Wall -o tests/dataframe_tests tests/dataframe_tests.cpp

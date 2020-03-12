@@ -14,7 +14,6 @@
 #include "rower.h"
 #include "fielder.h"
 #include "row.h"
-#include "thread.h"
 
 /****************************************************************************
  * DataFrame::
@@ -295,7 +294,6 @@ public:
     std::thread threads[THREAD_COUNT];
     for (int i = 0; i < THREAD_COUNT; ++i)
     {
-      size_t nrows = this->nrows();
       threads[i] = std::thread(&DataFrame::pmap_help, this, std::ref(*rowers[i]), i);
     }
     for (int i = 0; i < THREAD_COUNT; ++i)

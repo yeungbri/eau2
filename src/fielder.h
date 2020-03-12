@@ -17,6 +17,8 @@
 class Fielder
 {
 public:
+  virtual ~Fielder() { }
+  
   /** Called before visiting a row, the argument is the row offset in the
     dataframe. */
   virtual void start(size_t r) = 0;

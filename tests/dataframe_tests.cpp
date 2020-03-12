@@ -8,8 +8,25 @@
 #include <gtest/gtest.h>
 #include <iostream>
 #include "../src/dataframe.h"
+#include <string>
+#include <vector>
 
 #define ASSERT_EXIT_ZERO(a) ASSERT_EXIT(a(), ::testing::ExitedWithCode(0), ".*")
+
+std::string s1 = "Hello";
+std::string s2 = "Bye Bye";
+std::string empty_string = "";
+std::string col_name = "New Column";
+std::string row_name = "New Row";
+std::string s3 = "a";
+std::string s4 = "1./0v^#$&%*";
+std::string fcolName = "float";
+std::string icolName = "int";
+std::string bcolName = "bool";
+std::string scolName = "String";
+std::string apple = "apple";
+std::string pear = "pear";
+std::string orange = "orange";
 
 Row **generateTenRowsFIBSFIBS()
 {
@@ -17,10 +34,8 @@ Row **generateTenRowsFIBSFIBS()
   Schema *schema = new Schema("FIBSFIBS");
   for (size_t i = 0; i < 10; ++i)
   {
-    String *name = new String(std::to_string(i).c_str());
+    std::string name = std::to_string(i);
     Row *row = new Row(*schema, name);
-    String *s1 = new String("Hello");
-    String *s2 = new String("Bye Bye");
     row->set(0, float(1.0));
     row->set(1, int(2));
     row->set(2, true);
@@ -40,9 +55,8 @@ Row **generateTenRowsFIBS()
   Schema *schema = new Schema("FIBS");
   for (size_t i = 0; i < 10; ++i)
   {
-    String *name = new String(std::to_string(i).c_str());
+    std::string name = std::to_string(i);
     Row *row = new Row(*schema, name);
-    String *s1 = new String("Hello");
     row->set(0, float(0.5 + i * 1.0));
     row->set(1, int(i * 2));
     row->set(2, i % 2 == 0);
@@ -59,14 +73,12 @@ TEST(a4, testSchema)
   EXPECT_EQ(s.width(), 4);
   EXPECT_EQ(s.length(), 0);
 
-  String empty_str("");
-  String col_name("New Column");
-  s.add_column('S', &col_name);
-  s.add_column('F', &col_name);
-  EXPECT_EQ(s.col_name(1), nullptr);
-  EXPECT_EQ(s.col_name(2), nullptr);
-  EXPECT_EQ(s.col_name(3), nullptr);
-  EXPECT_EQ(s.col_name(4), &col_name);
+  s.add_column('S', col_name);
+  s.add_column('F', col_name);
+  EXPECT_EQ(s.col_name(1), "");
+  EXPECT_EQ(s.col_name(2), "");
+  EXPECT_EQ(s.col_name(3), "");
+  EXPECT_EQ(s.col_name(4), col_name);
 
   EXPECT_EQ(s.col_type(0), 'F');
   EXPECT_EQ(s.col_type(1), 'B');
@@ -78,9 +90,8 @@ TEST(a4, testSchema)
   // Return first col with that name in case of duplicates
   EXPECT_EQ(s.col_idx("New Column"), 4);
 
-  String row_name("New Row");
-  s.add_row(&row_name);
-  EXPECT_EQ(s.row_name(0), &row_name);
+  s.add_row(row_name);
+  EXPECT_EQ(s.row_name(0), row_name);
   EXPECT_EQ(s.row_idx("New Row"), 0);
 
   EXPECT_EQ(s.width(), 6);
@@ -90,17 +101,17 @@ TEST(a4, testSchema)
   Schema s2(s);
   EXPECT_EQ(s2.width(), 6);
   EXPECT_EQ(s2.length(), 1);
-  EXPECT_EQ(s2.col_name(1), nullptr);
-  EXPECT_EQ(s2.col_name(2), nullptr);
-  EXPECT_EQ(s2.col_name(3), nullptr);
-  EXPECT_EQ(s2.col_name(4), &col_name);
+  EXPECT_EQ(s2.col_name(1), "");
+  EXPECT_EQ(s2.col_name(2), "");
+  EXPECT_EQ(s2.col_name(3), "");
+  EXPECT_EQ(s2.col_name(4), col_name);
   EXPECT_EQ(s2.col_type(0), 'F');
   EXPECT_EQ(s2.col_type(1), 'B');
   EXPECT_EQ(s2.col_type(2), 'I');
   EXPECT_EQ(s2.col_type(3), 'S');
   EXPECT_EQ(s2.col_idx(""), -1);
   EXPECT_EQ(s2.col_idx("New Column"), 4);
-  EXPECT_EQ(s2.row_name(0), &row_name);
+  EXPECT_EQ(s2.row_name(0), row_name);
   EXPECT_EQ(s2.row_idx("New Row"), 0);
 }
 
@@ -164,16 +175,11 @@ TEST(a4, testColumn)
   fc.set(0, -35);
   ASSERT_FLOAT_EQ(fc.get(0), -35);
 
-  String s1("");
-  String s2("asdf");
-  String s3("a");
-  String s4("1./0v^#$&%*");
-
-  StringColumn sc(4, &s1, &s2, &s3, &s4);
-  EXPECT_EQ(sc.get(0), &s1);
-  EXPECT_EQ(sc.get(1), &s2);
-  EXPECT_EQ(sc.get(2), &s3);
-  EXPECT_EQ(sc.get(3), &s4);
+  StringColumn sc(4, s1.c_str(), s2.c_str(), s3.c_str(), s4.c_str());
+  EXPECT_EQ(sc.get(0), s1);
+  EXPECT_EQ(sc.get(1), s2);
+  EXPECT_EQ(sc.get(2), s3);
+  EXPECT_EQ(sc.get(3), s4);
 
   EXPECT_EQ(sc.as_bool(), nullptr);
   EXPECT_EQ(sc.as_int(), nullptr);
@@ -183,12 +189,10 @@ TEST(a4, testColumn)
   EXPECT_EQ(sc.size(), 4);
   EXPECT_EQ(sc.get_type(), 'S');
 
-  sc.set(0, &s2);
-  EXPECT_EQ(sc.get(0), &s2);
-  sc.set(0, &s3);
-  EXPECT_EQ(sc.get(0), &s3);
-
-  ;
+  sc.set(0, s2);
+  EXPECT_EQ(sc.get(0), s2);
+  sc.set(0, s3);
+  EXPECT_EQ(sc.get(0), s3);
 }
 
 // Test Dataframe
@@ -214,18 +218,14 @@ TEST(a4, testAddColumnRow)
   DataFrame df(schema);
   EXPECT_EQ(df.ncols(), 4);
   EXPECT_EQ(df.get_schema()._types, schema._types);
-  String fcolName("float");
-  String icolName("int");
-  String bcolName("bool");
-  String scolName("String");
   FloatColumn fcol2;
   IntColumn icol2;
   BoolColumn bcol2;
   StringColumn scol2;
-  df.add_column(&fcol2, &fcolName);
-  df.add_column(&icol2, &icolName);
-  df.add_column(&bcol2, &bcolName);
-  df.add_column(&scol2, &scolName);
+  df.add_column(&fcol2, fcolName);
+  df.add_column(&icol2, icolName);
+  df.add_column(&bcol2, bcolName);
+  df.add_column(&scol2, scolName);
   EXPECT_EQ(df.ncols(), 8);
   EXPECT_EQ(df.get_col(fcolName), 4);
   EXPECT_EQ(df.get_col(icolName), 5);
@@ -248,8 +248,8 @@ TEST(a4, testAddColumnRow)
   EXPECT_EQ(df.nrows(), 10);
   for (int i = 0; i < 10; ++i)
   {
-    String c(std::to_string(i).c_str());
-    EXPECT_EQ(df.get_row(c), i);
+    std::string tmp = std::to_string(i);
+    EXPECT_EQ(df.get_row(tmp), i);
   }
 
   delete[] rows;
@@ -260,22 +260,18 @@ TEST(a4, testGetSet)
   Schema schema;
   DataFrame df(schema);
   FloatColumn fcol;
-  String fcolName("float");
   IntColumn icol;
-  String icolName("int");
   BoolColumn bcol;
-  String bcolName("bool");
   StringColumn scol(15);
   for (int i = 0; i < 15; ++i)
   {
-    String *str = new String(std::to_string(i).c_str());
+    std::string str = std::to_string(i);
     scol.set(i, str);
   }
-  String scolName("String");
-  df.add_column(&fcol, &fcolName);
-  df.add_column(&icol, &icolName);
-  df.add_column(&bcol, &bcolName);
-  df.add_column(&scol, &scolName);
+  df.add_column(&fcol, fcolName);
+  df.add_column(&icol, icolName);
+  df.add_column(&bcol, bcolName);
+  df.add_column(&scol, scolName);
   Row **rows = generateTenRowsFIBS();
   for (int i = 0; i < 10; ++i)
   {
@@ -290,7 +286,7 @@ TEST(a4, testGetSet)
   EXPECT_EQ(df.get_int(1, 0), 0);
   EXPECT_EQ(df.get_bool(2, 5), false);
   EXPECT_EQ(df.get_bool(2, 0), true);
-  EXPECT_EQ(strcmp(df.get_string(3, 0)->c_str(), "Hello"), 0);
+  EXPECT_EQ(df.get_string(3, 0) == "Hello", true);
 
   delete[] rows;
 }
@@ -301,30 +297,26 @@ TEST(a4, testFillRow)
   DataFrame df(schema);
   Row r(schema);
 
-  String s0("apple");
-  String s1("pear");
-  String s2("orange");
-
-  r.set(0, &s1);
+  r.set(0, s1);
   r.set(1, 1);
-  r.set(2, &s2);
+  r.set(2, s2);
   df.add_row(r);
 
   EXPECT_EQ(df.nrows(), 1);
-  EXPECT_EQ(df.get_string(0, 0)->equals(&s1), true);
+  EXPECT_EQ(df.get_string(0, 0) == apple, true);
   EXPECT_EQ(df.get_int(1, 0), 1);
-  EXPECT_EQ(df.get_string(2, 0)->equals(&s2), true);
+  EXPECT_EQ(df.get_string(2, 0) == orange, true);
 
   Row r2(schema);
-  r2.set(0, &s0);
+  r2.set(0, apple);
   r2.set(1, 2);
-  r2.set(2, &s0);
+  r2.set(2, apple);
   df.fill_row(0, r2);
 
   EXPECT_EQ(df.nrows(), 1);
-  EXPECT_EQ(df.get_string(0, 0)->equals(&s0), true);
+  EXPECT_EQ(df.get_string(0, 0) == apple, true);
   EXPECT_EQ(df.get_int(1, 0), 2);
-  EXPECT_EQ(df.get_string(2, 0)->equals(&s0), true);
+  EXPECT_EQ(df.get_string(2, 0) == orange, true);
 }
 
 TEST(a4, testMap)
@@ -357,28 +349,24 @@ TEST(a4, testFilter)
   DataFrame df(schema);
   Row r(schema);
 
-  String s0("apple");
-  String s1("pear");
-  String s2("orange");
-  String s3("grape");
   for(size_t i = 0; i < 10; i++) {
     if (i % 2 == 0) {
-      r.set(0, &s0);
+      r.set(0, apple);
     } else {
-      r.set(0, &s1);
+      r.set(0, pear);
     }
     r.set(1, 1);
-    r.set(2, &s2);
+    r.set(2, orange);
     df.add_row(r);
   }
 
   DataFrame* apple_df = df.filter(apple_sr);
   EXPECT_EQ(apple_df->nrows(), 5);
-  EXPECT_EQ(apple_df->get_string(0, 0)->equals(&s0), true);
-  EXPECT_EQ(apple_df->get_string(0, 1)->equals(&s0), true);
-  EXPECT_EQ(apple_df->get_string(0, 2)->equals(&s0), true);
-  EXPECT_EQ(apple_df->get_string(0, 3)->equals(&s0), true);
-  EXPECT_EQ(apple_df->get_string(0, 4)->equals(&s0), true);
+  EXPECT_EQ(apple_df->get_string(0, 0) == apple, true);
+  EXPECT_EQ(apple_df->get_string(0, 1) == apple, true);
+  EXPECT_EQ(apple_df->get_string(0, 2) == apple, true);
+  EXPECT_EQ(apple_df->get_string(0, 3) == apple, true);
+  EXPECT_EQ(apple_df->get_string(0, 4) == apple, true);
 }
 
 int main(int argc, char **argv)
