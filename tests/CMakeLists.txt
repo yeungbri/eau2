@@ -38,29 +38,5 @@ add_subdirectory(${CMAKE_CURRENT_BINARY_DIR}/googletest-src
                  EXCLUDE_FROM_ALL
                  )
 
-add_executable(basic_example basic_example.cpp)
-target_link_libraries(basic_example gtest)
-
-add_executable(personal_test_suite personal_test_suite.cpp)
-target_link_libraries(personal_test_suite gtest)
-
-add_executable(submitted_test_1 submitted_test_1.cpp)
-target_link_libraries(submitted_test_1 gtest)
-
-add_executable(submitted_test_2 submitted_test_2.cpp)
-target_link_libraries(submitted_test_2 gtest)
-
-add_executable(submitted_test_3 submitted_test_3.cpp)
-target_link_libraries(submitted_test_3 gtest)
-
-add_executable(submitted_test_4 submitted_test_4.cpp)
-target_link_libraries(submitted_test_4 gtest)
-
-add_executable(submitted_test_5 submitted_test_5.cpp)
-target_link_libraries(submitted_test_5 gtest)
-
-add_executable(submitted_test_6 submitted_test_6.cpp)
-target_link_libraries(submitted_test_6 gtest)
-
-add_executable(submitted_test_7 submitted_test_7.cpp)
-target_link_libraries(submitted_test_7 gtest)
+add_executable(dataframe_tests dataframe_tests.cpp)
+target_link_libraries(dataframe_tests gtest)
