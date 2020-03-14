@@ -25,8 +25,6 @@ class Row
 {
 public:
   Schema _schema; // External Schema
-  size_t _length;
-  size_t _capacity;
   size_t _idx; // Not our responsibility
   std::string _name;
 
@@ -59,8 +57,7 @@ public:
   Row(Schema &scm)
   {
     _schema = scm;
-    _length = scm.width();
-    for (size_t i = 0; i < _length; i++)
+    for (size_t i = 0; i < _schema.width(); i++)
     {
       _elements.push_back(new struct Data());
     }
@@ -69,19 +66,23 @@ public:
   Row(Row &row)
   {
     _schema = row._schema;
-    _length = row._length;
     _idx = row._idx;
-    for (size_t i = 0; i < _length; ++i)
+    for (size_t i = 0; i < _schema.width(); ++i)
     {
       struct Data *element = new struct Data();
       element->type = row._elements[i]->type;
       element->val = row._elements[i]->val;
-      _elements[i] = element;
+      _elements.push_back(element);
     }
   }
 
   virtual ~Row()
   {
+    for (auto field : _elements)
+    {
+      //delete field->val.sval;
+      delete field;
+    }
     _elements.clear();
   }
 
@@ -91,10 +92,6 @@ public:
   {
     if (_schema.col_type(col) == 'I')
     {
-      if (col == _capacity)
-      {
-        _grow();
-      }
       _elements[col]->type = Data::is_int;
       _elements[col]->val.ival = val;
     }
@@ -103,10 +100,6 @@ public:
   {
     if (_schema.col_type(col) == 'F')
     {
-      if (col == _length)
-      {
-        _grow();
-      }
       _elements[col]->type = Data::is_float;
       _elements[col]->val.fval = val;
     }
@@ -126,6 +119,7 @@ public:
     if (_schema.col_type(col) == 'S')
     {
       _elements[col]->type = Data::is_string;
+      //delete _elements[col]->val.sval;
       _elements[col]->val.sval = strdup(val.c_str());
     }
   }
@@ -168,7 +162,7 @@ public:
   size_t width()
   {
     size_t result = 0;
-    for (size_t i = 0; i < _length; i++)
+    for (size_t i = 0; i < _elements.size(); i++)
     {
       if (_elements[i] != nullptr)
       {
@@ -181,7 +175,7 @@ public:
   /** Type of the field at the given position. An idx >= width is  undefined. */
   char col_type(size_t idx)
   {
-    if (idx < _length)
+    if (idx < _elements.size())
     {
       switch (_elements[idx]->type)
       {
@@ -205,7 +199,7 @@ public:
     * Calling this method before the row's fields have been set is undefined. */
   void visit(size_t idx, Fielder &f)
   {
-    for (size_t i = 0; i < _length; i++)
+    for (size_t i = 0; i < _elements.size(); i++)
     {
       f.start(i);
       switch (col_type(i))
@@ -227,20 +221,6 @@ public:
     }
   }
 
-  void _grow()
-  {
-    _capacity = _capacity * 2;
-    Data **elementsCopy = new struct Data *[_capacity];
-    for (size_t i = 0; i < _length; ++i)
-    {
-      elementsCopy[i] = _elements[i];
-    }
-    for (size_t i = _length; i < _capacity; ++i)
-    {
-      elementsCopy[i] = new struct Data();
-    }
-  }
-
   /**
    * Caller of this method is responsible for updating this schema
    * If _elements is not big enough, make it bigger
@@ -248,41 +228,29 @@ public:
    */
   void push_back(bool b)
   {
-    if (_length == _capacity)
-    {
-      _grow();
-    }
-    _elements[_length]->val.bval = b;
-    _length++;
+    struct Data *element = new struct Data();
+    element->val.bval = b;
+    _elements.push_back(element);
   }
 
   void push_back(int i)
   {
-    if (_length == _capacity)
-    {
-      _grow();
-    }
-    _elements[_length]->val.ival = i;
-    _length++;
+    struct Data *element = new struct Data();
+    element->val.ival = i;
+    _elements.push_back(element);;
   }
 
   void push_back(float f)
   {
-    if (_length == _capacity)
-    {
-      _grow();
-    }
-    _elements[_length]->val.fval = f;
-    _length++;
+    struct Data *element = new struct Data();
+    element->val.fval = f;
+    _elements.push_back(element);
   }
 
   void push_back(std::string s)
   {
-    if (_length == _capacity)
-    {
-      _grow();
-    }
-    _elements[_length]->val.sval = strdup(s.c_str());
-    _length++;
+    struct Data *element = new struct Data();
+    element->val.sval = strdup(s.c_str());
+    _elements.push_back(element);;
   }
 };

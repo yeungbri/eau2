@@ -6,7 +6,6 @@
 //lang::Cpp
 
 #pragma once
-#include <cstdarg>
 #include <iostream>
 #include <vector>
 
@@ -62,24 +61,14 @@ public:
 class BoolColumn : public Column
 {
 public:
-  BoolColumn() : BoolColumn(size_t(10))
-  {
-  }
+  BoolColumn() = default;
 
-  BoolColumn(size_t size)
+  BoolColumn(std::vector<bool> bools)
   {
-    _arr = std::vector<bool>(size);
-  }
-
-  BoolColumn(int n, ...) : BoolColumn(size_t(n))
-  {
-    va_list bools;
-    va_start(bools, n);
-    for (int i = 0; i < n; i++)
+    for (bool b : bools)
     {
-      _arr.push_back(bool(va_arg(bools, int)));
+      _arr.push_back(b);
     }
-    va_end(bools);
   }
 
   virtual ~BoolColumn() { 
@@ -99,7 +88,7 @@ public:
   /** Set value at idx. An out of bound idx is undefined.  */
   void set(size_t idx, bool val)
   {
-    _arr.assign(idx, val);
+    _arr[idx] = val;
   }
 
   virtual size_t size()
@@ -122,24 +111,14 @@ public:
 class IntColumn : public Column
 {
 public:
-  IntColumn() : IntColumn(size_t(10))
-  {
-  }
+  IntColumn() = default;
 
-  IntColumn(size_t size)
+  IntColumn(std::vector<int> ints)
   {
-    _arr = std::vector<int>(size);
-  }
-
-  IntColumn(int n, ...) : IntColumn(size_t(n))
-  {
-    va_list ints;
-    va_start(ints, n);
-    for (int i = 0; i < n; i++)
+    for (int i : ints)
     {
-      _arr.push_back(va_arg(ints, int));
+      _arr.push_back(i);
     }
-    va_end(ints);
   }
 
   virtual ~IntColumn() {
@@ -159,7 +138,7 @@ public:
   /** Set value at idx. An out of bound idx is undefined.  */
   void set(size_t idx, int val)
   {
-    _arr.assign(idx, val);
+    _arr[idx] = val;
   }
 
   size_t size()
@@ -182,25 +161,14 @@ public:
 class FloatColumn : public Column
 {
 public:
-  FloatColumn() : FloatColumn(size_t(10))
-  {
-  }
+  FloatColumn() = default;
 
-  FloatColumn(size_t size)
+  FloatColumn(std::vector<float> floats)
   {
-    _arr = std::vector<float>(size);
-  }
-
-  FloatColumn(int n, ...) : FloatColumn(size_t(n))
-  {
-    va_list floats;
-    va_start(floats, n);
-    for (int i = 0; i < n; i++)
+    for (float f : floats)
     {
-      double val = va_arg(floats, double);
-      _arr.push_back((float) val);
+      _arr.push_back(f);
     }
-    va_end(floats);
   }
 
   virtual ~FloatColumn() {
@@ -220,7 +188,7 @@ public:
   /** Set value at idx. An out of bound idx is undefined.  */
   void set(size_t idx, float val)
   {
-    _arr.assign(idx, val);
+    _arr[idx] = val;
   }
 
   size_t size()
@@ -244,24 +212,14 @@ public:
 class StringColumn : public Column
 {
 public:
-  StringColumn() : StringColumn(size_t(10))
-  {
-  }
+  StringColumn() = default;
 
-  StringColumn(size_t size)
+  StringColumn(std::vector<std::string> strings)
   {
-    _arr = std::vector<std::string>(size);
-  }
-
-  StringColumn(int n, ...) : StringColumn(size_t(n))
-  {
-    va_list strings;
-    va_start(strings, n);
-    for (int i = 0; i < n; i++)
+    for (std::string s : strings)
     {
-      _arr.push_back(std::string(va_arg(strings, const char*)));
+      _arr.push_back(s);
     }
-    va_end(strings);
   }
 
   virtual ~StringColumn() {
@@ -281,7 +239,7 @@ public:
   /** Set value at idx. An out of bound idx is undefined.  */
   void set(size_t idx, std::string val)
   {
-    _arr.assign(idx, val);
+    _arr[idx] = val;
   }
 
   size_t size()

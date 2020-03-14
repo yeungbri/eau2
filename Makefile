@@ -7,6 +7,10 @@ run:
 test:
 	cd ./tests; cmake .; make dataframe_tests && ./dataframe_tests
 
+valgrind:
+	docker build -t memory-test:0.1 .
+	docker run -ti -v "$$(pwd)":/test memory-test:0.1 bash -c "cd ./test/tests; cmake .; make dataframe_tests && valgrind --leak-check=full ./dataframe_tests"
+
 clean:
 	rm -f tests/CMakeCache.txt
 	rm -rf tests/CMakeFiles/

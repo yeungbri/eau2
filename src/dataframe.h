@@ -33,21 +33,13 @@ public:
   /** Create a data frame with the same columns as the given df but with no rows or rownames */
   DataFrame(DataFrame &df) : _schema(df.get_schema())
   {
-    Schema* schema = new Schema(df.get_schema());
-    int schema_rows = schema->length();
-    for (size_t i=0; i<schema_rows; i++) {
-      schema->_rows.erase(schema->_rows.begin() + i);
-    }
-    _schema = *schema;
-    _columns = std::vector<Column*>(df._columns);
-    _rows = std::vector<Row*>(0);
+    _schema._rows.clear();
   }
 
   /** Create a data frame from a schema and columns. All columns are created
     * empty. */
   DataFrame(Schema &schema) : _schema(schema)
   {
-    _columns = std::vector<Column*>(_schema.width());
     for (size_t i = 0; i < _schema.width(); ++i)
     {
       Column *col;
@@ -70,15 +62,22 @@ public:
       }
       _columns.push_back(col);
     }
-    _rows = std::vector<Row*>(_schema.length());
     for (size_t i = 0; i < _schema.length(); ++i)
     {
-      Row *row = new Row(_schema, nullptr);
+      Row *row = new Row(_schema, "");
       _rows.push_back(row);
     }
   }
 
   virtual ~DataFrame() {
+    // for (auto row : _rows)
+    // {
+    //   delete row;
+    // }
+    // for (auto col : _columns)
+    // {
+    //   delete col;
+    // }
     _columns.clear();
     _rows.clear();
   }

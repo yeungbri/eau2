@@ -26,12 +26,18 @@ public:
   {
     if (this != &from)
     {
-      std::vector<std::string> fromTypes(from._types);
-      std::vector<std::string> fromRows(from._rows);
-      std::vector<std::string> fromCols(from._cols);
-      this->_types = fromTypes;
-      this->_rows = fromRows;
-      this->_cols = fromCols;
+      for (auto s : from._types)
+      {
+        _types.push_back(s);
+      }
+      for (auto s : from._rows)
+      {
+        _rows.push_back(s);
+      }
+      for (auto s : from._cols)
+      {
+        _cols.push_back(s);
+      }
     }
   }
 
@@ -42,16 +48,13 @@ public:
     * characters other than those identifying the four type results in
     * undefined behavior. The argument is external, a empty string argument is
     * undefined. **/
-  Schema(const char *types) : Schema()
+  Schema(const char *types)
   {
     for (int i = 0; i < strlen(types); ++i)
     {
       if (types[i] == 'B' || types[i] == 'I' || types[i] == 'F' || types[i] == 'S')
       {
-        char *type = new char[2];
-        type[0] = types[i];
-        type[1] = '\0';
-        _types.push_back(type);
+        _types.push_back(std::string(1, types[i]));
         _cols.push_back("");
       }
     }
@@ -59,10 +62,9 @@ public:
 
   virtual ~Schema()
   {
-    // Something is causing a double free in our tests
-    // delete _types;
-    // delete _rows;
-    // delete _cols;
+    _types.clear();
+    _rows.clear();
+    _cols.clear();
   }
 
   /** Add a column of the given type and name (can be empty string), name
@@ -70,10 +72,7 @@ public:
     * in undefined behavior. */
   void add_column(char typ, std::string name)
   {
-    char *type = new char[2];
-    type[0] = typ;
-    type[1] = '\0';
-    _types.push_back(type);
+    _types.push_back(std::string(1, typ));
     _cols.push_back(name);
   }
 

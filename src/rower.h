@@ -6,6 +6,7 @@
 //lang::Cpp
 
 #pragma once
+#include <iostream>
 #include "row.h"
 #include "fielder.h"
 #include "helper.h"
