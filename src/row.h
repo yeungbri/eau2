@@ -86,6 +86,7 @@ public:
     for (auto field : _elements)
     {
       //delete field->val.sval;
+      //delete field->val.mval;
       delete field;
     }
     _elements.clear();

@@ -1,3 +1,7 @@
+/*
+Authors: Zhichao Chen and Bryce Russell-Benoit
+*/
+
 #include <iostream>
 #include <string>
 #include <fstream>

@@ -27,15 +27,16 @@ std::string scolName = "String";
 std::string apple = "apple";
 std::string pear = "pear";
 std::string orange = "orange";
+Schema fibsfibs("FIBSFIBS");
+Schema fibs("FIBS");
 
 std::vector<Row*> generateTenRowsFIBSFIBS()
 {
-  Schema *schema = new Schema("FIBSFIBS");
   std::vector<Row*> rows;
   for (size_t i = 0; i < 10; ++i)
   {
     std::string name = std::to_string(i);
-    Row *row = new Row(*schema, name);
+    Row *row = new Row(fibsfibs, name);
     row->set(0, float(1.0));
     row->set(1, int(2));
     row->set(2, true);
@@ -52,11 +53,10 @@ std::vector<Row*> generateTenRowsFIBSFIBS()
 std::vector<Row*> generateTenRowsFIBS()
 {
   std::vector<Row*> rows;
-  Schema *schema = new Schema("FIBS");
   for (size_t i = 0; i < 10; ++i)
   {
     std::string name = std::to_string(i);
-    Row *row = new Row(*schema, name);
+    Row *row = new Row(fibs, name);
     row->set(0, float(0.5 + i * 1.0));
     row->set(1, int(i * 2));
     row->set(2, i % 2 == 0);
@@ -255,10 +255,10 @@ TEST(a4, testAddColumnRow)
     std::string tmp = std::to_string(i);
     EXPECT_EQ(df.get_row(tmp), i);
   }
-  // for (auto row : rows)
-  // {
-  //   delete row;
-  // }
+  for (auto row : rows)
+  {
+    delete row;
+  }
 }
 
 TEST(a4, testGetSet)
@@ -293,10 +293,10 @@ TEST(a4, testGetSet)
   EXPECT_EQ(df.get_bool(2, 5), false);
   EXPECT_EQ(df.get_bool(2, 0), true);
   EXPECT_EQ(df.get_string(3, 0) == "Hello", true);
-  // for (auto row : rows)
-  // {
-  //   delete row;
-  // }
+  for (auto row : rows)
+  {
+    delete row;
+  }
 }
 
 TEST(a4, testFillRow)
@@ -377,6 +377,7 @@ TEST(a4, testFilter)
   EXPECT_EQ(apple_df->get_string(0, 2), apple);
   EXPECT_EQ(apple_df->get_string(0, 3), apple);
   EXPECT_EQ(apple_df->get_string(0, 4), apple);
+  delete apple_df;
 }
 
 int main(int argc, char **argv)

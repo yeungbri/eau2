@@ -1,16 +1,16 @@
-build:
-	g++ -std=c++17 -Wall -o eau2 src/main.cpp
-
 run:
 	./eau2
 
-basic_example:
+build:
+	make clean
 	cd tests; g++ -std=c++17 -Wall -o basic_example example.cpp; ./basic_example
 
 test:
+	make clean
 	cd ./tests; cmake .; make dataframe_tests && ./dataframe_tests
 
 valgrind:
+	make clean
 	docker build -t memory-test:0.1 .
 	docker run -ti -v "$$(pwd)":/test memory-test:0.1 bash -c "cd ./test/tests; cmake .; make dataframe_tests && valgrind --leak-check=full ./dataframe_tests"
 

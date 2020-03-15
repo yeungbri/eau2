@@ -70,10 +70,10 @@ public:
   }
 
   virtual ~DataFrame() {
-    // for (auto row : _rows)
-    // {
-    //   delete row;
-    // }
+    for (auto row : _rows)
+    {
+      delete row;
+    }
     // for (auto col : _columns)
     // {
     //   delete col;
@@ -316,5 +316,6 @@ public:
       Row *row = _rows.at(i);
       rower->accept(*row);
     }
+    delete rower;
   }
 };
