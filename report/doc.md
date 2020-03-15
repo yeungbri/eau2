@@ -70,6 +70,7 @@ More use cases will be added as this system is developed.
 * Implement a robust key-value store for storing many, many key-value pairs. This will definitely be the most difficult part.
 * Implement a key implementation that can be used to easily identify and access the node that the value is on.
 * Create lots of tests for our existing code, and our new code!
+* Fix serializing functionality to use C++ types and not custom-created CwC types. Optimize the serializing as well.
 
 ### Time estimates:
 * Key-value store: 20 hours
