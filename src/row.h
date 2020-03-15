@@ -44,6 +44,7 @@ public:
       float fval;
       bool bval;
       char* sval;
+      char* mval;
     } val;
   };
 
@@ -60,7 +61,10 @@ public:
     _schema = scm;
     for (size_t i = 0; i < _schema.width(); i++)
     {
-      _elements.push_back(new struct Data());
+      struct Data* element = new struct Data();
+      element->type = Data::is_missing;
+      element->val.mval = new char[0];
+      _elements.push_back(element);
     }
   }
 
@@ -225,11 +229,12 @@ public:
     }
   }
 
-  void set_missing(int idx)
-  {
-    
-    _elements[idx]->type = Data::is_missing;
-  }
+  // void set_missing(int idx)
+  // {
+  //   std::cout << _elements[idx]->type << std::endl;
+  //   std::cout << Data::is_missing << std::endl;
+  //   _elements[idx]->type = Data::is_missing;
+  // }
 
   /**
    * Caller of this method is responsible for updating this schema
@@ -239,6 +244,7 @@ public:
   void push_back(bool b)
   {
     struct Data *element = new struct Data();
+    element->type = Data::is_bool;
     element->val.bval = b;
     _elements.push_back(element);
   }
@@ -246,6 +252,7 @@ public:
   void push_back(int i)
   {
     struct Data *element = new struct Data();
+    element->type = Data::is_int;
     element->val.ival = i;
     _elements.push_back(element);;
   }
@@ -253,6 +260,7 @@ public:
   void push_back(float f)
   {
     struct Data *element = new struct Data();
+    element->type = Data::is_float;
     element->val.fval = f;
     _elements.push_back(element);
   }
@@ -260,6 +268,7 @@ public:
   void push_back(std::string s)
   {
     struct Data *element = new struct Data();
+    element->type = Data::is_string;
     element->val.sval = strdup(s.c_str());
     _elements.push_back(element);;
   }

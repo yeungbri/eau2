@@ -353,9 +353,6 @@ DataFrame* getDataFrame(std::string filePath)
                     default:
                         throw std::runtime_error("Unknown type!");
                 }
-            } else
-            {
-                row->set_missing(i);
             }
         }
         df->add_row(*row);
