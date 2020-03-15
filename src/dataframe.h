@@ -259,30 +259,6 @@ public:
 
   /** This method clones the Rower and executes the map in parallel. Join is
   * used at the end to merge the results. */
-  // void pmap(Rower &r)
-  // {
-  //   Rower** rowers = new Rower*[THREAD_COUNT];
-  //   for (int i = 0; i < THREAD_COUNT; ++i)
-  //   {
-  //     rowers[i] = dynamic_cast<Rower*>(r.clone());
-  //   }
-  //   std::thread threads[THREAD_COUNT];
-  //   for (int i = 0; i < THREAD_COUNT; ++i)
-  //   {
-  //     size_t nrows = this->nrows();
-  //     threads[i] = RowerThread()
-  //   }
-  //   for (int i = 0; i < THREAD_COUNT; ++i)
-  //   {
-  //     threads[i].join();
-  //   std::cout << "hi\n";
-  //   }
-  //   for (int i = 0; i < THREAD_COUNT; ++i)
-  //   {
-  //     r.join_delete(rowers[i]);
-  //   }
-  // }
-
   void pmap(Rower &r)
   {
     Rower** rowers = new Rower*[THREAD_COUNT];

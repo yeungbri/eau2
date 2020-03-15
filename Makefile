@@ -4,6 +4,9 @@ build:
 run:
 	./eau2
 
+basic_example:
+	cd tests; g++ -std=c++17 -Wall -o basic_example example.cpp; ./basic_example
+
 test:
 	cd ./tests; cmake .; make dataframe_tests && ./dataframe_tests
 
@@ -13,6 +16,7 @@ valgrind:
 
 clean:
 	rm -f tests/CMakeCache.txt
+	rm -f tests/basic_example
 	rm -rf tests/CMakeFiles/
 	rm -rf tests/googletest-build/
 	rm -rf tests/googletest-download/

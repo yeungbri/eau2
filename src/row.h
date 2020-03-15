@@ -36,7 +36,8 @@ public:
       is_int,
       is_float,
       is_bool,
-      is_string
+      is_string,
+      is_missing
     } type;
     union {
       int ival;
@@ -197,28 +198,37 @@ public:
   /** Given a Fielder, visit every field of this row. The first argument is
     * index of the row in the dataframe.
     * Calling this method before the row's fields have been set is undefined. */
-  void visit(size_t idx, Fielder &f)
+  void visit(Fielder &f)
   {
     for (size_t i = 0; i < _elements.size(); i++)
     {
       f.start(i);
-      switch (col_type(i))
+      if (_elements[i]->type != Data::is_missing)
       {
-      case 'I':
-        f.accept(_elements[i]->val.ival);
-        break;
-      case 'B':
-        f.accept(_elements[i]->val.bval);
-        break;
-      case 'F':
-        f.accept(_elements[i]->val.fval);
-        break;
-      case 'S':
-        f.accept(_elements[i]->val.sval);
-        break;
+        switch (col_type(i))
+        {
+        case 'I':
+          f.accept(_elements[i]->val.ival);
+          break;
+        case 'B':
+          f.accept(_elements[i]->val.bval);
+          break;
+        case 'F':
+          f.accept(_elements[i]->val.fval);
+          break;
+        case 'S':
+          f.accept(std::string(_elements[i]->val.sval));
+          break;
+        }
       }
       f.done();
     }
+  }
+
+  void set_missing(int idx)
+  {
+    
+    _elements[idx]->type = Data::is_missing;
   }
 
   /**

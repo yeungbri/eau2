@@ -1,5 +1,5 @@
-build: main.cpp
-	g++ -std=c++11 -O3 main.cpp -o sorer
+build: example.cpp
+	g++ -std=c++11 -O3 -Wall example.cpp -o sorer
 
 test: sorer
 	#Example from assignment description, retrun BOOL

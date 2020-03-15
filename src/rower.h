@@ -61,11 +61,8 @@ public:
 
   virtual bool accept(Row& r)
   {
-    for (size_t i = 0; i < r.width(); ++i)
-    {
-      r.visit(i, *_fielder);
-      _sys.p("\n");
-    }
+    r.visit(*_fielder);
+    _sys.p("\n");
     return true;
   }
 };

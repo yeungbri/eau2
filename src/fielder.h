@@ -64,6 +64,7 @@ public:
 
   virtual void accept(std::string s)
   {
+
     _sys.p(s.c_str());
   }
 

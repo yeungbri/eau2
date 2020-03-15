@@ -54,8 +54,7 @@ public:
     {
       if (types[i] == 'B' || types[i] == 'I' || types[i] == 'F' || types[i] == 'S')
       {
-        _types.push_back(std::string(1, types[i]));
-        _cols.push_back("");
+        add_column(types[i], "");
       }
     }
   }
