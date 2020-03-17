@@ -5,13 +5,17 @@
 
 // lang::CwC
 
-#include "string.h"
+#include "message.h"
 #include "serial.h"
-#include "serializable.h"
 #include "helper.h"
 
 int main() {
     // serialization/deserialization examples
+    Ack ackmsg(MsgKind::Ack, 1, 2, 0);
+    Serializer *ser = new Serializer();
+    ackmsg.serialize(*ser);
+    Deserializer *dser = new Deserializer(ser->data(), ser->length());
+    Message *d_ackmsg = ackmsg.deserialize(*dser);
 
     // size_t
     Archive* a = new Archive();
