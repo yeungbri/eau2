@@ -40,3 +40,5 @@ add_subdirectory(${CMAKE_CURRENT_BINARY_DIR}/googletest-src
 
 add_executable(dataframe_tests dataframe_tests.cpp)
 target_link_libraries(dataframe_tests gtest)
+add_executable(serialization_tests serialization_tests.cpp)
+target_link_libraries(serialization_tests gtest)

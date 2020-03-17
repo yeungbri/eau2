@@ -67,7 +67,7 @@ std::vector<Row*> generateTenRowsFIBS()
 }
 
 // Test Schema
-TEST(a4, testSchema)
+TEST(dataframe, testSchema)
 {
   Schema s("FBIS");
   EXPECT_EQ(s.width(), 4);
@@ -116,7 +116,7 @@ TEST(a4, testSchema)
 }
 
 // Test Column
-TEST(a4, testColumn)
+TEST(dataframe, testColumn)
 {
   std::vector<bool> bools = {0, 1, 0, 1};
   BoolColumn bc(bools);
@@ -200,7 +200,7 @@ TEST(a4, testColumn)
 }
 
 // Test Dataframe
-TEST(a4, testGetSchema)
+TEST(dataframe, testGetSchema)
 {
   Schema schema("FIBS");
   DataFrame df(schema);
@@ -214,7 +214,7 @@ TEST(a4, testGetSchema)
   // EXPECT_EQ(emptyDf.nrows(), emptySchema.length());
 }
 
-TEST(a4, testAddColumnRow)
+TEST(dataframe, testAddColumnRow)
 {
   // test add columns, verify column names and size
   Schema schema("FIBS");
@@ -261,7 +261,7 @@ TEST(a4, testAddColumnRow)
   }
 }
 
-TEST(a4, testGetSet)
+TEST(dataframe, testGetSet)
 {
   Schema schema;
   DataFrame df(schema);
@@ -299,7 +299,7 @@ TEST(a4, testGetSet)
   }
 }
 
-TEST(a4, testFillRow)
+TEST(dataframe, testFillRow)
 {
   Schema schema("SIS");
   DataFrame df(schema);
@@ -327,7 +327,7 @@ TEST(a4, testFillRow)
   EXPECT_EQ(df.get_string(2, 0), apple);
 }
 
-TEST(a4, testMap)
+TEST(dataframe, testMap)
 {
   Schema s("II");
   DataFrame df(s);
@@ -348,7 +348,7 @@ TEST(a4, testMap)
   EXPECT_EQ(intRower._sum, 1000000);
 }
 
-TEST(a4, testFilter)
+TEST(dataframe, testFilter)
 {
   StringSearchRower apple_sr("apple");
   Schema schema("SIS");
