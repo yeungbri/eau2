@@ -10,8 +10,6 @@
 #include "../src/helper.h"
 #include <gtest/gtest.h>
 
-#define ASSERT_TRUE(a) ASSERT_EQ((a),true);
-#define ASSERT_FALSE(a) ASSERT_EQ((a),false);
 #define ASSERT_EXIT_ZERO(a) ASSERT_EXIT(a(), ::testing::ExitedWithCode(0), ".*");
 
 void test1() {
@@ -21,9 +19,14 @@ void test1() {
     Deserializer dser(ser.data(), ser.length());
     Message *d_ackmsg = ackmsg.deserialize(dser);
     ASSERT_TRUE(ackmsg.kind_ == d_ackmsg->kind_); 
+    std::cout << (size_t) d_ackmsg->kind_ << "\n";
+    std::cout << d_ackmsg->sender_ << "\n";
+    std::cout << d_ackmsg->target_ << "\n";
+    std::cout << d_ackmsg->id_ << "\n";
     // ASSERT_TRUE(ackmsg.sender_ == d_ackmsg->sender_); 
     // ASSERT_TRUE(ackmsg.target_ == d_ackmsg->target_); 
-    // ASSERT_TRUE(ackmsg.id_ == d_ackmsg->id_);
+    ASSERT_TRUE(ackmsg.id_ == d_ackmsg->id_);
+    delete d_ackmsg;
     exit(0);
 }
 

@@ -6,6 +6,7 @@
 //lang::Cpp
 
 #pragma once
+#include "helper.h"
 
 class Serializer {
 public:
@@ -27,6 +28,7 @@ public:
     void write_size_t(size_t v) {
         memcpy(data_ + length_, &v, sizeof(size_t));
         length_ += sizeof(size_t);
+        std::cout << length_ << "\n";
     }
 
     void write_chars(char* v, size_t len) {
@@ -53,7 +55,7 @@ public:
     size_t length_;
 
     Deserializer(char* data, size_t length) : data_(data), length_(length) {
-
+        std::cout << sizeof(data_) << "\n";
     }
 
     size_t read_size_t() {
@@ -71,7 +73,7 @@ public:
     }
 
     std::string read_string(size_t len) {
-        return std::string(read_chars(len));
+        return std::string(read_chars(len)); // TODO: leak
     }
 
     size_t length() {
