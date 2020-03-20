@@ -14,6 +14,7 @@
 #include "rower.h"
 #include "fielder.h"
 #include "row.h"
+#include "kvstore.h"
 
 /****************************************************************************
  * DataFrame::
@@ -317,5 +318,20 @@ public:
       rower->accept(*row);
     }
     delete rower;
+  }
+
+  /** Creates a dataframe, with SZ values and puts it in the kv store under the key
+   *  @return the dataframe
+   **/
+  static DataFrame* fromArray(Key *key, KVStore *store, size_t sz, std::vector<float> vals) {
+    Schema s("F");
+    DataFrame *res = new DataFrame(s);
+
+    for (int i=0; i<sz; i++) {
+
+    }
+
+    store.put(key, res);
+    return res;
   }
 };
