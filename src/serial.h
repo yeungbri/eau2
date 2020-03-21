@@ -36,8 +36,21 @@ public:
     length_ += len;
   }
 
+  void write_float(float v) {
+    memcpy(data_ + sizeof(float), &v, sizeof(float));
+    length_ += sizeof(float);
+  }
+
   void write_string(std::string s) {
+    write_size_t(s.length());
     write_chars(strdup(s.c_str()), s.size());
+  }
+
+  void write_string_vector(std::vector<std::string> v) {
+    write_size_t(v.size());
+    for (int i=0; i<v.size(); i++) {
+      write_string(v.at(i));
+    }
   }
 
   char* data() {
@@ -72,8 +85,25 @@ public:
     return res;
   }
 
-  std::string read_string(size_t len) {
+  float read_float() {
+    float v;
+    memcpy(&v, data_ + length_, sizeof(float));
+    length_ += sizeof(float);
+    return v;
+  }
+
+  std::string read_string() {
+    size_t len = read_size_t();
     return std::string(read_chars(len)); // TODO: leak
+  }
+
+  std::vector<std::string> read_string_vector() {
+    size_t vector_size = read_size_t();
+    std::vector<std::string> res;
+    for (int i=0; i<vector_size; i++) {
+      res.push_back(read_string());
+    }
+    return res;
   }
 
   size_t length() {

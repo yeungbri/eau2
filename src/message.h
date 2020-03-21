@@ -59,7 +59,6 @@ public:
 class Status : public Message {
 public:
   std::string msg_; // owned
-  size_t msglen_;
 
   Status(MsgKind kind, size_t sender, size_t target, size_t id, std::string msg) : 
     Message(kind, sender, target ,id) {
@@ -67,13 +66,11 @@ public:
   };
 
   Status(Deserializer& d) : Message(d) {
-    msglen_ = d.read_size_t();
-    msg_ = d.read_string(msglen_);
+    msg_ = d.read_string();
   }
 
   void serialize(Serializer& ser) {
     Message::serialize(ser);
-    ser.write_size_t(msglen_);
     ser.write_string(msg_);
   }
 };
