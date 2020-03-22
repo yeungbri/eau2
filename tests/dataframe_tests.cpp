@@ -204,14 +204,14 @@ TEST(dataframe, testGetSchema)
 {
   Schema schema("FIBS");
   DataFrame df(schema);
-  // EXPECT_EQ(df.get_schema()._types, schema._types);
-  // EXPECT_EQ(df.ncols(), schema.width());
-  // EXPECT_EQ(df.nrows(), schema.length());
-  // Schema emptySchema;
-  // DataFrame emptyDf(emptySchema);
-  // EXPECT_EQ(emptyDf.get_schema()._types, emptySchema._types);
-  // EXPECT_EQ(emptyDf.ncols(), emptySchema.width());
-  // EXPECT_EQ(emptyDf.nrows(), emptySchema.length());
+  EXPECT_EQ(df.get_schema()._types, schema._types);
+  EXPECT_EQ(df.ncols(), schema.width());
+  EXPECT_EQ(df.nrows(), schema.length());
+  Schema emptySchema;
+  DataFrame emptyDf(emptySchema);
+  EXPECT_EQ(emptyDf.get_schema()._types, emptySchema._types);
+  EXPECT_EQ(emptyDf.ncols(), emptySchema.width());
+  EXPECT_EQ(emptyDf.nrows(), emptySchema.length());
 }
 
 TEST(dataframe, testAddColumnRow)
@@ -269,11 +269,6 @@ TEST(dataframe, testGetSet)
   IntColumn icol;
   BoolColumn bcol;
   StringColumn scol;
-  for (int i = 0; i < 15; ++i)
-  {
-    std::string str = std::to_string(i);
-    scol.push_back(str);
-  }
   df.add_column(&fcol, fcolName);
   df.add_column(&icol, icolName);
   df.add_column(&bcol, bcolName);
@@ -292,7 +287,7 @@ TEST(dataframe, testGetSet)
   EXPECT_EQ(df.get_int(1, 0), 0);
   EXPECT_EQ(df.get_bool(2, 5), false);
   EXPECT_EQ(df.get_bool(2, 0), true);
-  EXPECT_EQ(df.get_string(3, 0) == "Hello", true);
+  EXPECT_EQ(df.get_string(3, 0), "Hello");
   for (auto row : rows)
   {
     delete row;
@@ -319,13 +314,26 @@ TEST(dataframe, testFillRow)
   r2.set(0, apple);
   r2.set(1, 2);
   r2.set(2, apple);
-  df.fill_row(0, r2);
+  df.add_row(r2);
 
-  EXPECT_EQ(df.nrows(), 1);
-  EXPECT_EQ(df.get_string(0, 0), apple);
-  EXPECT_EQ(df.get_int(1, 0), 2);
-  EXPECT_EQ(df.get_string(2, 0), apple);
+  EXPECT_EQ(df.nrows(), 2);
+  EXPECT_EQ(df.get_string(0, 1), apple);
+  EXPECT_EQ(df.get_int(1, 1), 2);
+  EXPECT_EQ(df.get_string(2, 1), apple);
+
+  Row filledR1(schema);
+  df.fill_row(0, filledR1);
+  EXPECT_EQ(filledR1.get_string(0), s1);
+  EXPECT_EQ(filledR1.get_int(1), 1);
+  EXPECT_EQ(filledR1.get_string(2), s2);
+
+  Row filledR2(schema);
+  df.fill_row(1, filledR2);
+  EXPECT_EQ(filledR2.get_string(0), apple);
+  EXPECT_EQ(filledR2.get_int(1), 2);
+  EXPECT_EQ(filledR2.get_string(2), apple);
 }
+
 
 TEST(dataframe, testMap)
 {
@@ -346,38 +354,6 @@ TEST(dataframe, testMap)
 
   df.map(intRower);
   EXPECT_EQ(intRower._sum, 1000000);
-}
-
-TEST(dataframe, testFilter)
-{
-  StringSearchRower apple_sr("apple");
-  Schema schema("SIS");
-  DataFrame df(schema);
-  Row r(schema);
-
-  for (size_t i = 0; i < 10; i++)
-  {
-    if (i % 2 == 0)
-    {
-      r.set(0, apple);
-    }
-    else
-    {
-      r.set(0, pear);
-    }
-    r.set(1, 1);
-    r.set(2, orange);
-    df.add_row(r);
-  }
-
-  DataFrame *apple_df = df.filter(apple_sr);
-  EXPECT_EQ(apple_df->nrows(), 5);
-  EXPECT_EQ(apple_df->get_string(0, 0), apple);
-  EXPECT_EQ(apple_df->get_string(0, 1), apple);
-  EXPECT_EQ(apple_df->get_string(0, 2), apple);
-  EXPECT_EQ(apple_df->get_string(0, 3), apple);
-  EXPECT_EQ(apple_df->get_string(0, 4), apple);
-  delete apple_df;
 }
 
 int main(int argc, char **argv)

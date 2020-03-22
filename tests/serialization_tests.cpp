@@ -38,6 +38,7 @@ void test2() {
   ser.write_string(s1);
   ser.write_string(s2);
   ser.write_string(s3);
+  std::cout << ser.length() << std::endl;
 
   Deserializer dser(ser.data());
   std::string d1 = dser.read_string();

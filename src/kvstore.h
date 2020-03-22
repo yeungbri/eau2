@@ -42,19 +42,20 @@ public:
   }
 
   DataFrame* get_dataframe(Key k) {
-    Value v = get(k);
-    Deserializer d(v.data(), v.length());
-    DataFrame* res = new DataFrame(d);
-    return res;
+    //Value v = get(k);
+    //Deserializer d(v.data(), v.length());
+    //DataFrame* res = new DataFrame(d);
+    //return res;
   }
 
-  Value get(Key k) {
-    auto search = store_.find(k);
-    if (search != store_.end()) {
-      return search->second;
-    } else {
-      std::cout << "Cannot get key " << k.name_ << "\n";
-    }
+  // TODO: change return to Value
+  void get(Key k) {
+    // auto search = store_.find(k);
+    // if (search != store_.end()) {
+    //   return search->second;
+    // } else {
+    //   std::cout << "Cannot get key " << k.name_ << "\n";
+    // }
   }
 
   void put(Key k, DataFrame* df) {
@@ -64,10 +65,10 @@ public:
   }
 
   void put(Key k, Value v) {
-    store_.insert_or_assign(k, v);
+    //store_.insert_or_assign(k, v);
   }
 
-  Value waitAndGet(Key k) {
-
+  // TODO: change return to Value
+  void waitAndGet(Key k) {
   }
 };

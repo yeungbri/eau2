@@ -6,6 +6,7 @@
 // lang::Cpp
 
 #pragma once
+#include "serial.h"
 #include <iostream>
 #include <vector>
 
@@ -33,10 +34,10 @@ class Column {
 
   /** Type appropriate push_back methods. Calling the wrong method is
    * undefined behavior. **/
-  virtual void push_back(int val) {}
-  virtual void push_back(bool val) {}
-  virtual void push_back(float val) {}
-  virtual void push_back(std::string val) {}
+  virtual void push_back(int val) {};
+  virtual void push_back(bool val) {};
+  virtual void push_back(float val) {};
+  virtual void push_back(std::string val) {};
 
   /** Returns the number of elements in the column. */
   virtual size_t size() = 0;
@@ -71,6 +72,8 @@ class BoolColumn : public Column {
   virtual size_t size() { return _arr.size(); }
 
   virtual char get_type() { return 'B'; }
+  
+  virtual void push_back(bool b) { _arr.push_back(b); }
 
  public:
   std::vector<bool> _arr;
@@ -103,6 +106,8 @@ class IntColumn : public Column {
 
   virtual char get_type() { return 'I'; }
 
+  virtual void push_back(int i) { _arr.push_back(i); }
+
  public:
   std::vector<int> _arr;
 };
@@ -133,6 +138,8 @@ class FloatColumn : public Column {
   size_t size() { return _arr.size(); }
 
   virtual char get_type() { return 'F'; }
+
+  virtual void push_back(float f) { _arr.push_back(f); }
 
   void serialize(Serializer &ser) {
     ser.write_float_vector(_arr);
@@ -174,6 +181,8 @@ class StringColumn : public Column {
   size_t size() { return _arr.size(); }
 
   char get_type() { return 'S'; }
+
+  virtual void push_back(std::string s) { _arr.push_back(s); }
 
  public:
   std::vector<std::string> _arr;

@@ -74,6 +74,7 @@ public:
   size_t length_;
 
   Deserializer(char* data) {
+    
     data_ = data;
     length_ = 0;
   }

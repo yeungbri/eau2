@@ -12,7 +12,6 @@
 #include "column.h"
 #include "fielder.h"
 #include "helper.h"
-#include "kvstore.h"
 #include "row.h"
 #include "rower.h"
 #include "schema.h"
@@ -32,8 +31,8 @@ class DataFrame {
 
   /** Create a data frame with the same columns as the given df but with no rows
    * or rownames */
-  DataFrame(DataFrame &df) : schema_(df.getschema_()) {
-    schema_._row_names.clear();
+  DataFrame(DataFrame &df) : schema_(df.get_schema()) {
+    //schema_._row_names.clear();
   }
 
   /** Create a data frame from a schema and columns. All columns are created
@@ -61,9 +60,9 @@ class DataFrame {
     }
   }
 
-  DataFrame(Deserializer& d) {
+  // DataFrame(Deserializer& d) {
 
-  }
+  // }
 
   virtual ~DataFrame() {
     // for (auto col : cols_)
@@ -75,7 +74,7 @@ class DataFrame {
 
   /** Returns the dataframe's schema. Modifying the schema after a dataframe
    * has been created is undefined. */
-  Schema &getschema_() { return schema_; }
+  Schema &get_schema() { return schema_; }
 
   /** Adds a column this dataframe, updates the schema, the new column
    * is external, and appears as the last column of the dataframe, the
@@ -139,16 +138,16 @@ class DataFrame {
       Column *col = cols_.at(i);
       switch (col->get_type()) {
         case 'B':
-          row.push_back(col->as_bool()->get(idx));
+          row.set(i, col->as_bool()->get(idx));
           break;
         case 'I':
-          row.push_back(col->as_int()->get(idx));
+          row.set(i, col->as_int()->get(idx));
           break;
         case 'F':
-          row.push_back(col->as_float()->get(idx));
+          row.set(i, col->as_float()->get(idx));
           break;
         case 'S':
-          row.push_back(col->as_string()->get(idx));
+          row.set(i, col->as_string()->get(idx));
           break;
       }
     }
@@ -203,18 +202,20 @@ class DataFrame {
   }
 
   void serialize(Serializer& ser) {
-    schema_.serialize(ser);
+    //schema_.serialize(ser);
   }
 
   /** Returns a dataframe with sz values and puts it in the key value store
    *  under the key */
-  static DataFrame *fromArray(Key *key, KVStore *store, size_t sz,
-                              std::vector<float> vals) {
-    Schema s("F");
-    DataFrame *res = new DataFrame(s);
-    FloatColumn *fc = new FloatColumn(vals);
-    res->add_column(fc, "My floats");
-    store->put(*key, res);
-    return res;
-  }
+  // static DataFrame *fromArray(Key *key, KVStore *store, size_t sz,
+  //                             std::vector<float> vals) {
+  //   Schema s("F");
+  //   DataFrame *res = new DataFrame(s);
+
+  //   for (int i = 0; i < sz; i++) {
+  //   }
+
+  //   // store.put(key, res);
+  //   return res;
+  // }
 };
