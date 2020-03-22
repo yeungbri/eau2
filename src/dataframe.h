@@ -60,10 +60,6 @@ class DataFrame {
     }
   }
 
-  // DataFrame(Deserializer& d) {
-
-  // }
-
   virtual ~DataFrame() {
     // for (auto col : cols_)
     // {
@@ -202,7 +198,17 @@ class DataFrame {
   }
 
   void serialize(Serializer& ser) {
-    //schema_.serialize(ser);
+    schema_.serialize(ser);
+    for (int i=0; i<ncols(); i++) {
+      cols_.at(i)->serialize(ser);
+    }
+  }
+
+  static DataFrame* deserialize(Deserializer& dser) {
+    Schema s;
+    s.deserialize(dser);
+
+    // DataFrame(s);
   }
 
   /** Returns a dataframe with sz values and puts it in the key value store

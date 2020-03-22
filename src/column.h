@@ -45,6 +45,10 @@ class Column {
 
   /** Return the type of this column as a char: 'S', 'B', 'I' and 'F'.*/
   virtual char get_type() = 0;
+
+  virtual void serialize(Serializer& ser) { }
+
+  virtual Column deserialize(Deserializer& dser) { }
 };
 
 /*************************************************************************
@@ -146,7 +150,7 @@ class FloatColumn : public Column {
     ser.write_float_vector(_arr);
   }
 
-  FloatColumn *deserialize(Deserializer &dser) {
+  static FloatColumn* deserialize(Deserializer &dser) {
     std::vector<float> arr = dser.read_float_vector();
     return new FloatColumn(arr);
   }

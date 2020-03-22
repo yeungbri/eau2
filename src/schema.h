@@ -64,7 +64,7 @@ class Schema {
     ser.write_string_vector(_col_names);
   }
 
-  Schema* deserialize(Deserializer& dser) {
+  static Schema* deserialize(Deserializer& dser) {
     std::vector<std::string> types = dser.read_string_vector();
     std::vector<std::string> row_names = dser.read_string_vector();
     std::vector<std::string> col_names = dser.read_string_vector();

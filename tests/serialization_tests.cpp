@@ -10,7 +10,7 @@
 #include "../src/message.h"
 #include "../src/schema.h"
 #include "../src/serial.h"
-// #include "../src/dataframe.h"
+#include "../src/dataframe.h"
 #include <gtest/gtest.h>
 
 #define ASSERT_EXIT_ZERO(a) \
@@ -40,7 +40,6 @@ void test_string() {
   ser.write_string(s1);
   ser.write_string(s2);
   ser.write_string(s3);
-  std::cout << ser.length() << std::endl;
 
   Deserializer dser(ser.data());
   std::string d1 = dser.read_string();
@@ -127,19 +126,26 @@ void test_schema() {
 
   Deserializer dser(ser.data());
   Schema* s2 = s.deserialize(dser);
-  // ASSERT_TRUE()
+
+  ASSERT_TRUE(s.width() == s2->width());
+  for (int i=0; i<3; i++) {
+    ASSERT_TRUE(s._types.at(i) == s2->_types.at(i));
+    ASSERT_TRUE(s._types.at(i) == "F");
+    ASSERT_TRUE(s2->_types.at(i) == "F");
+  }
+  exit(0);
 }
 
 TEST(serial, test_schema) { ASSERT_EXIT_ZERO(test_schema) }
 
 void test_dataframe() {
-
+  DataFrame df();
   Serializer ser;
 
   Deserializer dser(ser.data());
 }
 
-TEST(serial, test_dataframe) { ASSERT_EXIT_ZERO(test_dataframe) }
+// TEST(serial, test_dataframe) { ASSERT_EXIT_ZERO(test_dataframe) }
 
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);
