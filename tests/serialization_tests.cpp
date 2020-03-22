@@ -162,16 +162,18 @@ void test_dataframe() {
   Deserializer dser(ser.data());
   DataFrame* df2 = DataFrame::deserialize(dser);
 
-  // std::cout << df.cols_[0]->as_float()->get(0) << "\n";
-  std::cout << df.ncols() << "\n";
-  std::cout << df2->ncols() << "\n";
   ASSERT_FLOAT_EQ(df2->get_float(1, 0), fv[0]);
   ASSERT_FLOAT_EQ(df2->get_float(1, 1), fv[1]);
   ASSERT_FLOAT_EQ(df2->get_float(1, 2), fv[2]);
 
-  // ASSERT_EQ(df.get_int(2, 0), iv[0]);
+  for (int i; i<iv.size(); i++) {
+    ASSERT_EQ(df.get_int(2, i), iv[i]);
+  }
 
-  // ASSERT_EQ(df.get_bool(3, 0), bv[0])
+  ASSERT_EQ(df.get_bool(3, 0), bv[0]);
+
+  ASSERT_EQ(df.get_string(4, 0), sv[0]);
+  
   exit(0);
 }
 

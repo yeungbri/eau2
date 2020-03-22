@@ -205,13 +205,12 @@ class DataFrame {
   }
 
   static DataFrame* deserialize(Deserializer& dser) {
-    Schema schema;
-    schema.deserialize(dser);
+    Schema* schema = Schema::deserialize(dser);
 
     std::vector<Column*> cols;
-    for (int i=0; i<schema.width(); i++) {
+    for (int i=0; i<schema->width(); i++) {
       Column* c;
-      switch (schema.col_type(i)) {
+      switch (schema->col_type(i)) {
         case 'B':
           c = BoolColumn::deserialize(dser);
           break;
@@ -230,22 +229,24 @@ class DataFrame {
       cols.push_back(c);
     }
 
-    DataFrame* df = new DataFrame(schema);
+    DataFrame* df = new DataFrame(*schema);
     df->cols_ = cols;
     return df;
   }
 
   /** Returns a dataframe with sz values and puts it in the key value store
    *  under the key */
-  // static DataFrame *fromArray(Key *key, KVStore *store, size_t sz,
-  //                             std::vector<float> vals) {
-  //   Schema s("F");
-  //   DataFrame *res = new DataFrame(s);
+  static DataFrame *fromArray(Key *key, KVStore *store,
+                              std::vector<float> vals) {
+    Schema s;
+    DataFrame *res = new DataFrame(s);
+    FloatColumn *fc = new FloatColumn(vals);
+    res->add_column(fc, "Float column");
 
-  //   for (int i = 0; i < sz; i++) {
-  //   }
-
-  //   // store.put(key, res);
-  //   return res;
-  // }
+    Serializer ser;
+    res->serialize(ser);
+    Value* value = new Value(ser.data());
+    store->put(key, value);
+    return res;
+  }
 };

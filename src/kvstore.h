@@ -20,22 +20,17 @@ public:
 class Value {
 public:
   char* data_;
-  size_t length_;
 
-  Value(char* data, size_t length) : data_(data), length_(length) { }
+  Value(char* data) : data_(data) { }
 
   char* data() {
     return data_;
-  }
-
-  size_t length() {
-    return length_;
   }
 };
 
 class KVStore {
 public:
-  std::map<Key, Value> store_;
+  std::map<Key*, Value*> store_;
 
   KVStore() {
 
@@ -58,14 +53,14 @@ public:
     // }
   }
 
-  void put(Key k, DataFrame* df) {
-    Serializer ser;
-    df->serialize(ser);
-    put(k, Value(ser.data(), ser.length()));
-  }
+  // void put(Key k, DataFrame* df) {
+  //   Serializer ser;
+  //   df->serialize(ser);
+  //   put(k, Value(ser.data(), ser.length()));
+  // }
 
-  void put(Key k, Value v) {
-    //store_.insert_or_assign(k, v);
+  void put(Key* k, Value* v) {
+    store_.insert_or_assign(k, v);
   }
 
   // TODO: change return to Value

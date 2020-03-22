@@ -40,7 +40,7 @@ public:
     }
     
     Key key("triv", 0);
-    DataFrame* df = DataFrame::fromArray(&key, &kv, SZ, vals);
+    DataFrame* df = DataFrame::fromArray(&key, &kv, vals);
     assert(df->get_float(0, 1) == 1);
     
     DataFrame* df2 = kv.get_dataframe(key);
