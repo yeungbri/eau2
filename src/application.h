@@ -31,7 +31,7 @@ public:
   Trivial(size_t idx) : Application(idx) { }
 
   void run_() {
-    size_t SZ = 1000*1000;
+    size_t SZ = 1000 * 1000;
     std::vector<float> vals;
     float sum = 0;
     for (size_t i = 0; i < SZ; ++i){
@@ -39,13 +39,24 @@ public:
         sum += i;
     }
     
+    
     Key key("triv", 0);
     DataFrame* df = DataFrame::fromArray(&key, &kv, vals);
     assert(df->get_float(0, 1) == 1);
     
-    DataFrame* df2 = kv.get_dataframe(key);
-    for (size_t i = 0; i < SZ; ++i) sum -= df2->get_float(0, i);
-    assert(sum==0);
+    Value val = kv.get(key);
+    Deserializer dser(val.data());
+    DataFrame *df2 = DataFrame::deserialize(dser);
+    
+    std::cout << "Sum is " << sum << std::endl;
+    for (size_t i = 0; i < SZ; ++i)
+    {
+      assert(df2->get_float(0, i) == i);
+      sum -= df2->get_float(0, i);
+    }
+    std::cout << "Sum is " << sum << std::endl;
+    assert(sum == 0);
+    std::cout << "SUCCESS" << std::endl;
     
     delete df; delete df2;
   }

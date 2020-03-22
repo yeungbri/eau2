@@ -15,6 +15,7 @@
 #include "row.h"
 #include "rower.h"
 #include "schema.h"
+#include "kvstore.h"
 
 /****************************************************************************
  * DataFrame::
@@ -204,7 +205,8 @@ class DataFrame {
     }
   }
 
-  static DataFrame* deserialize(Deserializer& dser) {
+  static DataFrame* deserialize(Deserializer& dser) 
+  {
     Schema* schema = Schema::deserialize(dser);
 
     std::vector<Column*> cols;
@@ -246,7 +248,7 @@ class DataFrame {
     Serializer ser;
     res->serialize(ser);
     Value* value = new Value(ser.data());
-    store->put(key, value);
+    store->put(*key, *value);
     return res;
   }
 };

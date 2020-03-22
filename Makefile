@@ -18,6 +18,7 @@ valgrind:
 
 clean:
 	rm -f tests/serialization_tests
+	rm -f tests/trivial_example
 	rm -f tests/CMakeCache.txt
 	rm -f tests/basic_example
 	rm -rf tests/CMakeFiles/

@@ -18,6 +18,7 @@ public:
   // Double capacity if max capacity is reached
   void grow(size_t add_len) {
     if (length_ + add_len > capacity_) {
+      std::cout << length_ + add_len << " is greater than " << capacity_ << "!" << std::endl;
       capacity_ = 2 * capacity_;
       char *new_data = new char[capacity_];
       memcpy(new_data, data_, length_);
@@ -27,26 +28,31 @@ public:
   }
 
   void write_size_t(size_t v) {
+    grow(sizeof(size_t));
     memcpy(data_ + length_, &v, sizeof(size_t));
     length_ += sizeof(size_t);
   }
 
   void write_chars(char* v, size_t len) {
+    grow(len);
     memcpy(data_ + length_, v, len);
     length_ += len;
   }
 
   void write_int(int v) {
+    grow(sizeof(int));
     memcpy(data_ + length_, &v, sizeof(int));
     length_ += sizeof(int);
   }
 
   void write_bool(bool v) {
+    grow(sizeof(bool));
     memcpy(data_ + length_, &v, sizeof(bool));
     length_ += sizeof(bool);
   }
 
   void write_float(float v) {
+    grow(sizeof(float));
     memcpy(data_ + length_, &v, sizeof(float));
     length_ += sizeof(float);
   }
