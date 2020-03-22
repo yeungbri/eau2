@@ -8,8 +8,7 @@ build:
 
 test:
 	# make clean
-	cd ./tests; cmake .; make dataframe_tests && ./dataframe_tests;
-	# MOVE TO ABOVE LINE LATER: make serialization_tests && ./serialization_tests;
+	cd ./tests; cmake .; make dataframe_tests && ./dataframe_tests; make serialization_tests && ./serialization_tests;
 
 valgrind:
 	make clean

@@ -9,6 +9,7 @@
 #include "serial.h"
 #include <iostream>
 #include <vector>
+#include "serial.h"
 
 class IntColumn;
 class BoolColumn;

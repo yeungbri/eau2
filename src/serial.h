@@ -7,6 +7,7 @@
 
 #pragma once
 #include "helper.h"
+#include <vector>
 
 class Serializer {
 public:
@@ -36,7 +37,7 @@ public:
   }
 
   void write_float(float v) {
-    memcpy(data_ + sizeof(float), &v, sizeof(float));
+    memcpy(data_ + length_, &v, sizeof(float));
     length_ += sizeof(float);
   }
 
@@ -91,9 +92,10 @@ public:
   }
 
   char* read_chars(size_t len) {
-    char* res = new char[len];
+    char* res = new char[len + 1];
     memcpy(res, data_ + length_, len);
     length_ += len;
+    res[len] = '\0';
     return res;
   }
 
@@ -107,7 +109,6 @@ public:
   std::string read_string() {
     size_t len = read_size_t();
     std::string res = std::string(read_chars(len));
-    // std::cout << res << "\n";
     return res; // TODO: leak
   }
 
