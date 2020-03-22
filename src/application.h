@@ -43,7 +43,7 @@ public:
     DataFrame* df = DataFrame::fromArray(&key, &kv, SZ, vals);
     assert(df->get_float(0, 1) == 1);
     
-    DataFrame* df2 = kv.get(key);
+    DataFrame* df2 = kv.get_dataframe(key);
     for (size_t i = 0; i < SZ; ++i) sum -= df2->get_float(0, i);
     assert(sum==0);
     

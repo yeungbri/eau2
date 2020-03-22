@@ -200,6 +200,10 @@ public:
     return 'F';
   }
 
+  void serialize(Serializer& ser) {
+    ser.write_size_t(size());
+  }
+
 public:
   std::vector<float> _arr;
 };

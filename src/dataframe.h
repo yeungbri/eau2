@@ -61,6 +61,10 @@ class DataFrame {
     }
   }
 
+  DataFrame(Deserializer& d) {
+
+  }
+
   virtual ~DataFrame() {
     // for (auto col : cols_)
     // {
@@ -198,17 +202,19 @@ class DataFrame {
     delete rower;
   }
 
+  void serialize(Serializer& ser) {
+    schema_.serialize(ser);
+  }
+
   /** Returns a dataframe with sz values and puts it in the key value store
    *  under the key */
   static DataFrame *fromArray(Key *key, KVStore *store, size_t sz,
                               std::vector<float> vals) {
     Schema s("F");
     DataFrame *res = new DataFrame(s);
-
-    for (int i = 0; i < sz; i++) {
-    }
-
-    store.put(key, res);
+    FloatColumn *fc = new FloatColumn(vals);
+    res->add_column(fc, "My floats");
+    store->put(*key, res);
     return res;
   }
 };

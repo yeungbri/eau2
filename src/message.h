@@ -102,7 +102,9 @@ public:
 };
 
 Message* Message::deserialize(Deserializer& d) {
-  switch((MsgKind) d.read_size_t()) {
+  size_t msg_type = d.read_size_t();
+  d.set_length(0);
+  switch((MsgKind) msg_type) {
     case MsgKind::Ack: return new Ack(d);
     case MsgKind::Status: return new Status(d);
   }

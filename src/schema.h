@@ -55,6 +55,22 @@ class Schema {
     }
   }
 
+  Schema(std::vector<std::string> types, std::vector<std::string> row_names, 
+    std::vector<std::string> col_names) : _types(types), _row_names(row_names), _col_names(col_names) { }
+
+  void serialize(Serializer& ser) {
+    ser.write_string_vector(_types);
+    ser.write_string_vector(_row_names);
+    ser.write_string_vector(_col_names);
+  }
+
+  Schema* deserialize(Deserializer& dser) {
+    std::vector<std::string> types = dser.read_string_vector();
+    std::vector<std::string> row_names = dser.read_string_vector();
+    std::vector<std::string> col_names = dser.read_string_vector();
+    return new Schema(types, row_names, col_names);
+  }
+
   virtual ~Schema() {
     _types.clear();
     _row_names.clear();

@@ -7,6 +7,7 @@
 
 #pragma once
 #include "dataframe.h"
+#include "serial.h"
 #include <map>
 
 class Key {
@@ -19,7 +20,17 @@ public:
 class Value {
 public:
   char* data_;
-  Value(char* data) : data_(data) { }
+  size_t length_;
+
+  Value(char* data, size_t length) : data_(data), length_(length) { }
+
+  char* data() {
+    return data_;
+  }
+
+  size_t length() {
+    return length_;
+  }
 };
 
 class KVStore {
@@ -30,6 +41,13 @@ public:
 
   }
 
+  DataFrame* get_dataframe(Key k) {
+    Value v = get(k);
+    Deserializer d(v.data(), v.length());
+    DataFrame* res = new DataFrame(d);
+    return res;
+  }
+
   Value get(Key k) {
     auto search = store_.find(k);
     if (search != store_.end()) {
@@ -37,6 +55,12 @@ public:
     } else {
       std::cout << "Cannot get key " << k.name_ << "\n";
     }
+  }
+
+  void put(Key k, DataFrame* df) {
+    Serializer ser;
+    df->serialize(ser);
+    put(k, Value(ser.data(), ser.length()));
   }
 
   void put(Key k, Value v) {

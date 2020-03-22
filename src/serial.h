@@ -26,9 +26,9 @@ public:
   }
 
   void write_size_t(size_t v) {
+    std::cout << v << "\n";
     memcpy(data_ + length_, &v, sizeof(size_t));
     length_ += sizeof(size_t);
-    std::cout << length_ << "\n";
   }
 
   void write_chars(char* v, size_t len) {
@@ -43,13 +43,20 @@ public:
 
   void write_string(std::string s) {
     write_size_t(s.length());
-    write_chars(strdup(s.c_str()), s.size());
+    write_chars(strdup(s.c_str()), s.length());
   }
 
   void write_string_vector(std::vector<std::string> v) {
     write_size_t(v.size());
     for (int i=0; i<v.size(); i++) {
       write_string(v.at(i));
+    }
+  }
+
+  void write_float_vector(std::vector<float> v) {
+    write_size_t(v.size());
+    for (int i=0; i<v.size(); i++) {
+      write_float(v.at(i));
     }
   }
 
@@ -67,8 +74,13 @@ public:
   char* data_;
   size_t length_;
 
-  Deserializer(char* data, size_t length) : data_(data), length_(length) {
-    std::cout << sizeof(data_) << "\n";
+  Deserializer(char* data, size_t length) {
+    data_ = data;
+    length_ = 0;
+  }
+
+  void set_length(size_t len) {
+    length_ = len;
   }
 
   size_t read_size_t() {
@@ -102,6 +114,15 @@ public:
     std::vector<std::string> res;
     for (int i=0; i<vector_size; i++) {
       res.push_back(read_string());
+    }
+    return res;
+  }
+
+  std::vector<float> read_float_vector() {
+    size_t vector_size = read_size_t();
+    std::vector<float> res;
+    for (int i=0; i<vector_size; i++) {
+      res.push_back(read_float());
     }
     return res;
   }
