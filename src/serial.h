@@ -36,6 +36,16 @@ public:
     length_ += len;
   }
 
+  void write_int(int v) {
+    memcpy(data_ + length_, &v, sizeof(int));
+    length_ += sizeof(int);
+  }
+
+  void write_bool(bool v) {
+    memcpy(data_ + length_, &v, sizeof(bool));
+    length_ += sizeof(bool);
+  }
+
   void write_float(float v) {
     memcpy(data_ + length_, &v, sizeof(float));
     length_ += sizeof(float);
@@ -46,17 +56,32 @@ public:
     write_chars(strdup(s.c_str()), s.length());
   }
 
-  void write_string_vector(std::vector<std::string> v) {
-    write_size_t(v.size());
-    for (int i=0; i<v.size(); i++) {
-      write_string(v.at(i));
-    }
-  }
-
+  // Vectors of primitives
   void write_float_vector(std::vector<float> v) {
     write_size_t(v.size());
     for (int i=0; i<v.size(); i++) {
       write_float(v.at(i));
+    }
+  }
+
+  void write_int_vector(std::vector<int> v) {
+    write_size_t(v.size());
+    for (int i=0; i<v.size(); i++) {
+      write_int(v.at(i));
+    }
+  }
+
+  void write_bool_vector(std::vector<bool> v) {
+    write_size_t(v.size());
+    for (int i=0; i<v.size(); i++) {
+      write_bool(v.at(i));
+    }
+  }
+
+  void write_string_vector(std::vector<std::string> v) {
+    write_size_t(v.size());
+    for (int i=0; i<v.size(); i++) {
+      write_string(v.at(i));
     }
   }
 
@@ -99,6 +124,20 @@ public:
     return res;
   }
 
+  bool read_bool() {
+    bool v;
+    memcpy(&v, data_ + length_, sizeof(bool));
+    length_ += sizeof(bool);
+    return v;
+  }
+
+  int read_int() {
+    int v;
+    memcpy(&v, data_ + length_, sizeof(int));
+    length_ += sizeof(int);
+    return v;
+  }
+
   float read_float() {
     float v;
     memcpy(&v, data_ + length_, sizeof(float));
@@ -112,11 +151,21 @@ public:
     return res; // TODO: leak
   }
 
-  std::vector<std::string> read_string_vector() {
+  // Vectors of primitives
+  std::vector<bool> read_bool_vector() {
     size_t vector_size = read_size_t();
-    std::vector<std::string> res;
+    std::vector<bool> res;
     for (int i=0; i<vector_size; i++) {
-      res.push_back(read_string());
+      res.push_back(read_bool());
+    }
+    return res;
+  }
+
+  std::vector<int> read_int_vector() {
+    size_t vector_size = read_size_t();
+    std::vector<int> res;
+    for (int i=0; i<vector_size; i++) {
+      res.push_back(read_int());
     }
     return res;
   }
@@ -126,6 +175,15 @@ public:
     std::vector<float> res;
     for (int i=0; i<vector_size; i++) {
       res.push_back(read_float());
+    }
+    return res;
+  }
+
+  std::vector<std::string> read_string_vector() {
+    size_t vector_size = read_size_t();
+    std::vector<std::string> res;
+    for (int i=0; i<vector_size; i++) {
+      res.push_back(read_string());
     }
     return res;
   }

@@ -139,13 +139,42 @@ void test_schema() {
 TEST(serial, test_schema) { ASSERT_EXIT_ZERO(test_schema) }
 
 void test_dataframe() {
-  DataFrame df();
+  Schema s("F");
+
+  std::vector<float> fv = {0.1, 0.123, 1.80};
+  FloatColumn fc(fv);
+  std::vector<int> iv = {1, 2, 3};
+  IntColumn ic(iv);
+  std::vector<bool> bv = {0, 1, 1};
+  BoolColumn bc(bv);
+  std::vector<std::string> sv = {"hello", "good", "bye"};
+  StringColumn sc(sv);
+
+  DataFrame df(s);
+  df.add_column(&fc, "My float col");
+  df.add_column(&ic, "int col");
+  df.add_column(&bc, "bool col");
+  df.add_column(&sc, "string col");
+  
   Serializer ser;
+  df.serialize(ser);
 
   Deserializer dser(ser.data());
+  DataFrame* df2 = DataFrame::deserialize(dser);
+
+  // std::cout << df.cols_[0]->as_float()->get(0) << "\n";
+  std::cout << df2->ncols() << "\n";
+  ASSERT_FLOAT_EQ(df2->get_float(1, 0), fv[0]);
+  ASSERT_FLOAT_EQ(df2->get_float(1, 1), fv[1]);
+  ASSERT_FLOAT_EQ(df2->get_float(1, 2), fv[2]);
+
+  // ASSERT_EQ(df.get_int(2, 0), iv[0]);
+
+  // ASSERT_EQ(df.get_bool(3, 0), bv[0])
+  exit(0);
 }
 
-// TEST(serial, test_dataframe) { ASSERT_EXIT_ZERO(test_dataframe) }
+TEST(serial, test_dataframe) { ASSERT_EXIT_ZERO(test_dataframe) }
 
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);

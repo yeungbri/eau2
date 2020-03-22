@@ -47,8 +47,6 @@ class Column {
   virtual char get_type() = 0;
 
   virtual void serialize(Serializer& ser) { }
-
-  virtual Column deserialize(Deserializer& dser) { }
 };
 
 /*************************************************************************
@@ -79,6 +77,15 @@ class BoolColumn : public Column {
   virtual char get_type() { return 'B'; }
   
   virtual void push_back(bool b) { _arr.push_back(b); }
+  
+  void serialize(Serializer &ser) {
+    ser.write_bool_vector(_arr);
+  }
+
+  static BoolColumn* deserialize(Deserializer &dser) {
+    std::vector<bool> arr = dser.read_bool_vector();
+    return new BoolColumn(arr);
+  }
 
  public:
   std::vector<bool> _arr;
@@ -112,6 +119,15 @@ class IntColumn : public Column {
   virtual char get_type() { return 'I'; }
 
   virtual void push_back(int i) { _arr.push_back(i); }
+
+  void serialize(Serializer &ser) {
+    ser.write_int_vector(_arr);
+  }
+
+  static IntColumn* deserialize(Deserializer &dser) {
+    std::vector<int> arr = dser.read_int_vector();
+    return new IntColumn(arr);
+  }
 
  public:
   std::vector<int> _arr;
@@ -188,6 +204,15 @@ class StringColumn : public Column {
   char get_type() { return 'S'; }
 
   virtual void push_back(std::string s) { _arr.push_back(s); }
+  
+  void serialize(Serializer &ser) {
+    ser.write_string_vector(_arr);
+  }
+
+  static StringColumn* deserialize(Deserializer &dser) {
+    std::vector<std::string> arr = dser.read_string_vector();
+    return new StringColumn(arr);
+  }
 
  public:
   std::vector<std::string> _arr;

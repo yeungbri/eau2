@@ -205,10 +205,33 @@ class DataFrame {
   }
 
   static DataFrame* deserialize(Deserializer& dser) {
-    Schema s;
-    s.deserialize(dser);
+    Schema schema;
+    schema.deserialize(dser);
 
-    // DataFrame(s);
+    std::vector<Column*> cols;
+    for (int i=0; i<schema.width(); i++) {
+      Column* c;
+      switch (schema.col_type(i)) {
+        case 'B':
+          c = BoolColumn::deserialize(dser);
+          break;
+        case 'I':
+          c = IntColumn::deserialize(dser);
+          break;
+        case 'F':
+          c = FloatColumn::deserialize(dser);
+          break;
+        case 'S':
+          c = StringColumn::deserialize(dser);
+          break;
+        default:
+          throw std::runtime_error("bad column type!");
+      }
+      cols.push_back(c);
+    }
+
+    DataFrame* df = new DataFrame(schema);
+    df->cols_ = cols;
   }
 
   /** Returns a dataframe with sz values and puts it in the key value store
