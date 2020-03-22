@@ -26,7 +26,6 @@ public:
   }
 
   void write_size_t(size_t v) {
-    std::cout << v << "\n";
     memcpy(data_ + length_, &v, sizeof(size_t));
     length_ += sizeof(size_t);
   }
@@ -74,7 +73,7 @@ public:
   char* data_;
   size_t length_;
 
-  Deserializer(char* data, size_t length) {
+  Deserializer(char* data) {
     data_ = data;
     length_ = 0;
   }
@@ -106,7 +105,9 @@ public:
 
   std::string read_string() {
     size_t len = read_size_t();
-    return std::string(read_chars(len)); // TODO: leak
+    std::string res = std::string(read_chars(len));
+    // std::cout << res << "\n";
+    return res; // TODO: leak
   }
 
   std::vector<std::string> read_string_vector() {

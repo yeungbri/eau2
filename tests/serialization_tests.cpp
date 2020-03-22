@@ -16,7 +16,7 @@ void test1() {
     Ack ackmsg(MsgKind::Ack, 1, 2, 0);
     Serializer ser;
     ackmsg.serialize(ser);
-    Deserializer dser(ser.data(), ser.length());
+    Deserializer dser(ser.data());
     Message *d_ackmsg = ackmsg.deserialize(dser);
     ASSERT_TRUE(ackmsg.kind_ == d_ackmsg->kind_); 
     ASSERT_TRUE(ackmsg.sender_ == d_ackmsg->sender_); 
@@ -31,6 +31,21 @@ TEST(W1, test1) {
 }
 
 void test2() {
+  std::string s1 = "hello";
+  std::string s2 = "goodbye";
+  std::string s3 = "bye";
+  Serializer ser;
+  ser.write_string(s1);
+  ser.write_string(s2);
+  ser.write_string(s3);
+
+  Deserializer dser(ser.data());
+  std::string d1 = dser.read_string();
+  std::string d2 = dser.read_string();
+  std::string d3 = dser.read_string();
+  ASSERT_TRUE(s1 == d1);
+  ASSERT_TRUE(s2 == d2);
+  ASSERT_TRUE(s3 == d3);
   exit(0);
 }
 
@@ -39,6 +54,24 @@ TEST(W1, test2) {
 }
 
 void test3() {
+  std::vector<std::string> vs = {"hello", "goodbye", "bye"};
+  std::vector<std::string> vs2 = {"apple", "orange", "pear"};
+  Serializer ser;
+  ser.write_string_vector(vs);
+
+  Deserializer dser(ser.data());
+  std::vector<std::string> dvs = dser.read_string_vector();
+  std::vector<std::string> dvs2 = dser.read_string_vector();
+
+  ASSERT_TRUE(vs.size() == dvs.size());
+  for (int i=0; i<vs.size(); i++) {
+    std::cout << vs.at(i) << " " << dvs.at(i) << "\n";
+    ASSERT_TRUE(vs.at(i) == dvs.at(i));
+  }
+  // ASSERT_TRUE(vs2.size() == dvs2.size());
+  // for (int i=0; i<vs.size(); i++) {
+  //   ASSERT_TRUE(vs2.at(i) == dvs2.at(i));
+  // }
   exit(0);
 }
 
