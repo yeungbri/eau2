@@ -232,6 +232,7 @@ class DataFrame {
 
     DataFrame* df = new DataFrame(schema);
     df->cols_ = cols;
+    return df;
   }
 
   /** Returns a dataframe with sz values and puts it in the key value store

@@ -163,6 +163,7 @@ void test_dataframe() {
   DataFrame* df2 = DataFrame::deserialize(dser);
 
   // std::cout << df.cols_[0]->as_float()->get(0) << "\n";
+  std::cout << df.ncols() << "\n";
   std::cout << df2->ncols() << "\n";
   ASSERT_FLOAT_EQ(df2->get_float(1, 0), fv[0]);
   ASSERT_FLOAT_EQ(df2->get_float(1, 1), fv[1]);
