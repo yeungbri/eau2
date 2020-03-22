@@ -18,7 +18,6 @@ public:
   // Double capacity if max capacity is reached
   void grow(size_t add_len) {
     if (length_ + add_len > capacity_) {
-      std::cout << length_ + add_len << " is greater than " << capacity_ << "!" << std::endl;
       capacity_ = 2 * capacity_;
       char *new_data = new char[capacity_];
       memcpy(new_data, data_, length_);
@@ -51,10 +50,10 @@ public:
     length_ += sizeof(bool);
   }
 
-  void write_float(float v) {
-    grow(sizeof(float));
-    memcpy(data_ + length_, &v, sizeof(float));
-    length_ += sizeof(float);
+  void write_double(double v) {
+    grow(sizeof(double));
+    memcpy(data_ + length_, &v, sizeof(double));
+    length_ += sizeof(double);
   }
 
   void write_string(std::string s) {
@@ -63,10 +62,10 @@ public:
   }
 
   // Vectors of primitives
-  void write_float_vector(std::vector<float> v) {
+  void write_double_vector(std::vector<double> v) {
     write_size_t(v.size());
     for (int i=0; i<v.size(); i++) {
-      write_float(v.at(i));
+      write_double(v.at(i));
     }
   }
 
@@ -144,10 +143,10 @@ public:
     return v;
   }
 
-  float read_float() {
-    float v;
-    memcpy(&v, data_ + length_, sizeof(float));
-    length_ += sizeof(float);
+  double read_double() {
+    double v;
+    memcpy(&v, data_ + length_, sizeof(double));
+    length_ += sizeof(double);
     return v;
   }
 
@@ -176,11 +175,11 @@ public:
     return res;
   }
 
-  std::vector<float> read_float_vector() {
+  std::vector<double> read_double_vector() {
     size_t vector_size = read_size_t();
-    std::vector<float> res;
+    std::vector<double> res;
     for (int i=0; i<vector_size; i++) {
-      res.push_back(read_float());
+      res.push_back(read_double());
     }
     return res;
   }

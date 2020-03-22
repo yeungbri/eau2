@@ -75,7 +75,7 @@ int count_element(string line) {
 // find the type of the given input
 // if BOOL or empty, return 1
 // if INT, return 2
-// if FLOAT, return 3
+// if DOUBLE, return 3
 // if STRING, return 4
 int compute_type(string input) {
 
@@ -219,7 +219,7 @@ vector<string> parse_line(string input, vector<int>* types, int columns) {
             wordList[i] = "";
         }
         else if (type <= 3 && type > 1 && wordList[i].at(0) == '+' && types->at(i) != 4) {
-            // erase + if it is float or int
+            // erase + if it is double or int
             wordList[i].erase(0, 1);
         }
     }
@@ -241,7 +241,7 @@ void print_type(int type) {
         cout << "INT\n";
         break;
     case 3:
-        cout << "FLOAT\n";
+        cout << "DOUBLE\n";
         break;
     case 4:
         cout << "STRING\n";
@@ -314,7 +314,7 @@ DataFrame* getDataFrame(std::string filePath)
                 schema->add_column('I', "");
                 break;
             case 3:
-                schema->add_column('F', "");
+                schema->add_column('D', "");
                 break;
             case 4:
                 schema->add_column('S', "");

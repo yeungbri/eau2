@@ -25,7 +25,7 @@ public:
 
   /** Called for fields of the argument's type with the value of the field. */
   virtual void accept(bool b) = 0;
-  virtual void accept(float f) = 0;
+  virtual void accept(double f) = 0;
   virtual void accept(int i) = 0;
   virtual void accept(std::string s) = 0;
 
@@ -52,7 +52,7 @@ public:
     _sys.p(b);
   }
 
-  virtual void accept(float f)
+  virtual void accept(double f)
   {
     _sys.p(f);
   }

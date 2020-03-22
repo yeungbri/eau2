@@ -16,7 +16,7 @@
  * A schema is a description of the contents of a data frame, the schema
  * knows the number of columns and number of rows, the type of each column,
  * optionally columns and rows can be named by strings.
- * The valid types are represented by the chars 'S', 'B', 'I' and 'F'.
+ * The valid types are represented by the chars 'S', 'B', 'I' and 'D'.
  */
 class Schema {
  public:
@@ -48,7 +48,7 @@ class Schema {
    * undefined. **/
   Schema(const char *types) {
     for (int i = 0; i < strlen(types); ++i) {
-      if (types[i] == 'B' || types[i] == 'I' || types[i] == 'F' ||
+      if (types[i] == 'B' || types[i] == 'I' || types[i] == 'D' ||
           types[i] == 'S') {
         add_column(types[i], "");
       }

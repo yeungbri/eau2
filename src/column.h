@@ -13,7 +13,7 @@
 
 class IntColumn;
 class BoolColumn;
-class FloatColumn;
+class DoubleColumn;
 class StringColumn;
 
 /**************************************************************************
@@ -30,20 +30,20 @@ class Column {
    *  nullptr if of the wrong type.  */
   virtual IntColumn *as_int() { return nullptr; }
   virtual BoolColumn *as_bool() { return nullptr; }
-  virtual FloatColumn *as_float() { return nullptr; }
+  virtual DoubleColumn *as_double() { return nullptr; }
   virtual StringColumn *as_string() { return nullptr; }
 
   /** Type appropriate push_back methods. Calling the wrong method is
    * undefined behavior. **/
   virtual void push_back(int val) {};
   virtual void push_back(bool val) {};
-  virtual void push_back(float val) {};
+  virtual void push_back(double val) {};
   virtual void push_back(std::string val) {};
 
   /** Returns the number of elements in the column. */
   virtual size_t size() = 0;
 
-  /** Return the type of this column as a char: 'S', 'B', 'I' and 'F'.*/
+  /** Return the type of this column as a char: 'S', 'B', 'I' and 'D'.*/
   virtual char get_type() = 0;
 
   virtual void serialize(Serializer& ser) { }
@@ -134,45 +134,45 @@ class IntColumn : public Column {
 };
 
 /*************************************************************************
- * FloatColumn::
- * Holds float values.
+ * DoubleColumn::
+ * Holds double values.
  */
-class FloatColumn : public Column {
+class DoubleColumn : public Column {
  public:
-  FloatColumn() = default;
+  DoubleColumn() = default;
 
-  FloatColumn(std::vector<float> floats) {
-    for (float f : floats) {
+  DoubleColumn(std::vector<double> doubles) {
+    for (double f : doubles) {
       _arr.push_back(f);
     }
   }
 
-  virtual ~FloatColumn() { _arr.clear(); }
+  virtual ~DoubleColumn() { _arr.clear(); }
 
-  float get(size_t idx) { return _arr.at(idx); }
+  double get(size_t idx) { return _arr.at(idx); }
 
-  FloatColumn *as_float() { return this; }
+  DoubleColumn *as_double() { return this; }
 
   /** Set value at idx. An out of bound idx is undefined.  */
-  void set(size_t idx, float val) { _arr[idx] = val; }
+  void set(size_t idx, double val) { _arr[idx] = val; }
 
   size_t size() { return _arr.size(); }
 
-  virtual char get_type() { return 'F'; }
+  virtual char get_type() { return 'D'; }
 
-  virtual void push_back(float f) { _arr.push_back(f); }
+  virtual void push_back(double f) { _arr.push_back(f); }
 
   void serialize(Serializer &ser) {
-    ser.write_float_vector(_arr);
+    ser.write_double_vector(_arr);
   }
 
-  static FloatColumn* deserialize(Deserializer &dser) {
-    std::vector<float> arr = dser.read_float_vector();
-    return new FloatColumn(arr);
+  static DoubleColumn* deserialize(Deserializer &dser) {
+    std::vector<double> arr = dser.read_double_vector();
+    return new DoubleColumn(arr);
   }
 
  public:
-  std::vector<float> _arr;
+  std::vector<double> _arr;
 };
 
 /*************************************************************************

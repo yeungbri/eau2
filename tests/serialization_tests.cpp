@@ -77,37 +77,37 @@ void test_string_vector() {
 
 TEST(serial, test_string_vector) { ASSERT_EXIT_ZERO(test_string_vector) }
 
-void test_float() {
-  float f1 = 0.123;
-  float f2 = 8.123;
-  float f3 = 0;
+void test_double() {
+  double f1 = 0.123;
+  double f2 = 8.123;
+  double f3 = 0;
 
   Serializer ser;
-  ser.write_float(f1);
-  ser.write_float(f2);
-  ser.write_float(f3);
+  ser.write_double(f1);
+  ser.write_double(f2);
+  ser.write_double(f3);
 
   Deserializer dser(ser.data());
-  float df1 = dser.read_float();
-  float df2 = dser.read_float();
-  float df3 = dser.read_float();
+  double df1 = dser.read_double();
+  double df2 = dser.read_double();
+  double df3 = dser.read_double();
 
   ASSERT_TRUE(f1 = df1);
 
   exit(0);
 }
 
-TEST(serial, test_float) { ASSERT_EXIT_ZERO(test_float) }
+TEST(serial, test_double) { ASSERT_EXIT_ZERO(test_double) }
 
-void test_float_column() {
-  std::vector<float> fv = {0.1, 0.123, 1.80};
-  FloatColumn fc(fv);
+void test_double_column() {
+  std::vector<double> fv = {0.1, 0.123, 1.80};
+  DoubleColumn fc(fv);
 
   Serializer ser;
   fc.serialize(ser);
 
   Deserializer dser(ser.data());
-  FloatColumn *fc2 = fc.deserialize(dser);
+  DoubleColumn *fc2 = fc.deserialize(dser);
 
   for (int i = 0; i < fv.size(); i++) {
     ASSERT_TRUE(fc.get(i) == fc2->get(i));
@@ -117,10 +117,10 @@ void test_float_column() {
   exit(0);
 }
 
-TEST(serial, test_float_column) { ASSERT_EXIT_ZERO(test_float_column) }
+TEST(serial, test_double_column) { ASSERT_EXIT_ZERO(test_double_column) }
 
 void test_schema() {
-  Schema s("FFF");
+  Schema s("DDD");
   Serializer ser;
   s.serialize(ser);
 
@@ -130,8 +130,8 @@ void test_schema() {
   ASSERT_TRUE(s.width() == s2->width());
   for (int i=0; i<3; i++) {
     ASSERT_TRUE(s._types.at(i) == s2->_types.at(i));
-    ASSERT_TRUE(s._types.at(i) == "F");
-    ASSERT_TRUE(s2->_types.at(i) == "F");
+    ASSERT_TRUE(s._types.at(i) == "D");
+    ASSERT_TRUE(s2->_types.at(i) == "D");
   }
   exit(0);
 }
@@ -139,10 +139,10 @@ void test_schema() {
 TEST(serial, test_schema) { ASSERT_EXIT_ZERO(test_schema) }
 
 void test_dataframe() {
-  Schema s("F");
+  Schema s("D");
 
-  std::vector<float> fv = {0.1, 0.123, 1.80};
-  FloatColumn fc(fv);
+  std::vector<double> fv = {0.1, 0.123, 1.80};
+  DoubleColumn fc(fv);
   std::vector<int> iv = {1, 2, 3};
   IntColumn ic(iv);
   std::vector<bool> bv = {0, 1, 1};
@@ -151,7 +151,7 @@ void test_dataframe() {
   StringColumn sc(sv);
 
   DataFrame df(s);
-  df.add_column(&fc, "My float col");
+  df.add_column(&fc, "My double col");
   df.add_column(&ic, "int col");
   df.add_column(&bc, "bool col");
   df.add_column(&sc, "string col");
@@ -162,9 +162,9 @@ void test_dataframe() {
   Deserializer dser(ser.data());
   DataFrame* df2 = DataFrame::deserialize(dser);
 
-  ASSERT_FLOAT_EQ(df2->get_float(1, 0), fv[0]);
-  ASSERT_FLOAT_EQ(df2->get_float(1, 1), fv[1]);
-  ASSERT_FLOAT_EQ(df2->get_float(1, 2), fv[2]);
+  ASSERT_FLOAT_EQ(df2->get_double(1, 0), fv[0]);
+  ASSERT_FLOAT_EQ(df2->get_double(1, 1), fv[1]);
+  ASSERT_FLOAT_EQ(df2->get_double(1, 2), fv[2]);
 
   for (int i; i<iv.size(); i++) {
     ASSERT_EQ(df.get_int(2, i), iv[i]);

@@ -3,13 +3,12 @@ run:
 
 build:
 	make clean
-	# cd tests; g++ -std=c++17 -Wall -o basic_example basic_example.cpp; ./basic_example
+	#cd tests; g++ -std=c++17 -Wall -o basic_example basic_example.cpp; ./basic_example
 	cd tests; g++ -std=c++17 -Wall -o trivial_example trivial_example.cpp; ./trivial_example
 
 test:
 	# make clean
-	# make dataframe_tests && ./dataframe_tests; 
-	cd ./tests; cmake .; make serialization_tests && ./serialization_tests;
+	cd ./tests; cmake .; make dataframe_tests && ./dataframe_tests; make serialization_tests && ./serialization_tests;
 
 valgrind:
 	make clean

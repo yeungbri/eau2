@@ -48,8 +48,8 @@ class DataFrame {
         case 'I':
           col = new IntColumn();
           break;
-        case 'F':
-          col = new FloatColumn();
+        case 'D':
+          col = new DoubleColumn();
           break;
         case 'S':
           col = new StringColumn();
@@ -93,8 +93,8 @@ class DataFrame {
     return cols_.at(col)->as_bool()->get(row);
   }
 
-  float get_float(size_t col, size_t row) {
-    return cols_.at(col)->as_float()->get(row);
+  double get_double(size_t col, size_t row) {
+    return cols_.at(col)->as_double()->get(row);
   }
 
   std::string get_string(size_t col, size_t row) {
@@ -118,8 +118,8 @@ class DataFrame {
     cols_.at(col)->as_int()->set(row, val);
   }
 
-  void set(size_t col, size_t row, float val) {
-    cols_.at(col)->as_float()->set(row, val);
+  void set(size_t col, size_t row, double val) {
+    cols_.at(col)->as_double()->set(row, val);
   }
 
   void set(size_t col, size_t row, std::string val) {
@@ -140,8 +140,8 @@ class DataFrame {
         case 'I':
           row.set(i, col->as_int()->get(idx));
           break;
-        case 'F':
-          row.set(i, col->as_float()->get(idx));
+        case 'D':
+          row.set(i, col->as_double()->get(idx));
           break;
         case 'S':
           row.set(i, col->as_string()->get(idx));
@@ -162,8 +162,8 @@ class DataFrame {
         case 'I':
           cols_.at(i)->push_back(row.get_int(i));
           break;
-        case 'F':
-          cols_.at(i)->push_back(row.get_float(i));
+        case 'D':
+          cols_.at(i)->push_back(row.get_double(i));
           break;
         case 'S':
           cols_.at(i)->push_back(row.get_string(i));
@@ -219,8 +219,8 @@ class DataFrame {
         case 'I':
           c = IntColumn::deserialize(dser);
           break;
-        case 'F':
-          c = FloatColumn::deserialize(dser);
+        case 'D':
+          c = DoubleColumn::deserialize(dser);
           break;
         case 'S':
           c = StringColumn::deserialize(dser);
@@ -239,11 +239,11 @@ class DataFrame {
   /** Returns a dataframe with sz values and puts it in the key value store
    *  under the key */
   static DataFrame *fromArray(Key *key, KVStore *store,
-                              std::vector<float> vals) {
+                              std::vector<double> vals) {
     Schema s;
     DataFrame *res = new DataFrame(s);
-    FloatColumn *fc = new FloatColumn(vals);
-    res->add_column(fc, "Float column");
+    DoubleColumn *dc = new DoubleColumn(vals);
+    res->add_column(dc, "Double column");
 
     Serializer ser;
     res->serialize(ser);
