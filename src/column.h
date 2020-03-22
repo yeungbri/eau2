@@ -149,7 +149,10 @@ class DoubleColumn : public Column {
 
   virtual ~DoubleColumn() { _arr.clear(); }
 
-  double get(size_t idx) { return _arr.at(idx); }
+  double get(size_t idx) 
+  { 
+    return _arr.at(idx); 
+  }
 
   DoubleColumn *as_double() { return this; }
 
