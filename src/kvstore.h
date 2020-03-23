@@ -3,53 +3,52 @@
  * Emails: yeung.bri@husky.neu.edu, gao.d@husky.neu.edu
  */
 
-//lang::Cpp
+// lang::Cpp
 
 #pragma once
-#include "serial.h"
 #include <map>
+#include "serial.h"
 
-class Key
-{
-public:
-  std::string name_; // name to refer to key
-  size_t home_;      // index of home node
-  Key(std::string name, size_t home) : name_(name), home_(home) { }
+/** Key of a key-value store which consists of a name and 
+ * the home node that it exists on */
+class Key {
+ public:
+  std::string name_;  // name to refer to key
+  size_t home_;       // index of home node
+  Key(std::string name, size_t home) : name_(name), home_(home) {}
 
-  bool operator==(const Key& other)
-  {
+  /** Comparator for using Key in a std::map */
+  bool operator==(const Key& other) {
     return name_ == other.name_ && home_ == other.home_;
   }
 };
 
+/** Stores the binary representation of an object in the kv-store */
 class Value {
-public:
-  char* data_;
+ public:
+  char* data_; // serialized data
 
-  Value(char* data) : data_(data) { }
+  Value(char* data) : data_(data) {}
 
-  char* data() {
-    return data_;
+  char* data() { return data_; }
+};
+
+/** Used for comparing keys in a std::map */
+struct KeyCompare {
+  bool operator()(const Key& lhs, const Key& rhs) const {
+    return lhs.home_ < rhs.home_;
   }
 };
 
-struct KeyCompare
-{
-   bool operator() (const Key& lhs, const Key& rhs) const
-   {
-       return lhs.home_ < rhs.home_;
-   }
-};
-
-
+/** Key Value Store - users can associate keys with values and
+ * retrieve them */
 class KVStore {
-public:
+ public:
   std::map<Key, Value, KeyCompare> store_;
 
-  KVStore() {
+  KVStore() {}
 
-  }
-
+  /** Retrieves the associated value given the key */
   Value get(Key& k) {
     auto search = store_.find(k);
     if (search != store_.end()) {
@@ -59,7 +58,6 @@ public:
     }
   }
 
-  void put(Key& k, Value& v) {
-    store_.insert_or_assign(k, v);
-  }
+  /** Associates the given value with the given key */
+  void put(Key& k, Value& v) { store_.insert_or_assign(k, v); }
 };
