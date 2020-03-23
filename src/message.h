@@ -3,26 +3,37 @@
  * Emails: yeung.bri@husky.neu.edu, gao.d@husky.neu.edu
  */
 
-//lang::Cpp
+// lang::Cpp
 
 #pragma once
 #include <netinet/in.h>
-#include <vector>
+
 #include <string>
+#include <vector>
+
 #include "serial.h"
 
+/** Types of messages */
 enum class MsgKind {
-  Ack, Nack, Put,
-  Reply, Get, WaitAndGet, Status,
-  Kill, Register, Directory
+  Ack,
+  Nack,
+  Put,
+  Reply,
+  Get,
+  WaitAndGet,
+  Status,
+  Kill,
+  Register,
+  Directory
 };
 
+/** Base class for network messages between nodes */
 class Message {
-public:
-  MsgKind kind_;  // the message kind
-  size_t sender_; // the index of the sender node
-  size_t target_; // the index of the receiver node
-  size_t id_;     // an id t unique within the node
+ public:
+  MsgKind kind_;   // the message kind
+  size_t sender_;  // the index of the sender node
+  size_t target_;  // the index of the receiver node
+  size_t id_;      // an id t unique within the node
 
   Message(MsgKind kind, size_t sender, size_t target, size_t id) {
     kind_ = kind;
@@ -32,14 +43,14 @@ public:
   }
 
   Message(Deserializer& d) {
-    kind_ = (MsgKind) d.read_size_t();
+    kind_ = (MsgKind)d.read_size_t();
     sender_ = d.read_size_t();
     target_ = d.read_size_t();
     id_ = d.read_size_t();
   }
 
   virtual void serialize(Serializer& ser) {
-    ser.write_size_t((size_t) kind_);
+    ser.write_size_t((size_t)kind_);
     ser.write_size_t(sender_);
     ser.write_size_t(target_);
     ser.write_size_t(id_);
@@ -48,26 +59,27 @@ public:
   static Message* deserialize(Deserializer& d);
 };
 
+/** Acknowledgement message for confirming a message
+ * has been received. */
 class Ack : public Message {
-public:
-  Ack(MsgKind kind, size_t sender, size_t target, size_t id) : 
-    Message(kind, sender, target ,id) { };
+ public:
+  Ack(MsgKind kind, size_t sender, size_t target, size_t id)
+      : Message(kind, sender, target, id){};
 
-  Ack(Deserializer& d) : Message(d) { }
+  Ack(Deserializer& d) : Message(d) {}
 };
 
+/** Message for retrieving the cluster's status */
 class Status : public Message {
-public:
-  std::string msg_; // owned
+ public:
+  std::string msg_;  // owned
 
-  Status(MsgKind kind, size_t sender, size_t target, size_t id, std::string msg) : 
-    Message(kind, sender, target ,id) {
+  Status(MsgKind kind, size_t sender, size_t target, size_t id, std::string msg)
+      : Message(kind, sender, target, id) {
     msg_ = msg;
   };
 
-  Status(Deserializer& d) : Message(d) {
-    msg_ = d.read_string();
-  }
+  Status(Deserializer& d) : Message(d) { msg_ = d.read_string(); }
 
   void serialize(Serializer& ser) {
     Message::serialize(ser);
@@ -75,26 +87,30 @@ public:
   }
 };
 
+/** Message for registering a node to a cluster */
 class Register : public Message {
-public:
+ public:
   sockaddr_in client_;
   size_t port_;
 
-  Register(MsgKind kind, size_t sender, size_t target, size_t id, sockaddr_in client, 
-    size_t port) : Message(kind, sender, target ,id) {
+  Register(MsgKind kind, size_t sender, size_t target, size_t id,
+           sockaddr_in client, size_t port)
+      : Message(kind, sender, target, id) {
     client_ = client;
     port_ = port;
   };
 };
 
+/** Message for geting a list of other nodes on the cluster */
 class Directory : public Message {
-public:
+ public:
   size_t client_;
-  size_t * ports_;  // owned
+  size_t* ports_;                       // owned
   std::vector<std::string> addresses_;  // owned; strings owned
 
-  Directory(MsgKind kind, size_t sender, size_t target, size_t id, size_t client, 
-    size_t* ports, std::vector<std::string> addresses) : Message(kind, sender, target ,id) {
+  Directory(MsgKind kind, size_t sender, size_t target, size_t id,
+            size_t client, size_t* ports, std::vector<std::string> addresses)
+      : Message(kind, sender, target, id) {
     client_ = client;
     ports_ = ports;
     addresses_ = addresses;
@@ -104,8 +120,10 @@ public:
 Message* Message::deserialize(Deserializer& d) {
   size_t msg_type = d.read_size_t();
   d.set_length(0);
-  switch((MsgKind) msg_type) {
-    case MsgKind::Ack: return new Ack(d);
-    case MsgKind::Status: return new Status(d);
+  switch ((MsgKind)msg_type) {
+    case MsgKind::Ack:
+      return new Ack(d);
+    case MsgKind::Status:
+      return new Status(d);
   }
 }
