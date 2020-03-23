@@ -200,7 +200,7 @@ class DataFrame {
 
   void serialize(Serializer& ser) {
     schema_.serialize(ser);
-    for (int i=0; i<ncols(); i++) {
+    for (size_t i=0; i<ncols(); i++) {
       cols_.at(i)->serialize(ser);
     }
   }
@@ -210,7 +210,7 @@ class DataFrame {
     Schema* schema = Schema::deserialize(dser);
 
     std::vector<Column*> cols;
-    for (int i=0; i<schema->width(); i++) {
+    for (size_t i=0; i<schema->width(); i++) {
       Column* c;
       switch (schema->col_type(i)) {
         case 'B':

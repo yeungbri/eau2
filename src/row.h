@@ -11,8 +11,6 @@
 #include <string>
 #include <vector>
 
-static size_t DEFAULT_ROW_SIZE = 10;
-
 /*************************************************************************
  * Row::
  *
@@ -25,7 +23,7 @@ class Row
 {
 public:
   Schema _schema; // External Schema
-  size_t _idx; // Not our responsibility
+  size_t _idx;    // Not our responsibility
   std::string _name;
 
   // Attribution: https://stackoverflow.com/a/18577481/12602247 at 2/11 7:52PM

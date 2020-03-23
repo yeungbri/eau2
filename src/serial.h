@@ -15,6 +15,10 @@ public:
   size_t length_ = 0;
   size_t capacity_ = 1024;
 
+  ~Serializer() {
+    delete[] data_;
+  }
+
   // Double capacity if max capacity is reached
   void grow(size_t add_len) {
     if (length_ + add_len > capacity_) {
@@ -64,28 +68,28 @@ public:
   // Vectors of primitives
   void write_double_vector(std::vector<double> v) {
     write_size_t(v.size());
-    for (int i=0; i<v.size(); i++) {
+    for (size_t i=0; i<v.size(); i++) {
       write_double(v.at(i));
     }
   }
 
   void write_int_vector(std::vector<int> v) {
     write_size_t(v.size());
-    for (int i=0; i<v.size(); i++) {
+    for (size_t i=0; i<v.size(); i++) {
       write_int(v.at(i));
     }
   }
 
   void write_bool_vector(std::vector<bool> v) {
     write_size_t(v.size());
-    for (int i=0; i<v.size(); i++) {
+    for (size_t i=0; i<v.size(); i++) {
       write_bool(v.at(i));
     }
   }
 
   void write_string_vector(std::vector<std::string> v) {
     write_size_t(v.size());
-    for (int i=0; i<v.size(); i++) {
+    for (size_t i=0; i<v.size(); i++) {
       write_string(v.at(i));
     }
   }
@@ -105,7 +109,6 @@ public:
   size_t length_;
 
   Deserializer(char* data) {
-    
     data_ = data;
     length_ = 0;
   }
@@ -152,7 +155,9 @@ public:
 
   std::string read_string() {
     size_t len = read_size_t();
-    std::string res = std::string(read_chars(len));
+    char* chars = read_chars(len);
+    std::string res = std::string(chars);
+    delete chars;
     return res; // TODO: leak
   }
 
@@ -160,7 +165,7 @@ public:
   std::vector<bool> read_bool_vector() {
     size_t vector_size = read_size_t();
     std::vector<bool> res;
-    for (int i=0; i<vector_size; i++) {
+    for (size_t i=0; i<vector_size; i++) {
       res.push_back(read_bool());
     }
     return res;
@@ -169,7 +174,7 @@ public:
   std::vector<int> read_int_vector() {
     size_t vector_size = read_size_t();
     std::vector<int> res;
-    for (int i=0; i<vector_size; i++) {
+    for (size_t i=0; i<vector_size; i++) {
       res.push_back(read_int());
     }
     return res;
@@ -178,7 +183,7 @@ public:
   std::vector<double> read_double_vector() {
     size_t vector_size = read_size_t();
     std::vector<double> res;
-    for (int i=0; i<vector_size; i++) {
+    for (size_t i=0; i<vector_size; i++) {
       res.push_back(read_double());
     }
     return res;
@@ -187,7 +192,7 @@ public:
   std::vector<std::string> read_string_vector() {
     size_t vector_size = read_size_t();
     std::vector<std::string> res;
-    for (int i=0; i<vector_size; i++) {
+    for (size_t i=0; i<vector_size; i++) {
       res.push_back(read_string());
     }
     return res;

@@ -47,7 +47,7 @@ class Schema {
    * undefined behavior. The argument is external, a empty string argument is
    * undefined. **/
   Schema(const char *types) {
-    for (int i = 0; i < strlen(types); ++i) {
+    for (size_t i = 0; i < strlen(types); ++i) {
       if (types[i] == 'B' || types[i] == 'I' || types[i] == 'D' ||
           types[i] == 'S') {
         add_column(types[i], "");

@@ -62,7 +62,4 @@ public:
   void put(Key& k, Value& v) {
     store_.insert_or_assign(k, v);
   }
-
-  Value waitAndGet(Key k) {
-  }
 };
