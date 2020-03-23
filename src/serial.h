@@ -9,17 +9,25 @@
 #include "helper.h"
 #include <vector>
 
+/**
+ * Serializer::
+ *
+ * A Serializer is used to serialize objects into binary form for 
+ * writing to disk or sending over the network. The class provides
+ * methods for serialzing primitives, which objects can use to 
+ * implement serialize methods for themselves.
+ */
 class Serializer {
 public:
-  char* data_ = new char[1024];
-  size_t length_ = 0;
-  size_t capacity_ = 1024;
+  char* data_ = new char[1024]; // stores binary representation of data
+  size_t length_ = 0;           // length of binary representation of data
+  size_t capacity_ = 1024;      // amount of bytes data can hold
 
   ~Serializer() {
     delete[] data_;
   }
 
-  // Double capacity if max capacity is reached
+  /** Doubles data capacity when it runs out of room */
   void grow(size_t add_len) {
     if (length_ + add_len > capacity_) {
       capacity_ = 2 * capacity_;
@@ -30,6 +38,7 @@ public:
     }
   }
 
+  /** Below are methods for serializing primitive data types */
   void write_size_t(size_t v) {
     grow(sizeof(size_t));
     memcpy(data_ + length_, &v, sizeof(size_t));
@@ -94,6 +103,7 @@ public:
     }
   }
 
+  /** Getter for binary representation of data */
   char* data() {
     return data_;
   }
@@ -103,20 +113,32 @@ public:
   }
 };
 
+/**
+ * Deserializer::
+ *
+ * The deserializer is the complement to the serializer class and
+ * provides methods for deserializing primitives from the binary
+ * data it is initialized with.
+ */
 class Deserializer {
 public:
-  char* data_;
-  size_t length_;
+  char* data_;    // binary representation of data
+  size_t length_; // length of data
 
   Deserializer(char* data) {
     data_ = data;
     length_ = 0;
   }
 
+  /** Used for "seeking" to the binary data, user must
+   * know how long the proceeding data is. Common use case
+   * is to reset the deserialization to 0 after learning of
+   * the values in the first several fields */
   void set_length(size_t len) {
     length_ = len;
   }
 
+  /** Deserialization methods for primitives */
   size_t read_size_t() {
     size_t v;
     memcpy(&v, data_ + length_, sizeof(size_t));
@@ -158,7 +180,7 @@ public:
     char* chars = read_chars(len);
     std::string res = std::string(chars);
     delete chars;
-    return res; // TODO: leak
+    return res;
   }
 
   // Vectors of primitives
