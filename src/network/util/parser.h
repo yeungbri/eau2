@@ -17,7 +17,7 @@ public:
    * Checks if this string is convertible to an int.
    *
    * @param str  the string we are checking
-   * @return true if the number is all digits, and false if the number is a float or string
+   * @return true if the number is all digits, and false if the number is a double or string
    */
   bool isInt(char* str) {
     for (int i = 0; i < strlen(str); ++i) {

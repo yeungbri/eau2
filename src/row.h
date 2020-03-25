@@ -11,8 +11,6 @@
 #include <string>
 #include <vector>
 
-static size_t DEFAULT_ROW_SIZE = 10;
-
 /*************************************************************************
  * Row::
  *
@@ -25,7 +23,7 @@ class Row
 {
 public:
   Schema _schema; // External Schema
-  size_t _idx; // Not our responsibility
+  size_t _idx;    // Not our responsibility
   std::string _name;
 
   // Attribution: https://stackoverflow.com/a/18577481/12602247 at 2/11 7:52PM
@@ -34,14 +32,14 @@ public:
     enum
     {
       is_int,
-      is_float,
+      is_double,
       is_bool,
       is_string,
       is_missing
     } type;
     union {
       int ival;
-      float fval;
+      double fval;
       bool bval;
       char* sval;
       char* mval;
@@ -102,11 +100,11 @@ public:
       _elements[col]->val.ival = val;
     }
   }
-  void set(size_t col, float val)
+  void set(size_t col, double val)
   {
-    if (_schema.col_type(col) == 'F')
+    if (_schema.col_type(col) == 'D')
     {
-      _elements[col]->type = Data::is_float;
+      _elements[col]->type = Data::is_double;
       _elements[col]->val.fval = val;
     }
   }
@@ -154,7 +152,7 @@ public:
     return _elements[col]->val.bval;
   }
 
-  float get_float(size_t col)
+  double get_double(size_t col)
   {
     return _elements[col]->val.fval;
   }
@@ -187,8 +185,8 @@ public:
       {
       case Data::is_int:
         return 'I';
-      case Data::is_float:
-        return 'F';
+      case Data::is_double:
+        return 'D';
       case Data::is_bool:
         return 'B';
       case Data::is_string:
@@ -218,7 +216,7 @@ public:
         case 'B':
           f.accept(_elements[i]->val.bval);
           break;
-        case 'F':
+        case 'D':
           f.accept(_elements[i]->val.fval);
           break;
         case 'S':
@@ -258,10 +256,10 @@ public:
     _elements.push_back(element);;
   }
 
-  void push_back(float f)
+  void push_back(double f)
   {
     struct Data *element = new struct Data();
-    element->type = Data::is_float;
+    element->type = Data::is_double;
     element->val.fval = f;
     _elements.push_back(element);
   }

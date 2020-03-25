@@ -3,90 +3,103 @@
  * Emails: yeung.bri@husky.neu.edu, gao.d@husky.neu.edu
  */
 
-//lang::Cpp
+// lang::Cpp
 
 #pragma once
-#include "dataframe.h"
-#include "kvstore.h"
+#include <assert.h>
+
 #include <string>
 #include <vector>
 
+#include "dataframe.h"
+#include "kvstore.h"
+
+/** An application runs on a node and owns one local kvstore */
 class Application {
-public:
-  size_t idx_;
-  KVStore kv = KVStore();
+ public:
+  size_t idx_;             // index of node it is running on
+  KVStore kv = KVStore();  // local kvstore
 
-  Application(size_t idx) : idx_(idx) {
-  }
+  Application(size_t idx) : idx_(idx) {}
 
-  virtual void run_() { }
+  /** Invoke to run the application */
+  virtual void run_() {}
 
-  size_t this_node() {
-    return idx_;
-  }
+  size_t this_node() { return idx_; }
 };
 
+/** Trival application to test serialization on a single node */
 class Trivial : public Application {
-public:
-  Trivial(size_t idx) : Application(idx) { }
+ public:
+  Trivial(size_t idx) : Application(idx) {}
 
+  /** Creates a dataframe from all the numbers from 1 - 999999 and
+   * stores it onto the local kvstore. Then retrieves the stored 
+   * value and checks all values are there */
   void run_() {
-    size_t SZ = 1000*1000;
-    std::vector<float> vals;
-    float sum = 0;
-    for (size_t i = 0; i < SZ; ++i){
-        vals.push_back(i);
-        sum += i;
+    size_t SZ = 1000 * 1000;
+    std::vector<double> vals;
+    double sum = 0;
+    for (size_t i = 0; i < SZ; ++i) {
+      vals.push_back(i);
+      sum += i;
     }
-    
     Key key("triv", 0);
-    DataFrame* df = DataFrame::fromArray(&key, &kv, SZ, vals);
-    assert(df->get_float(0, 1) == 1);
-    
-    DataFrame* df2 = kv.get(key);
-    for (size_t i = 0; i < SZ; ++i) sum -= df2->get_float(0, i);
-    assert(sum==0);
-    
-    delete df; delete df2;
-  }
-};
+    DataFrame* df = DataFrame::fromArray(&key, &kv, vals);
+    assert(df->get_double(0, 1) == 1);
 
-class Demo : public Application {
-public:
-  Key main = Key("main", 0);
-  Key verify = Key("verif", 0);
-  Key check = Key("ck", 0);
- 
-  Demo(size_t idx): Application(idx) { }
-
-  void run_() override {
-    switch(this_node()) {
-      case 0:   producer();     break;
-      case 1:   counter();      break;
-      case 2:   summarizer();
+    Value val = kv.get(key);
+    Deserializer dser(val.data());
+    DataFrame* df2 = DataFrame::deserialize(dser);
+    for (size_t i = 0; i < SZ; ++i) {
+      assert(df2->get_double(0, i) == i);
+      sum -= df2->get_double(0, i);
     }
-  }
+    assert(sum == 0);
+    std::cout << "SUCCESS" << std::endl;
 
-  void producer() {
-    size_t SZ = 100*1000;
-    float* vals = new float[SZ];
-    float sum = 0;
-    for (size_t i = 0; i < SZ; ++i) sum += vals[i] = i;
-    DataFrame::fromArray(&main, &kv, SZ, vals);
-    DataFrame::fromScalar(&check, &kv, sum);
-  }
-
-  void counter() {
-    DataFrame* v = kv.waitAndGet(main);
-    size_t sum = 0;
-    for (size_t i = 0; i < 100*1000; ++i) sum += v->get_float(0,i);
-    std::cout << "The sum is  " << sum << "\n";
-    DataFrame::fromScalar(&verify, &kv, sum);
-  }
-
-  void summarizer() {
-    DataFrame* result = kv.waitAndGet(verify);
-    DataFrame* expected = kv.waitAndGet(check);
-    std::cout << (expected->get_float(0,0)==result->get_float(0,0) ? "SUCCESS":"FAILURE") << "\n";
+    delete df;
+    delete df2;
   }
 };
+
+// class Demo : public Application {
+// public:
+//   Key main = Key("main", 0);
+//   Key verify = Key("verif", 0);
+//   Key check = Key("ck", 0);
+
+//   Demo(size_t idx): Application(idx) { }
+
+//   void run_() override {
+//     switch(this_node()) {
+//       case 0:   producer();     break;
+//       case 1:   counter();      break;
+//       case 2:   summarizer();
+//     }
+//   }
+
+//   void producer() {
+//     size_t SZ = 100*1000;
+//     double* vals = new double[SZ];
+//     double sum = 0;
+//     for (size_t i = 0; i < SZ; ++i) sum += vals[i] = i;
+//     DataFrame::fromArray(&main, &kv, SZ, vals);
+//     DataFrame::fromScalar(&check, &kv, sum);
+//   }
+
+//   void counter() {
+//     DataFrame* v = kv.waitAndGet(main);
+//     size_t sum = 0;
+//     for (size_t i = 0; i < 100*1000; ++i) sum += v->get_double(0,i);
+//     std::cout << "The sum is  " << sum << "\n";
+//     DataFrame::fromScalar(&verify, &kv, sum);
+//   }
+
+//   void summarizer() {
+//     DataFrame* result = kv.waitAndGet(verify);
+//     DataFrame* expected = kv.waitAndGet(check);
+//     std::cout << (expected->get_double(0,0)==result->get_double(0,0) ?
+//     "SUCCESS":"FAILURE") << "\n";
+//   }
+// };

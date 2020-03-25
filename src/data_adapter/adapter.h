@@ -75,7 +75,7 @@ int count_element(string line) {
 // find the type of the given input
 // if BOOL or empty, return 1
 // if INT, return 2
-// if FLOAT, return 3
+// if DOUBLE, return 3
 // if STRING, return 4
 int compute_type(string input) {
 
@@ -219,7 +219,7 @@ vector<string> parse_line(string input, vector<int>* types, int columns) {
             wordList[i] = "";
         }
         else if (type <= 3 && type > 1 && wordList[i].at(0) == '+' && types->at(i) != 4) {
-            // erase + if it is float or int
+            // erase + if it is double or int
             wordList[i].erase(0, 1);
         }
     }
@@ -241,7 +241,7 @@ void print_type(int type) {
         cout << "INT\n";
         break;
     case 3:
-        cout << "FLOAT\n";
+        cout << "DOUBLE\n";
         break;
     case 4:
         cout << "STRING\n";
@@ -314,7 +314,7 @@ DataFrame* getDataFrame(std::string filePath)
                 schema->add_column('I', "");
                 break;
             case 3:
-                schema->add_column('F', "");
+                schema->add_column('D', "");
                 break;
             case 4:
                 schema->add_column('S', "");
@@ -366,141 +366,3 @@ DataFrame* getDataFrame(std::string filePath)
     file.close();
     return df;
 }
-
-/*
-// entrance of the program
-int main(int argc, char** argv)
-{
-    // default from flag to 0 and len flag to max
-    size_t from = 0;
-
-    // check f flag, if not exist, terminate the program
-    if (!cmdOptionExists(argv, argv + argc, "-f")) {
-        cout << "Must specify the file" << endl;
-        exit(1);
-    }
-
-    char* filePath = getCmdOption(argv, argv + argc, "-f");
-
-    // check from flag
-    if (cmdOptionExists(argv, argv + argc, "-from")) {
-        from = atoi(getCmdOption(argv, argv + argc, "-from"));
-    }
-
-    // set default len to max - from (avoid overflow) and read entire file
-    size_t len = SIZE_MAX - from;
-
-    // check len flag
-    if (cmdOptionExists(argv, argv + argc, "-len")) {
-        len = atol(getCmdOption(argv, argv + argc, "-len"));
-    }
-
-    // open file
-    ifstream file(filePath);
-
-    int lineNumber = 0;
-    int columns = 0;
-    vector<int> types;
-    string line;
-
-    // read either EOF or first 500, which either comes first
-    while ((lineNumber < 500) && getline(file, line, '\n')) {
-
-         vector<int> currentTypes = parse_type(line);
-         int currentColumns = currentTypes.size();
-
-        // compares current row type information with the record,
-        // take the most lenient one (or, max of their values)
-        if (columns >= currentColumns) {
-            for (int i = 0; i < currentColumns; i++) {
-                types[i] = max(types[i], currentTypes[i]);
-            }
-        }
-        else {
-            for (int i = 0; i < columns; i++) {
-                currentTypes[i] = max(types[i], currentTypes[i]);
-            }
-            types = currentTypes;
-            columns = currentColumns;
-        }
-        lineNumber += 1;
-    }
-
-    // move the pointer to the from flag user specified
-    file.clear();
-    file.seekg(from, file.beg);
-
-    // to avoid reading partial file, ignore the first row
-    // if from is not 0
-    if (from != 0) {
-        getline(file, line, '\n');
-    }
-
-    // store the content of the file
-    vector<vector<string>> matrix;
-
-    while (getline(file, line, '\n')) {
-        // if exceed reading length, break
-        if (file.tellg() > (len + from)) {
-            break;
-        }
-
-        matrix.push_back(parse_line(line, &types, columns));
-    }
-
-    // close file
-    file.close();
-
-    // check for print_col_type flag
-    if (cmdOptionExists(argv, argv + argc, "-print_col_type")) {
-        int column = atoi(getCmdOption(argv, argv + argc, "-print_col_type"));
-
-        if (column >= columns) {
-            cout << "Given column out of bound\n";
-            exit(1);
-        }
-
-        print_type(types[column]);
-    }
-
-    // check for print_col_idx flag
-    if (cmdOptionExists(argv, argv + argc, "-print_col_idx")) {
-        size_t column, offset;
-        getCmdOptions(argv, argv + argc, "-print_col_idx", column, offset);
-
-        // check that the columns and offset are in bounds
-        if (column >= columns || offset >= matrix.size()) {
-            cout << "Given column and/or offset out of bound\n";
-            exit(1);
-        }
-        if (types[column] == 4) {
-            cout << "\"" << matrix[offset][column] << "\"" << endl;
-        }
-        else {
-            cout << matrix[offset][column] << endl;
-        }
-
-    }
-
-    // check for is_missing_idx flag
-    if (cmdOptionExists(argv, argv + argc, "-is_missing_idx")) {
-        size_t column, offset;
-        getCmdOptions(argv, argv + argc, "-is_missing_idx", column, offset);
-
-        // check that the columns and offset are in bounds
-        if (column >= columns || offset >= matrix.size()) {
-            cout << "Given column and/or offset out of bound\n";
-            exit(1);
-        }
-
-        int value = 0;
-
-        if (matrix[offset][column] == "") {
-            value = 1;
-        }
-
-        cout << value << endl;
-    }
-    return 0;
-}
-*/

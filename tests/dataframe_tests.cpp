@@ -20,15 +20,15 @@ std::string col_name = "New Column";
 std::string row_name = "New Row";
 std::string s3 = "a";
 std::string s4 = "1./0v^#$&%*";
-std::string fcolName = "float";
+std::string fcolName = "double";
 std::string icolName = "int";
 std::string bcolName = "bool";
 std::string scolName = "String";
 std::string apple = "apple";
 std::string pear = "pear";
 std::string orange = "orange";
-Schema fibsfibs("FIBSFIBS");
-Schema fibs("FIBS");
+Schema fibsfibs("DIBSDIBS");
+Schema fibs("DIBS");
 
 std::vector<Row*> generateTenRowsFIBSFIBS()
 {
@@ -37,11 +37,11 @@ std::vector<Row*> generateTenRowsFIBSFIBS()
   {
     std::string name = std::to_string(i);
     Row *row = new Row(fibsfibs, name);
-    row->set(0, float(1.0));
+    row->set(0, double(1.0));
     row->set(1, int(2));
     row->set(2, true);
     row->set(3, s1);
-    row->set(4, float(69.0));
+    row->set(4, double(69.0));
     row->set(5, int(420));
     row->set(6, false);
     row->set(7, s2);
@@ -57,7 +57,7 @@ std::vector<Row*> generateTenRowsFIBS()
   {
     std::string name = std::to_string(i);
     Row *row = new Row(fibs, name);
-    row->set(0, float(0.5 + i * 1.0));
+    row->set(0, double(0.5 + i * 1.0));
     row->set(1, int(i * 2));
     row->set(2, i % 2 == 0);
     row->set(3, s1);
@@ -69,18 +69,18 @@ std::vector<Row*> generateTenRowsFIBS()
 // Test Schema
 TEST(dataframe, testSchema)
 {
-  Schema s("FBIS");
+  Schema s("DBIS");
   EXPECT_EQ(s.width(), 4);
   EXPECT_EQ(s.length(), 0);
 
   s.add_column('S', col_name);
-  s.add_column('F', col_name);
+  s.add_column('D', col_name);
   EXPECT_EQ(s.col_name(1), "");
   EXPECT_EQ(s.col_name(2), "");
   EXPECT_EQ(s.col_name(3), "");
   EXPECT_EQ(s.col_name(4), col_name);
 
-  EXPECT_EQ(s.col_type(0), 'F');
+  EXPECT_EQ(s.col_type(0), 'D');
   EXPECT_EQ(s.col_type(1), 'B');
   EXPECT_EQ(s.col_type(2), 'I');
   EXPECT_EQ(s.col_type(3), 'S');
@@ -105,7 +105,7 @@ TEST(dataframe, testSchema)
   EXPECT_EQ(s2.col_name(2), "");
   EXPECT_EQ(s2.col_name(3), "");
   EXPECT_EQ(s2.col_name(4), col_name);
-  EXPECT_EQ(s2.col_type(0), 'F');
+  EXPECT_EQ(s2.col_type(0), 'D');
   EXPECT_EQ(s2.col_type(1), 'B');
   EXPECT_EQ(s2.col_type(2), 'I');
   EXPECT_EQ(s2.col_type(3), 'S');
@@ -127,7 +127,7 @@ TEST(dataframe, testColumn)
 
   EXPECT_EQ(bc.as_bool(), &bc);
   EXPECT_EQ(bc.as_int(), nullptr);
-  EXPECT_EQ(bc.as_float(), nullptr);
+  EXPECT_EQ(bc.as_double(), nullptr);
   EXPECT_EQ(bc.as_string(), nullptr);
 
   EXPECT_EQ(bc.size(), 4);
@@ -147,7 +147,7 @@ TEST(dataframe, testColumn)
 
   EXPECT_EQ(ic.as_bool(), nullptr);
   EXPECT_EQ(ic.as_int(), &ic);
-  EXPECT_EQ(ic.as_float(), nullptr);
+  EXPECT_EQ(ic.as_double(), nullptr);
   EXPECT_EQ(ic.as_string(), nullptr);
 
   EXPECT_EQ(ic.size(), 4);
@@ -158,8 +158,8 @@ TEST(dataframe, testColumn)
   ic.set(0, -35);
   EXPECT_EQ(ic.get(0), -35);
 
-  std::vector<float> floats = {0.234, -0.678, 123.123, 67.0};
-  FloatColumn fc(floats);
+  std::vector<double> doubles = {0.234, -0.678, 123.123, 67.0};
+  DoubleColumn fc(doubles);
   ASSERT_FLOAT_EQ(fc.get(0), 0.234);
   ASSERT_FLOAT_EQ(fc.get(1), -0.678);
   ASSERT_FLOAT_EQ(fc.get(2), 123.123);
@@ -167,11 +167,11 @@ TEST(dataframe, testColumn)
 
   EXPECT_EQ(fc.as_bool(), nullptr);
   EXPECT_EQ(fc.as_int(), nullptr);
-  EXPECT_EQ(fc.as_float(), &fc);
+  EXPECT_EQ(fc.as_double(), &fc);
   EXPECT_EQ(fc.as_string(), nullptr);
 
   EXPECT_EQ(fc.size(), 4);
-  EXPECT_EQ(fc.get_type(), 'F');
+  EXPECT_EQ(fc.get_type(), 'D');
 
   fc.set(0, 12345);
   ASSERT_FLOAT_EQ(fc.get(0), 12345);
@@ -187,7 +187,7 @@ TEST(dataframe, testColumn)
 
   EXPECT_EQ(sc.as_bool(), nullptr);
   EXPECT_EQ(sc.as_int(), nullptr);
-  EXPECT_EQ(sc.as_float(), nullptr);
+  EXPECT_EQ(sc.as_double(), nullptr);
   EXPECT_EQ(sc.as_string(), &sc);
 
   EXPECT_EQ(sc.size(), 4);
@@ -202,27 +202,27 @@ TEST(dataframe, testColumn)
 // Test Dataframe
 TEST(dataframe, testGetSchema)
 {
-  Schema schema("FIBS");
+  Schema schema("DIBS");
   DataFrame df(schema);
-  // EXPECT_EQ(df.get_schema()._types, schema._types);
-  // EXPECT_EQ(df.ncols(), schema.width());
-  // EXPECT_EQ(df.nrows(), schema.length());
-  // Schema emptySchema;
-  // DataFrame emptyDf(emptySchema);
-  // EXPECT_EQ(emptyDf.get_schema()._types, emptySchema._types);
-  // EXPECT_EQ(emptyDf.ncols(), emptySchema.width());
-  // EXPECT_EQ(emptyDf.nrows(), emptySchema.length());
+  EXPECT_EQ(df.get_schema()._types, schema._types);
+  EXPECT_EQ(df.ncols(), schema.width());
+  EXPECT_EQ(df.nrows(), schema.length());
+  Schema emptySchema;
+  DataFrame emptyDf(emptySchema);
+  EXPECT_EQ(emptyDf.get_schema()._types, emptySchema._types);
+  EXPECT_EQ(emptyDf.ncols(), emptySchema.width());
+  EXPECT_EQ(emptyDf.nrows(), emptySchema.length());
 }
 
 TEST(dataframe, testAddColumnRow)
 {
   // test add columns, verify column names and size
-  Schema schema("FIBS");
-  Schema schemaCopy("FIBSFIBS");
+  Schema schema("DIBS");
+  Schema schemaCopy("DIBSDIBS");
   DataFrame df(schema);
   EXPECT_EQ(df.ncols(), 4);
   EXPECT_EQ(df.get_schema()._types, schema._types);
-  FloatColumn fcol2;
+  DoubleColumn fcol2;
   IntColumn icol2;
   BoolColumn bcol2;
   StringColumn scol2;
@@ -265,15 +265,10 @@ TEST(dataframe, testGetSet)
 {
   Schema schema;
   DataFrame df(schema);
-  FloatColumn fcol;
+  DoubleColumn fcol;
   IntColumn icol;
   BoolColumn bcol;
   StringColumn scol;
-  for (int i = 0; i < 15; ++i)
-  {
-    std::string str = std::to_string(i);
-    scol.push_back(str);
-  }
   df.add_column(&fcol, fcolName);
   df.add_column(&icol, icolName);
   df.add_column(&bcol, bcolName);
@@ -286,13 +281,13 @@ TEST(dataframe, testGetSet)
   }
   EXPECT_EQ(df.nrows(), 10);
   EXPECT_EQ(df.ncols(), 4);
-  EXPECT_FLOAT_EQ(df.get_float(0, 5), 5.5);
-  EXPECT_FLOAT_EQ(df.get_float(0, 0), 0.5);
+  EXPECT_FLOAT_EQ(df.get_double(0, 5), 5.5);
+  EXPECT_FLOAT_EQ(df.get_double(0, 0), 0.5);
   EXPECT_EQ(df.get_int(1, 5), 10);
   EXPECT_EQ(df.get_int(1, 0), 0);
   EXPECT_EQ(df.get_bool(2, 5), false);
   EXPECT_EQ(df.get_bool(2, 0), true);
-  EXPECT_EQ(df.get_string(3, 0) == "Hello", true);
+  EXPECT_EQ(df.get_string(3, 0), "Hello");
   for (auto row : rows)
   {
     delete row;
@@ -319,13 +314,26 @@ TEST(dataframe, testFillRow)
   r2.set(0, apple);
   r2.set(1, 2);
   r2.set(2, apple);
-  df.fill_row(0, r2);
+  df.add_row(r2);
 
-  EXPECT_EQ(df.nrows(), 1);
-  EXPECT_EQ(df.get_string(0, 0), apple);
-  EXPECT_EQ(df.get_int(1, 0), 2);
-  EXPECT_EQ(df.get_string(2, 0), apple);
+  EXPECT_EQ(df.nrows(), 2);
+  EXPECT_EQ(df.get_string(0, 1), apple);
+  EXPECT_EQ(df.get_int(1, 1), 2);
+  EXPECT_EQ(df.get_string(2, 1), apple);
+
+  Row filledR1(schema);
+  df.fill_row(0, filledR1);
+  EXPECT_EQ(filledR1.get_string(0), s1);
+  EXPECT_EQ(filledR1.get_int(1), 1);
+  EXPECT_EQ(filledR1.get_string(2), s2);
+
+  Row filledR2(schema);
+  df.fill_row(1, filledR2);
+  EXPECT_EQ(filledR2.get_string(0), apple);
+  EXPECT_EQ(filledR2.get_int(1), 2);
+  EXPECT_EQ(filledR2.get_string(2), apple);
 }
+
 
 TEST(dataframe, testMap)
 {
@@ -346,38 +354,6 @@ TEST(dataframe, testMap)
 
   df.map(intRower);
   EXPECT_EQ(intRower._sum, 1000000);
-}
-
-TEST(dataframe, testFilter)
-{
-  StringSearchRower apple_sr("apple");
-  Schema schema("SIS");
-  DataFrame df(schema);
-  Row r(schema);
-
-  for (size_t i = 0; i < 10; i++)
-  {
-    if (i % 2 == 0)
-    {
-      r.set(0, apple);
-    }
-    else
-    {
-      r.set(0, pear);
-    }
-    r.set(1, 1);
-    r.set(2, orange);
-    df.add_row(r);
-  }
-
-  DataFrame *apple_df = df.filter(apple_sr);
-  EXPECT_EQ(apple_df->nrows(), 5);
-  EXPECT_EQ(apple_df->get_string(0, 0), apple);
-  EXPECT_EQ(apple_df->get_string(0, 1), apple);
-  EXPECT_EQ(apple_df->get_string(0, 2), apple);
-  EXPECT_EQ(apple_df->get_string(0, 3), apple);
-  EXPECT_EQ(apple_df->get_string(0, 4), apple);
-  delete apple_df;
 }
 
 int main(int argc, char **argv)
