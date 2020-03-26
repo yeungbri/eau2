@@ -119,7 +119,7 @@ class Directory : public Message {
 
 Message* Message::deserialize(Deserializer& d) {
   size_t msg_type = d.read_size_t();
-  d.set_length(0);
+  d.set_index(0);
   switch ((MsgKind)msg_type) {
     case MsgKind::Ack:
       return new Ack(d);

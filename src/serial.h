@@ -127,7 +127,9 @@ public:
   size_t index_;  // index in the data to start deserializing at
 
   Deserializer(char* data, size_t length) {
-    data_ = data;
+    data_ = new char[length];
+    memcpy(data_, data, length);
+    length_ = length;
     index_ = 0;
   }
 
@@ -135,8 +137,8 @@ public:
    * know how long the proceeding data is. Common use case
    * is to reset the deserialization to 0 after learning of
    * the values in the first several fields */
-  void set_length(size_t len) {
-    index_ = len;
+  void set_index(size_t idx) {
+    index_ = idx;
   }
 
   /** Deserialization methods for primitives */
