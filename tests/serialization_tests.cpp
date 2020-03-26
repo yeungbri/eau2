@@ -20,7 +20,7 @@ void test_ackmsg() {
   Ack ackmsg(MsgKind::Ack, 1, 2, 0);
   Serializer ser;
   ackmsg.serialize(ser);
-  Deserializer dser(ser.data());
+  Deserializer dser(ser.data(), ser.length());
   Message *d_ackmsg = ackmsg.deserialize(dser);
   ASSERT_TRUE(ackmsg.kind_ == d_ackmsg->kind_);
   ASSERT_TRUE(ackmsg.sender_ == d_ackmsg->sender_);
@@ -41,7 +41,7 @@ void test_string() {
   ser.write_string(s2);
   ser.write_string(s3);
 
-  Deserializer dser(ser.data());
+  Deserializer dser(ser.data(), ser.length());
   std::string d1 = dser.read_string();
   std::string d2 = dser.read_string();
   std::string d3 = dser.read_string();
@@ -60,7 +60,7 @@ void test_string_vector() {
   ser.write_string_vector(vs);
   ser.write_string_vector(vs2);
 
-  Deserializer dser(ser.data());
+  Deserializer dser(ser.data(), ser.length());
   std::vector<std::string> dvs = dser.read_string_vector();
   std::vector<std::string> dvs2 = dser.read_string_vector();
 
@@ -87,7 +87,7 @@ void test_double() {
   ser.write_double(f2);
   ser.write_double(f3);
 
-  Deserializer dser(ser.data());
+  Deserializer dser(ser.data(), ser.length());
   double df1 = dser.read_double();
   double df2 = dser.read_double();
   double df3 = dser.read_double();
@@ -106,7 +106,7 @@ void test_double_column() {
   Serializer ser;
   fc.serialize(ser);
 
-  Deserializer dser(ser.data());
+  Deserializer dser(ser.data(), ser.length());
   DoubleColumn *fc2 = fc.deserialize(dser);
 
   for (int i = 0; i < fv.size(); i++) {
@@ -124,7 +124,7 @@ void test_schema() {
   Serializer ser;
   s.serialize(ser);
 
-  Deserializer dser(ser.data());
+  Deserializer dser(ser.data(), ser.length());
   Schema* s2 = s.deserialize(dser);
 
   ASSERT_TRUE(s.width() == s2->width());
@@ -159,7 +159,7 @@ void test_dataframe() {
   Serializer ser;
   df.serialize(ser);
 
-  Deserializer dser(ser.data());
+  Deserializer dser(ser.data(), ser.length());
   DataFrame* df2 = DataFrame::deserialize(dser);
 
   ASSERT_FLOAT_EQ(df2->get_double(1, 0), fv[0]);

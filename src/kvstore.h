@@ -26,11 +26,14 @@ class Key {
 /** Stores the binary representation of an object in the kv-store */
 class Value {
  public:
-  char* data_; // serialized data
+  char* data_;    // serialized data
+  size_t length_; // length of serialized data
 
-  Value(char* data) : data_(data) {}
+  Value(char* data, size_t length) : data_(data), length_(length) {}
 
   char* data() { return data_; }
+
+  size_t length() { return length_; }
 };
 
 /** Used for comparing keys in a std::map */

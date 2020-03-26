@@ -124,10 +124,11 @@ class Deserializer {
 public:
   char* data_;    // binary representation of data
   size_t length_; // length of data
+  size_t index_;  // index in the data to start deserializing at
 
-  Deserializer(char* data) {
+  Deserializer(char* data, size_t length) {
     data_ = data;
-    length_ = 0;
+    index_ = 0;
   }
 
   /** Used for "seeking" to the binary data, user must
@@ -135,43 +136,43 @@ public:
    * is to reset the deserialization to 0 after learning of
    * the values in the first several fields */
   void set_length(size_t len) {
-    length_ = len;
+    index_ = len;
   }
 
   /** Deserialization methods for primitives */
   size_t read_size_t() {
     size_t v;
-    memcpy(&v, data_ + length_, sizeof(size_t));
-    length_ += sizeof(size_t);
+    memcpy(&v, data_ + index_, sizeof(size_t));
+    index_ += sizeof(size_t);
     return v;
   }
 
   char* read_chars(size_t len) {
     char* res = new char[len + 1];
-    memcpy(res, data_ + length_, len);
-    length_ += len;
+    memcpy(res, data_ + index_, len);
+    index_ += len;
     res[len] = '\0';
     return res;
   }
 
   bool read_bool() {
     bool v;
-    memcpy(&v, data_ + length_, sizeof(bool));
-    length_ += sizeof(bool);
+    memcpy(&v, data_ + index_, sizeof(bool));
+    index_ += sizeof(bool);
     return v;
   }
 
   int read_int() {
     int v;
-    memcpy(&v, data_ + length_, sizeof(int));
-    length_ += sizeof(int);
+    memcpy(&v, data_ + index_, sizeof(int));
+    index_ += sizeof(int);
     return v;
   }
 
   double read_double() {
     double v;
-    memcpy(&v, data_ + length_, sizeof(double));
-    length_ += sizeof(double);
+    memcpy(&v, data_ + index_, sizeof(double));
+    index_ += sizeof(double);
     return v;
   }
 

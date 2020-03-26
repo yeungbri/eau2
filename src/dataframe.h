@@ -247,7 +247,7 @@ class DataFrame {
 
     Serializer ser;
     res->serialize(ser);
-    Value* value = new Value(ser.data());
+    Value* value = new Value(ser.data(), ser.length());
     store->put(*key, *value);
     return res;
   }

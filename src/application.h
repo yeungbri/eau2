@@ -49,7 +49,7 @@ class Trivial : public Application {
     assert(df->get_double(0, 1) == 1);
 
     Value val = kv.get(key);
-    Deserializer dser(val.data());
+    Deserializer dser(val.data(), val.length());
     DataFrame* df2 = DataFrame::deserialize(dser);
     for (size_t i = 0; i < SZ; ++i) {
       assert(df2->get_double(0, i) == i);
