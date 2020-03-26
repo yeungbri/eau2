@@ -22,6 +22,16 @@ class Key {
   bool operator==(const Key& other) {
     return name_ == other.name_ && home_ == other.home_;
   }
+
+  void serialize(Serializer ser)
+  {
+
+  }
+
+  static Key* deserialize(Deserializer dser)
+  {
+    return nullptr;
+  }
 };
 
 /** Stores the binary representation of an object in the kv-store */
@@ -60,6 +70,11 @@ class KVStore {
   std::map<Key, Value, KeyCompare> store_;
 
   KVStore() {}
+
+  size_t num_nodes()
+  {
+    return 1;
+  }
 
   /** Retrieves the associated value given the key */
   Value get(Key& k) {

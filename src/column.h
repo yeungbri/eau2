@@ -29,7 +29,7 @@ const size_t MAX_CHUNK_SIZE = 1000;
 class Column {
 public:
   KVStore *store_;
-  std::vector<Key> chunks_;
+  std::vector<Key> keys_;
   size_t sz;
 
   Column(KVStore *store) : store_(store) {
@@ -57,6 +57,11 @@ public:
   virtual void push_back(double val) {};
   virtual void push_back(std::string val) {};
 
+  virtual void push_back_n(std::vector<int> vals) {};
+  virtual void push_back_n(std::vector<bool> vals) {};
+  virtual void push_back_n(std::vector<double> vals) {};
+  virtual void push_back_n(std::vector<std::string> vals) {};
+
   /** Return the type of this column as a char: 'S', 'B', 'I' and 'D'.*/
   virtual char get_type() = 0;
 
@@ -72,34 +77,19 @@ class BoolColumn : public Column {
   BoolColumn() = default;
 
   BoolColumn(KVStore *store, std::vector<bool> bools) : Column(store) {
-    size_t chunk_count = std::round( (double) bools.size()/ MAX_CHUNK_SIZE);
-    size_t next_node = 0;
-    for (size_t i=0; i<chunk_count; i++) {
-      BoolColumnChunk chunk;
-      for (size_t j=0; j<MAX_CHUNK_SIZE; j++) {
-        chunk.push_back(bools.at(i * MAX_CHUNK_SIZE + j));
-      }
-
-      std::string key_name = ""; //TODO: name key
-      Key* k = new Key(key_name, next_node);
-      Serializer ser;
-      chunk.serialize(ser);
-      Value* v = new Value(ser.data(), ser.length());
-      store->put(*k, *v);
-      next_node = next_node + 1 % store_->num_nodes();
-    }
+    push_back_n(bools);
   }
 
-  virtual ~BoolColumn() { chunks_.clear(); }
+  virtual ~BoolColumn() { keys_.clear(); }
 
   BoolColumnChunk* get_chunk(size_t chunk_idx) {
-    Value v = store_->get(chunks_.at(chunk_idx));
+    Value v = store_->get(keys_.at(chunk_idx));
     Deserializer dser(v.data(), v.length());
     return BoolColumnChunk::deserialize(dser); 
   }
 
   bool get(size_t idx) {
-    assert(idx < sz);
+    assert(idx < size());
     size_t chunk_idx = idx / MAX_CHUNK_SIZE;
     BoolColumnChunk* bcc = get_chunk(chunk_idx);
     return bcc->get(idx - chunk_idx * MAX_CHUNK_SIZE);
@@ -109,22 +99,78 @@ class BoolColumn : public Column {
 
   virtual char get_type() { return 'B'; }
   
-  virtual void push_back(bool b) {
-    if (sz % MAX_CHUNK_SIZE == 0) {
-      // make a new chunk since last is full
-      std::vector<bool> v {b};
-      BoolColumnChunk(v);
-    } else {
-      // place bool into last chunk
-      BoolColumnChunk* bcc = get_chunk(sz / MAX_CHUNK_SIZE);
-      bcc->push_back(b);
+  /**
+   * Inserts variable number of elements into this column. Preferable to use
+   * this over push_back if vals.size() > 1, to reduce the amount we need to
+   * repeatedly serialize/deserialize.
+   */
+  virtual void push_back_n(std::vector<bool> vals)
+  {
+    size_t next_node = 0;   // The node to store next chunk (determined round-robin style)
+    size_t chunks_used = 0; // How many chunks we've used so far
+    bool done = false;      // Becomes true once all vals have been added
+
+    while (!done) {
+      // If a partially-filled chunk exists, use it. Else, create a new chunk.
+      bool reusable = size() % MAX_CHUNK_SIZE == 0;
+      BoolColumnChunk chunk = reusable ? *get_chunk(size() / MAX_CHUNK_SIZE) : BoolColumnChunk();
+      size_t chunk_size = chunk.size();
+
+      Key* k;
+      // Reuse the old key if we are reusing a chunk
+      if (reusable)
+      {
+        k = &keys_.at(size() / MAX_CHUNK_SIZE);
+      // Create a unique key with the name and the node this chunk will live on
+      } else {      
+        std::string key_name = ""; // TODO: name key
+        k = new Key(key_name, next_node);
+        keys_.push_back(*k);
+        // Advance to the next node, round-robin style
+        next_node = next_node + 1 % store_->num_nodes();
+      }
+
+      // Fill the chunk up to the MAX_CHUNK_SIZE minus what's already in the chunk
+      for (size_t j=0; j<MAX_CHUNK_SIZE - chunk_size; j++) {
+        // If we've added all the vals... mark done, and exit this loop
+        if (chunks_used * MAX_CHUNK_SIZE + j >= vals.size())
+        {
+          done = true;
+          break;
+        }
+        chunk.push_back(vals.at(chunks_used * MAX_CHUNK_SIZE + j));
+        sz++;
+      }
+
+      // Serialize this chunk and store it as a Value, and put pair in KV store
+      Serializer ser;
+      chunk.serialize(ser);
+      Value* v = new Value(ser.data(), ser.length());
+      store_->put(*k, *v);
     }
+  }
+
+  /**
+   * Inserts this element into the column by first retrieving a partially-
+   * filled chunk from the KVStore (if it exists) or creating a new chunk
+   * if it does not. Must serialize the chunk before adding it back.
+   */
+  virtual void push_back(bool b) {
+    size_t chunk_idx = size() / MAX_CHUNK_SIZE;
+    BoolColumnChunk chunk = size() % MAX_CHUNK_SIZE == 0 ? BoolColumnChunk() : *get_chunk(chunk_idx);
+    chunk.push_back(b);
+    Serializer ser;
+    chunk.serialize(ser);
+    Key k = keys_.at(chunk_idx);
+    Value* v = new Value(ser.data(), ser.length());
+    store_->put(k, *v);
+    sz++;
   }
   
   void serialize(Serializer &ser) {
-    ser.write_size_t(chunks_.size());
-    for (size_t i=0; i<chunks_.size(); i++) {
-      chunks_.at(i).serialize(ser);
+    ser.write_size_t(keys_.size());
+    for (size_t i=0; i<keys_.size(); i++) {
+      keys_.at(i).serialize(ser);
     }
   }
 
@@ -149,27 +195,27 @@ class IntColumn : public Column {
 
   IntColumn(std::vector<int> ints) {
     for (int i : ints) {
-      chunks_.push_back(i);
+      keys_.push_back(i);
     }
   }
 
-  virtual ~IntColumn() { chunks_.clear(); }
+  virtual ~IntColumn() { keys_.clear(); }
 
-  int get(size_t idx) { return chunks_.at(idx); }
+  int get(size_t idx) { return keys_.at(idx); }
 
   IntColumn *as_int() { return this; }
 
   /** Set value at idx. An out of bound idx is undefined.  */
-  void set(size_t idx, int val) { chunks_[idx] = val; }
+  void set(size_t idx, int val) { keys_[idx] = val; }
 
-  size_t size() { return chunks_.size(); }
+  size_t size() { return keys_.size(); }
 
   virtual char get_type() { return 'I'; }
 
-  virtual void push_back(int i) { chunks_.push_back(i); }
+  virtual void push_back(int i) { keys_.push_back(i); }
 
   void serialize(Serializer &ser) {
-    ser.write_int_vector(chunks_);
+    ser.write_int_vector(keys_);
   }
 
   static IntColumn* deserialize(Deserializer &dser) {
@@ -178,7 +224,7 @@ class IntColumn : public Column {
   }
 
  public:
-  std::vector<int> chunks_;
+  std::vector<int> keys_;
 };
 
 /*************************************************************************
@@ -191,30 +237,30 @@ class DoubleColumn : public Column {
 
   DoubleColumn(std::vector<double> doubles) {
     for (double f : doubles) {
-      chunks_.push_back(f);
+      keys_.push_back(f);
     }
   }
 
-  virtual ~DoubleColumn() { chunks_.clear(); }
+  virtual ~DoubleColumn() { keys_.clear(); }
 
   double get(size_t idx) 
   { 
-    return chunks_.at(idx); 
+    return keys_.at(idx); 
   }
 
   DoubleColumn *as_double() { return this; }
 
   /** Set value at idx. An out of bound idx is undefined.  */
-  void set(size_t idx, double val) { chunks_[idx] = val; }
+  void set(size_t idx, double val) { keys_[idx] = val; }
 
-  size_t size() { return chunks_.size(); }
+  size_t size() { return keys_.size(); }
 
   virtual char get_type() { return 'D'; }
 
-  virtual void push_back(double f) { chunks_.push_back(f); }
+  virtual void push_back(double f) { keys_.push_back(f); }
 
   void serialize(Serializer &ser) {
-    ser.write_double_vector(chunks_);
+    ser.write_double_vector(keys_);
   }
 
   static DoubleColumn* deserialize(Deserializer &dser) {
@@ -223,7 +269,7 @@ class DoubleColumn : public Column {
   }
 
  public:
-  std::vector<double> chunks_;
+  std::vector<double> keys_;
 };
 
 /*************************************************************************
@@ -237,27 +283,27 @@ class StringColumn : public Column {
 
   StringColumn(std::vector<std::string> strings) {
     for (std::string s : strings) {
-      chunks_.push_back(s);
+      keys_.push_back(s);
     }
   }
 
-  virtual ~StringColumn() { chunks_.clear(); }
+  virtual ~StringColumn() { keys_.clear(); }
 
-  std::string get(size_t idx) { return chunks_.at(idx); }
+  std::string get(size_t idx) { return keys_.at(idx); }
 
   StringColumn *as_string() { return this; }
 
   /** Set value at idx. An out of bound idx is undefined.  */
-  void set(size_t idx, std::string val) { chunks_[idx] = val; }
+  void set(size_t idx, std::string val) { keys_[idx] = val; }
 
-  size_t size() { return chunks_.size(); }
+  size_t size() { return keys_.size(); }
 
   char get_type() { return 'S'; }
 
-  virtual void push_back(std::string s) { chunks_.push_back(s); }
+  virtual void push_back(std::string s) { keys_.push_back(s); }
   
   void serialize(Serializer &ser) {
-    ser.write_string_vector(chunks_);
+    ser.write_string_vector(keys_);
   }
 
   static StringColumn* deserialize(Deserializer &dser) {
@@ -266,5 +312,5 @@ class StringColumn : public Column {
   }
 
  public:
-  std::vector<std::string> chunks_;
+  std::vector<std::string> keys_;
 };
