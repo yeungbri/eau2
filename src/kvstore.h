@@ -29,7 +29,15 @@ class Value {
   char* data_;    // serialized data
   size_t length_; // length of serialized data
 
-  Value(char* data, size_t length) : data_(data), length_(length) {}
+  Value(char* data, size_t length) : length_(length) {
+    data_ = new char[length];
+    // Data is not guaranteed to be available i.e. across network
+    memcpy(data_, data, length);
+  }
+
+  ~Value() {
+    delete[] data_;
+  }
 
   char* data() { return data_; }
 

@@ -127,8 +127,7 @@ public:
   size_t index_;  // index in the data to start deserializing at
 
   Deserializer(char* data, size_t length) {
-    data_ = new char[length];
-    memcpy(data_, data, length);
+    data_ = data;
     length_ = length;
     index_ = 0;
   }
@@ -182,7 +181,6 @@ public:
     size_t len = read_size_t();
     char* chars = read_chars(len);
     std::string res = std::string(chars);
-    delete chars;
     return res;
   }
 
