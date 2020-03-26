@@ -17,6 +17,7 @@ class Key {
   size_t home_;       // index of home node
   Key(std::string name, size_t home) : name_(name), home_(home) {}
 
+  // TODO: explain what this is doing
   /** Comparator for using Key in a std::map */
   bool operator==(const Key& other) {
     return name_ == other.name_ && home_ == other.home_;
@@ -44,6 +45,7 @@ class Value {
   size_t length() { return length_; }
 };
 
+// TODO: explain what this is doing
 /** Used for comparing keys in a std::map */
 struct KeyCompare {
   bool operator()(const Key& lhs, const Key& rhs) const {
