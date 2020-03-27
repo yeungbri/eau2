@@ -18,7 +18,7 @@
 class Application {
  public:
   size_t idx_;             // index of node it is running on
-  KVStore kv = KVStore();  // local kvstore
+  KVStore kv;              // local kvstore
 
   Application(size_t idx) : idx_(idx) {}
 
@@ -46,14 +46,14 @@ class Trivial : public Application {
     }
     Key key("triv", 0);
     DataFrame* df = DataFrame::fromArray(&key, &kv, vals);
-    assert(df->get_double(0, 1) == 1);
+    assert(df->get_double(0, 1, &kv) == 1);
 
     Value val = kv.get(key);
     Deserializer dser(val.data(), val.length());
     DataFrame* df2 = DataFrame::deserialize(dser);
     for (size_t i = 0; i < SZ; ++i) {
-      assert(df2->get_double(0, i) == i);
-      sum -= df2->get_double(0, i);
+      assert(df2->get_double(0, i, &kv) == i);
+      sum -= df2->get_double(0, i, &kv);
     }
     assert(sum == 0);
     std::cout << "SUCCESS" << std::endl;
@@ -81,25 +81,37 @@ public:
 
   void producer() {
     size_t SZ = 100*1000;
-    double* vals = new double[SZ];
+    std::vector<double> vals;
     double sum = 0;
-    for (size_t i = 0; i < SZ; ++i) sum += vals[i] = i;
-    DataFrame::fromArray(&main, &kv, SZ, vals);
+    for (size_t i = 0; i < SZ; ++i) 
+    {
+      vals.push_back(i);
+      sum += i;
+    }
+    DataFrame::fromArray(&main, &kv, vals);
     DataFrame::fromScalar(&check, &kv, sum);
   }
 
   void counter() {
-    DataFrame* v = kv.waitAndGet(main);
+    Value val = kv.waitAndGet(main);
+    Deserializer dser(val.data(), val.length());
+    DataFrame* df = DataFrame::deserialize(dser);
     size_t sum = 0;
-    for (size_t i = 0; i < 100*1000; ++i) sum += v->get_double(0,i);
+    for (size_t i = 0; i < 100*1000; ++i) sum += df->get_double(0,i, &kv);
     std::cout << "The sum is  " << sum << "\n";
     DataFrame::fromScalar(&verify, &kv, sum);
   }
 
   void summarizer() {
-    DataFrame* result = kv.waitAndGet(verify);
-    DataFrame* expected = kv.waitAndGet(check);
-    std::cout << (expected->get_double(0,0)==result->get_double(0,0) ?
+    Value val = kv.waitAndGet(verify);
+    Deserializer dser(val.data(), val.length());
+    DataFrame* result = DataFrame::deserialize(dser);
+
+    Value val = kv.waitAndGet(check);
+    Deserializer dser(val.data(), val.length());
+    DataFrame* expected = DataFrame::deserialize(dser);
+
+    std::cout << (expected->get_double(0,0, &kv)==result->get_double(0,0, &kv) ?
     "SUCCESS":"FAILURE") << "\n";
   }
 };

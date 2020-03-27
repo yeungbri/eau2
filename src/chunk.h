@@ -75,7 +75,7 @@ class BoolColumnChunk : public ColumnChunk{
 public:
   std::vector<bool> vals_;
 
-  BoolColumnChunk() {}
+  BoolColumnChunk() = default;
 
   BoolColumnChunk(std::vector<bool> vals) : vals_(vals) {}
 
