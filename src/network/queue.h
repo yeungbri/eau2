@@ -6,45 +6,15 @@
 // lang::Cpp
 
 #pragma once
-#include <condition_variable>
-#include <cstdlib>
-#include <mutex>
-#include <sstream>
-#include <thread>
 #include <vector>
 #include <map>
 
+#include "thread.h"
 #include "message.h"
 
-/** A convenient lock and condition variable wrapper. */
-class Lock {
- public:
-  std::mutex mtx_;
-  std::condition_variable_any cv_;
-
-  /** Request ownership of this lock.
-   *
-   *  Note: This operation will block the current thread until the lock can
-   *  be acquired.
-   */
-  void lock() { mtx_.lock(); }
-
-  /** Release this lock (relinquish ownership). */
-  void unlock() { mtx_.unlock(); }
-
-  /** Sleep and wait for a notification on this lock.
-   *
-   *  Note: After waking up, the lock is owned by the current thread and
-   *  needs released by an explicit invocation of unlock().
-   */
-  void wait() { cv_.wait(mtx_); }
-
-  // Notify all threads waiting on this lock
-  void notify_all() { cv_.notify_all(); }
-};
-
 /**
- * 
+ * FIFO queue of messages with atomic push and pop
+ * author: vitekj@me.com
  */
 class MessageQueue {
  public:
@@ -65,7 +35,8 @@ class MessageQueue {
     while (queue_.size() == 0) {
       lock_.wait();
     }
-    Message* result = queue_.pop_back();
+    Message* result = queue_.back();
+    queue_.pop_back();
     lock_.unlock();
     return result;
   }
@@ -73,6 +44,7 @@ class MessageQueue {
 
 /**
  * Associates threads to node id's
+ * author: vitekj@me.com
  */
 class ThreadNodeMap {
  public:

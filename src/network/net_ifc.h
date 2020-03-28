@@ -6,19 +6,19 @@
 // lang::Cpp
 
 #pragma once
-#include <map>
-#include <thread>
-#include <cstdlib>
-#include <mutex>
-#include <condition_variable>
-#include <sstream>
+
+#include <vector>
 
 #include "message.h"
+#include "queue.h"
+#include "thread.h"
 
 /**
  * NetworkIfc: Abstract communication layer between eau2 nodes.
  * Contains two implementations: one for in-process communications
  * and another for real network connections.
+ * 
+ * author: vitekj@me.com
  */
 class NetworkIfc {
  public:
@@ -37,24 +37,32 @@ class NetworkIfc {
 
 /**
  * Communications layer between nodes represented by threads
+ * 
+ * author: vitekj@me.com
  */
 class NetworkPseudo : public NetworkIfc {
  public:
-  std::map<std::string, size_t> threads_;  // map thread ids to size_t
+  ThreadNodeMap threads_;  // map thread ids to size_t
+  std::vector<MessageQueue*> msg_queues_;  // array of message queues, 1 per thread
 
-
-  NetworkPsuedo() {}
+  NetworkPseudo(size_t num_nodes) {
+    for (size_t i = 0; i < num_nodes; i++) {
+      msg_queues_.push_back(new MessageQueue());
+    }
+  };
 
   void register_node(size_t idx) {
-    std::stringstream buf;
-    buf << std::this_thread::get_id();
-    std::string tid(buf.str());
-    threads_.
+    std::string tid = Thread::thread_id();
+    threads_.set_u(tid, idx);
   }
 
-  void send_msg(Message* msg) {}
+  void send_msg(Message* msg) {
+    msg_queues_.at(msg->target_)->push(msg);
+  }
 
   Message* recv_msg() {
-
+    std::string tid = Thread::thread_id();
+    size_t i = threads_.get(tid);
+    return msg_queues_.at(i)->pop();
   }
 };
