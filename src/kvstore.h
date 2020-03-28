@@ -8,7 +8,7 @@
 #pragma once
 #include <map>
 
-#include "net_ifc.h"
+#include "network/net_ifc.h"
 #include "serial.h"
 
 /** Key of a key-value store which consists of a name and
