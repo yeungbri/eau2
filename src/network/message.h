@@ -77,12 +77,48 @@ class Put : public Message {
   Put(MsgKind kind, size_t sender, size_t target, size_t id, Key& k, Value& v)
       : Message(kind, sender, target, id), k_(k), v_(v){};
 
-  Put(Deserializer& d) : Message(d), k_(*Key::deserialize(d)), v_(*Value::deserialize(d)) {}
+  Put(Deserializer& d)
+      : Message(d), k_(*Key::deserialize(d)), v_(*Value::deserialize(d)) {}
 
   void serialize(Serializer& ser) {
     Message::serialize(ser);
     k_.serialize(ser);
     v_.serialize(ser);
+  }
+};
+
+class Get : public Message {
+ public:
+  Key& k_;
+
+  Get(MsgKind kind, size_t sender, size_t target, size_t id, Key& k)
+      : Message(kind, sender, target, id), k_(k){};
+
+  Get(Deserializer& d) : Message(d), k_(*Key::deserialize(d)) {}
+
+  void serialize(Serializer& ser) {
+    Message::serialize(ser);
+    k_.serialize(ser);
+  }
+};
+
+class Reply : public Message {
+ public:
+  char* data_;
+  size_t len_;
+
+  Reply(MsgKind kind, size_t sender, size_t target, size_t id, char* data, size_t len)
+      : Message(kind, sender, target, id), data_(data), len_(len){};
+
+  Reply(Deserializer& d) : Message(d) {
+    len_ = d.read_size_t();
+    data_ = d.read_chars(len_);
+  }
+
+  void serialize(Serializer& ser) {
+    Message::serialize(ser);
+    ser.write_size_t(len_);
+    ser.write_chars(data_, len_);
   }
 };
 

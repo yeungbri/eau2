@@ -40,6 +40,10 @@ class MessageQueue {
     lock_.unlock();
     return result;
   }
+
+  size_t size() {
+    return queue_.size();
+  }
 };
 
 /**

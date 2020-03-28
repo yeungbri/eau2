@@ -82,6 +82,7 @@ class KVStore {
   std::map<Key, Value, KeyCompare> store_;
   NetworkIfc* net_;
   size_t idx_;
+  Lock lock_;
 
   KVStore() {}
 
@@ -90,23 +91,39 @@ class KVStore {
   /** Retrieves the associated value given the key */
   Value get(Key& k) {
     Value res("", 0);
+    lock_.lock();
     auto search = store_.find(k);
     if (search != store_.end()) {
       res = search->second;
     } else {
       std::cout << "Cannot get key " << k.name_ << "\n";
     }
+    lock_.unlock();
     return res;
   }
 
   /** Blocking get */
-  Value waitAndGet(Key& k) { return get(k); }
+  Value waitAndGet(Key& k) {
+    size_t target_idx = k.home_;
+    if (target_idx == idx_) {
+      return get(k);
+    } else {
+      // ask cluster
+      Get* get_msg = new Get(MsgKind::Get, idx_, target_idx, 0, k);
+      net_->send_msg(get_msg);
+      Reply* re_msg = dynamic_cast<Reply*>(net_->recv_msg());
+      Value res = Value(re_msg->data_, re_msg->len_);
+      return res;
+    }
+  }
 
   /** Associates the given value with the given key */
   void put(Key& k, Value& v) {
     size_t target_idx = k.home_;
     if (target_idx == idx_) {
+      lock_.lock();
       store_.insert_or_assign(k, v);
+      lock_.unlock();
     } else {
       Put* put_msg = new Put(MsgKind::Put, idx_, target_idx, 0, k, v);
       net_->send_msg(put_msg);
