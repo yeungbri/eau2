@@ -69,6 +69,23 @@ class Ack : public Message {
   Ack(Deserializer& d) : Message(d) {}
 };
 
+class Put : public Message {
+ public:
+  Key& k_;
+  Value& v_;
+
+  Put(MsgKind kind, size_t sender, size_t target, size_t id, Key& k, Value& v)
+      : Message(kind, sender, target, id), k_(k), v_(v){};
+
+  Put(Deserializer& d) : Message(d), k_(*Key::deserialize(d)), v_(*Value::deserialize(d)) {}
+
+  void serialize(Serializer& ser) {
+    Message::serialize(ser);
+    k_.serialize(ser);
+    v_.serialize(ser);
+  }
+};
+
 /** Message for retrieving the cluster's status */
 class Status : public Message {
  public:
