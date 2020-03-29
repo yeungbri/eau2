@@ -98,7 +98,6 @@ public:
   static std::shared_ptr<BoolColumnChunk> deserialize(Deserializer &dser)
   {
     std::vector<bool> arr = dser.read_bool_vector();
-    std::cout << "deserializing bool col chunk of size " << dser.length() << std::endl;
     return std::make_shared<BoolColumnChunk>(arr);
   }
 };

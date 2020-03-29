@@ -97,81 +97,79 @@ TEST(dataframe, testColumn)
   std::vector<bool> bools = {0, 1, 0, 1};
   auto store = std::make_shared<KVStore>(0, nullptr);
   BoolColumn bc;
-
   for (bool b : bools)
   {
     bc.push_back(b, store);
   }
   EXPECT_EQ(bc.get(0, store), 0);
-  // EXPECT_EQ(bc.get(1, store), 1);
-  // EXPECT_EQ(bc.get(2, store), 0);
-  // EXPECT_EQ(bc.get(3, store), 1);
+  EXPECT_EQ(bc.get(1, store), 1);
+  EXPECT_EQ(bc.get(2, store), 0);
+  EXPECT_EQ(bc.get(3, store), 1);
 
+  EXPECT_EQ(bc.as_bool(), &bc);
+  EXPECT_EQ(bc.as_int(), nullptr);
+  EXPECT_EQ(bc.as_double(), nullptr);
+  EXPECT_EQ(bc.as_string(), nullptr);
 
-  // EXPECT_EQ(bc.as_bool().get(), &bc);
-  // EXPECT_EQ(bc.as_int(), nullptr);
-  // EXPECT_EQ(bc.as_double(), nullptr);
-  // EXPECT_EQ(bc.as_string(), nullptr);
+  EXPECT_EQ(bc.size(), 4);
+  EXPECT_EQ(bc.get_type(), 'B');
 
-  // EXPECT_EQ(bc.size(), 4);
-  // EXPECT_EQ(bc.get_type(), 'B');
+  std::vector<int> ints = {1, 2, 3, -4};
+  IntColumn ic;
+  for (int i : ints)
+  {
+    ic.push_back(i, store);
+  }
+  EXPECT_EQ(ic.get(0, store), 1);
+  EXPECT_EQ(ic.get(1, store), 2);
+  EXPECT_EQ(ic.get(2, store), 3);
+  EXPECT_EQ(ic.get(3, store), -4);
 
-  // std::vector<int> ints = {1, 2, 3, -4};
-  // IntColumn ic;
-  // for (int i : ints)
-  // {
-  //   ic.push_back(i, store);
-  // }
-  // EXPECT_EQ(ic.get(0, store), 1);
-  // EXPECT_EQ(ic.get(1, store), 2);
-  // EXPECT_EQ(ic.get(2, store), 3);
-  // EXPECT_EQ(ic.get(3, store), -4);
+  EXPECT_EQ(ic.as_bool(), nullptr);
+  EXPECT_EQ(ic.as_int(), &ic);
+  EXPECT_EQ(ic.as_double(), nullptr);
+  EXPECT_EQ(ic.as_string(), nullptr);
 
-  // EXPECT_EQ(ic.as_bool(), nullptr);
-  // EXPECT_EQ(ic.as_int().get(), &ic);
-  // EXPECT_EQ(ic.as_double(), nullptr);
-  // EXPECT_EQ(ic.as_string(), nullptr);
+  EXPECT_EQ(ic.size(), 4);
+  EXPECT_EQ(ic.get_type(), 'I');
 
-  // EXPECT_EQ(ic.size(), 4);
-  // EXPECT_EQ(ic.get_type(), 'I');
+  std::vector<double> doubles = {0.234, -0.678, 123.123, 67.0};
+  DoubleColumn fc;
+  for (double d : doubles)
+  {
+    fc.push_back(d, store);
+  }
+  ASSERT_FLOAT_EQ(fc.get(0, store), 0.234);
+  ASSERT_FLOAT_EQ(fc.get(1, store), -0.678);
+  ASSERT_FLOAT_EQ(fc.get(2, store), 123.123);
+  ASSERT_FLOAT_EQ(fc.get(3, store), 67);
 
-  // std::vector<double> doubles = {0.234, -0.678, 123.123, 67.0};
-  // DoubleColumn fc;
-  // for (double d : doubles)
-  // {
-  //   fc.push_back(d, store);
-  // }
-  // ASSERT_FLOAT_EQ(fc.get(0, store), 0.234);
-  // ASSERT_FLOAT_EQ(fc.get(1, store), -0.678);
-  // ASSERT_FLOAT_EQ(fc.get(2, store), 123.123);
-  // ASSERT_FLOAT_EQ(fc.get(3, store), 67);
+  EXPECT_EQ(fc.as_bool(), nullptr);
+  EXPECT_EQ(fc.as_int(), nullptr);
+  EXPECT_EQ(fc.as_double(), &fc);
+  EXPECT_EQ(fc.as_string(), nullptr);
 
-  // EXPECT_EQ(fc.as_bool(), nullptr);
-  // EXPECT_EQ(fc.as_int(), nullptr);
-  // EXPECT_EQ(fc.as_double().get(), &fc);
-  // EXPECT_EQ(fc.as_string(), nullptr);
+  EXPECT_EQ(fc.size(), 4);
+  EXPECT_EQ(fc.get_type(), 'D');
 
-  // EXPECT_EQ(fc.size(), 4);
-  // EXPECT_EQ(fc.get_type(), 'D');
+  std::vector<std::string> strings = {s1.c_str(), s2.c_str(), s3.c_str(), s4.c_str()};
+  StringColumn sc;
+  for (std::string s : strings)
+  {
+    sc.push_back(s, store);
+  }
+  EXPECT_EQ(sc.get(0, store), s1);
+  EXPECT_EQ(sc.get(1, store), s2);
+  EXPECT_EQ(sc.get(2, store), s3);
+  EXPECT_EQ(sc.get(3, store), s4);
 
-  // std::vector<std::string> strings = {s1.c_str(), s2.c_str(), s3.c_str(), s4.c_str()};
-  // StringColumn sc;
-  // for (std::string s : strings)
-  // {
-  //   sc.push_back(s, store);
-  // }
-  // EXPECT_EQ(sc.get(0, store), s1);
-  // EXPECT_EQ(sc.get(1, store), s2);
-  // EXPECT_EQ(sc.get(2, store), s3);
-  // EXPECT_EQ(sc.get(3, store), s4);
+  EXPECT_EQ(sc.as_bool(), nullptr);
+  EXPECT_EQ(sc.as_int(), nullptr);
+  EXPECT_EQ(sc.as_double(), nullptr);
+  EXPECT_EQ(sc.as_string(), &sc);
 
-  // EXPECT_EQ(sc.as_bool(), nullptr);
-  // EXPECT_EQ(sc.as_int(), nullptr);
-  // EXPECT_EQ(sc.as_double(), nullptr);
-  // EXPECT_EQ(sc.as_string().get(), &sc);
-
-  // EXPECT_EQ(sc.size(), 4);
-  // EXPECT_EQ(sc.get_type(), 'S');
+  EXPECT_EQ(sc.size(), 4);
+  EXPECT_EQ(sc.get_type(), 'S');
 }
 
 // Test Dataframe
@@ -197,10 +195,10 @@ TEST(dataframe, testAddColumnRow)
   DataFrame df(schema);
   EXPECT_EQ(df.ncols(), 4);
   EXPECT_EQ(df.get_schema()._types, schema._types);
-  std::shared_ptr<DoubleColumn> fcol2;
-  std::shared_ptr<IntColumn> icol2;
-  std::shared_ptr<BoolColumn> bcol2;
-  std::shared_ptr<StringColumn> scol2;
+  auto fcol2 = std::make_shared<DoubleColumn>();
+  auto icol2 = std::make_shared<IntColumn>();
+  auto bcol2 = std::make_shared<BoolColumn>();
+  auto scol2 = std::make_shared<StringColumn>();
   df.add_column(fcol2);
   df.add_column(icol2);
   df.add_column(bcol2);
@@ -227,10 +225,10 @@ TEST(dataframe, testGetSet)
 {
   Schema schema;
   DataFrame df(schema);
-  std::shared_ptr<DoubleColumn> fcol;
-  std::shared_ptr<IntColumn> icol;
-  std::shared_ptr<BoolColumn> bcol;
-  std::shared_ptr<StringColumn> scol;
+  auto fcol = std::make_shared<DoubleColumn>();
+  auto icol = std::make_shared<IntColumn>();
+  auto bcol = std::make_shared<BoolColumn>();
+  auto scol = std::make_shared<StringColumn>();
   auto store = std::make_shared<KVStore>(0, nullptr);
   df.add_column(fcol);
   df.add_column(icol);
@@ -242,6 +240,7 @@ TEST(dataframe, testGetSet)
     auto row = rows[i];
     df.add_row(*row, store);
   }
+  df.print(store);
   EXPECT_EQ(df.nrows(), 10);
   EXPECT_EQ(df.ncols(), 4);
   EXPECT_FLOAT_EQ(df.get_double(0, 5, store), 5.5);

@@ -69,7 +69,8 @@ class DataFrame {
    * is external, and appears as the last column of the dataframe. A
    * nullptr column is undefined. */
   void add_column(std::shared_ptr<Column> col) {
-    if (col) {
+    if (col)
+    {
       schema_.add_column(col->get_type());
       cols_.push_back(col);
     }
@@ -157,17 +158,14 @@ class DataFrame {
   */
 
   /** Print the dataframe in SoR format to standard output. */
-  /*
-  void print(KVStore* store) {
-    Rower *rower = new PrintRower();
+  void print(std::shared_ptr<KVStore> store) {
+    auto rower = std::make_shared<PrintRower>();
     for (size_t i = 0; i < nrows(); ++i) {
       Row row(schema_);
       fill_row(i, row, store);
       rower->accept(row);
     }
-    delete rower;
   }
-  */
 
   void serialize(Serializer& ser) {
     schema_.serialize(ser);

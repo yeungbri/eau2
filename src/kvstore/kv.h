@@ -48,7 +48,10 @@ class Value {
     memcpy(data_, data, length);
   }
 
-  ~Value() { delete[] data_; }
+  ~Value() 
+  { 
+    //delete[] data_; 
+  }
 
   char* data() { return data_; }
 
