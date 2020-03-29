@@ -109,7 +109,11 @@ public:
 
   DoubleColumnChunk() {}
 
-  DoubleColumnChunk(std::vector<double> vals) : vals_(vals) {}
+  DoubleColumnChunk(std::vector<double> vals) : vals_(vals) {
+    for (double d : vals) {
+      std::cout << "making double chunk: " << d << std::endl;
+    }
+  }
 
   ~DoubleColumnChunk() { vals_.clear(); }
 

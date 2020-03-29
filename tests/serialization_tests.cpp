@@ -6,7 +6,6 @@
 // lang::CwC
 
 #include "../src/column.h"
-#include "../src/helper.h"
 #include "../src/network/message.h"
 #include "../src/schema.h"
 #include "../src/serial.h"

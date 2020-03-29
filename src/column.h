@@ -18,7 +18,7 @@ class BoolColumn;
 class DoubleColumn;
 class StringColumn;
 
-const size_t MAX_CHUNK_SIZE = 2;
+const size_t MAX_CHUNK_SIZE = 5;
 
 /**************************************************************************
  * Column ::
@@ -103,6 +103,7 @@ public:
   BoolColumn(std::vector<Key> keys, std::vector<bool> cache) {
     keys_ = keys;
     cached_chunk_ = cache;
+    sz_ = keys.size() * MAX_CHUNK_SIZE + cache.size();
   }
 
   virtual ~BoolColumn() { keys_.clear(); }
@@ -180,6 +181,7 @@ public:
   IntColumn(std::vector<Key> keys, std::vector<int> cache) {
     keys_ = keys;
     cached_chunk_ = cache;
+    sz_ = keys.size() * MAX_CHUNK_SIZE + cache.size();
   }
 
   virtual ~IntColumn() { keys_.clear(); }
@@ -256,6 +258,7 @@ public:
   DoubleColumn(std::vector<Key> keys, std::vector<double> cache) {
     keys_ = keys;
     cached_chunk_ = cache;
+    sz_ = keys.size() * MAX_CHUNK_SIZE + cache.size();
   }
 
   virtual ~DoubleColumn() { keys_.clear(); }
@@ -268,6 +271,8 @@ public:
     assert(idx < sz_);
     size_t chunk_idx = idx / MAX_CHUNK_SIZE;
     size_t element_idx = idx % MAX_CHUNK_SIZE;
+    // std::cout << chunk_idx << std::endl;
+    // std::cout << keys_.size() << std::endl;
     if (chunk_idx == keys_.size())
     {
       return cached_chunk_.at(element_idx);
@@ -276,6 +281,8 @@ public:
       Value v = store->get(keys_.at(chunk_idx));
       Deserializer dser(v.data(), v.length());
       auto chunk = DoubleColumnChunk::deserialize(dser);
+      // std::cout << element_idx << std::endl;
+      // std::cout << chunk->vals_[0] << std::endl;
       return chunk->get(element_idx);
     }
   }
@@ -289,8 +296,10 @@ public:
    * the KV store, and empty the cache.
    */
   virtual void push_back(double d, std::shared_ptr<KVStore> store) {
+    std::cout << d << std::endl;
     if (cached_chunk_.size() >= MAX_CHUNK_SIZE)
     {
+      std::cout << "making new chunk" << std::endl;
       DoubleColumnChunk chunk(cached_chunk_);
       store_chunk(chunk, store);
       cached_chunk_.clear();
@@ -333,6 +342,7 @@ public:
   StringColumn(std::vector<Key> keys, std::vector<std::string> cache) {
     keys_ = keys;
     cached_chunk_ = cache;
+    sz_ = keys.size() * MAX_CHUNK_SIZE + cache.size();
   }
 
   virtual ~StringColumn() { keys_.clear(); }
