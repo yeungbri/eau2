@@ -49,18 +49,17 @@ class Schema {
     }
   }
 
-  Schema(std::vector<std::string> types, std::vector<std::string> row_names, 
-    std::vector<std::string> col_names) : _types(types) { }
+  Schema(std::vector<std::string> types, size_t nrows) : _types(types), nrows_(nrows) { }
 
   void serialize(Serializer& ser) {
     ser.write_string_vector(_types);
+    ser.write_size_t(nrows_);
   }
 
   static std::shared_ptr<Schema> deserialize(Deserializer& dser) {
     std::vector<std::string> types = dser.read_string_vector();
-    std::vector<std::string> row_names = dser.read_string_vector();
-    std::vector<std::string> col_names = dser.read_string_vector();
-    return std::make_shared<Schema>(types, row_names, col_names);
+    size_t nrows = dser.read_size_t();
+    return std::make_shared<Schema>(types, nrows);
   }
 
   virtual ~Schema() {

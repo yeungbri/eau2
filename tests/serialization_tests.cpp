@@ -144,25 +144,25 @@ void test_dataframe() {
   auto store = std::make_shared<KVStore>(0, nullptr);
 
   std::vector<double> fv = {0.1, 0.123, 1.80};
-  std::shared_ptr<DoubleColumn> fc;
+  std::shared_ptr<DoubleColumn> fc = std::make_shared<DoubleColumn>();
   for (double d : fv)
   {
     fc->push_back(d, store);
   }
   std::vector<int> iv = {1, 2, 3};
-  std::shared_ptr<IntColumn> ic;
+  auto ic = std::make_shared<IntColumn>();
   for (int i : iv)
   {
     ic->push_back(i, store);
   }
   std::vector<bool> bv = {0, 1, 1};
-  std::shared_ptr<BoolColumn> bc;
+  auto bc = std::make_shared<BoolColumn>();
   for (bool b : bv)
   {
     bc->push_back(b, store);
   }
   std::vector<std::string> sv = {"hello", "good", "bye"};
-  std::shared_ptr<StringColumn> sc;
+  std::shared_ptr<StringColumn> sc = std::make_shared<StringColumn>();
   for (std::string s : sv)
   {
     sc->push_back(s, store);
