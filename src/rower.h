@@ -9,7 +9,6 @@
 #include <iostream>
 #include "row.h"
 #include "fielder.h"
-#include "helper.h"
 
 /*******************************************************************************
  *  Rower::
@@ -35,12 +34,12 @@ public:
       split off will be joined.  There will be one join per split. The
       original object will be the last to be called join on. The join method
       is reponsible for cleaning up memory. */
-  virtual void join_delete(Rower *other)
+  virtual void join_delete(std::shared_ptr<Rower> other)
   {
     return;
   }
 
-  virtual Rower* clone() {
+  virtual std::shared_ptr<Rower> clone() {
     return nullptr;
   }
 };
@@ -48,21 +47,19 @@ public:
 class PrintRower : public Rower
 {
 public:
-  Fielder* _fielder;
-  Sys _sys;
+  std::shared_ptr<Fielder> _fielder;
 
-  PrintRower() : _sys() {
-    _fielder = new PrintFielder();
+  PrintRower() 
+  {
+    _fielder = std::make_shared<PrintFielder>();
   }
 
-  virtual ~PrintRower() {
-    delete _fielder;
-  }
+  virtual ~PrintRower() = default;
 
   virtual bool accept(Row& r)
   {
     r.visit(*_fielder);
-    _sys.p("\n");
+    std::cout << "\n";
     return true;
   }
 };
@@ -72,9 +69,9 @@ class StringSearchRower : public Rower
 {
 public:
   std::string _search_str;
-  Sys _sys;
 
-  StringSearchRower(const char* search_str) : _sys() {
+  StringSearchRower(const char* search_str)
+  {
     _search_str = std::string(search_str);
   }
 
@@ -99,9 +96,9 @@ class IntSumRower : public Rower
 {
 public:
   size_t _sum;
-  Sys _sys;
 
-  IntSumRower() : _sys() {
+  IntSumRower()
+  {
     _sum = 0;
   }
 
@@ -118,15 +115,14 @@ public:
     return true;
   }
 
-  virtual IntSumRower* clone()
+  virtual std::shared_ptr<Rower> clone()
   {
-    return new IntSumRower();
+    return std::make_shared<IntSumRower>();
   }
 
-  virtual void join_delete(Rower* other)
+  virtual void join_delete(std::shared_ptr<Rower> other)
   {
-    _sum = _sum + dynamic_cast<IntSumRower*>(other)->_sum;
-    delete other;
+    _sum = _sum + std::dynamic_pointer_cast<IntSumRower>(other)->_sum;
   }
 };
 
@@ -135,9 +131,8 @@ class CounterRower : public Rower
 {
 public:
   size_t _count = 0;
-  Sys _sys;
 
-  CounterRower() : _sys() {}
+  CounterRower() = default;
 
   virtual ~CounterRower() = default;
 
@@ -147,15 +142,14 @@ public:
     return true;
   }
 
-  virtual CounterRower* clone()
+  virtual std::shared_ptr<Rower> clone()
   {
-    return new CounterRower();
+    return std::make_shared<CounterRower>();
   }
 
-  virtual void join_delete(Rower* other)
+  virtual void join_delete(std::shared_ptr<Rower> other)
   {
-    _count += dynamic_cast<CounterRower*>(other)->_count;
-    delete other;
+    _count += std::dynamic_pointer_cast<CounterRower>(other)->_count;
   }
 };
 
@@ -165,9 +159,9 @@ class CharCountRower : public Rower
 public:
   char _search_char;
   size_t _count;
-  Sys _sys;
 
-  CharCountRower(char search_char) : _sys() {
+  CharCountRower(char search_char)
+  {
     _search_char = search_char;
     _count = 0;
   }
@@ -191,14 +185,13 @@ public:
     return true;
   }
 
-  virtual CharCountRower* clone()
+  virtual std::shared_ptr<Rower> clone()
   {
-    return new CharCountRower(_search_char);
+    return std::make_shared<CharCountRower>(_search_char);
   }
 
-  virtual void join_delete(Rower* other)
+  virtual void join_delete(std::shared_ptr<Rower> other)
   {
-    _count += dynamic_cast<CharCountRower*>(other)->_count;
-    delete other;
+    _count += std::dynamic_pointer_cast<CharCountRower>(other)->_count;
   }
 };

@@ -9,7 +9,7 @@
 #include "serial.h"
 #include <iostream>
 #include <vector>
-#include "kvstore.h"
+#include "kvstore/kvstore.h"
 #include "chunk.h"
 #include <cmath>
 
@@ -18,7 +18,7 @@ class BoolColumn;
 class DoubleColumn;
 class StringColumn;
 
-const size_t MAX_CHUNK_SIZE = 1000;
+const size_t MAX_CHUNK_SIZE = 2;
 
 /**************************************************************************
  * Column ::
@@ -44,27 +44,37 @@ public:
 
   /** Type converters: Return same column under its actual type, or
    *  nullptr if of the wrong type.  */
-  virtual IntColumn *as_int() { return nullptr; }
-  virtual BoolColumn *as_bool() { return nullptr; }
-  virtual DoubleColumn *as_double() { return nullptr; }
-  virtual StringColumn *as_string() { return nullptr; }
+  virtual std::shared_ptr<IntColumn> as_int() { return nullptr; }
+  virtual std::shared_ptr<BoolColumn> as_bool() { return nullptr; }
+  virtual std::shared_ptr<DoubleColumn> as_double() { return nullptr; }
+  virtual std::shared_ptr<StringColumn> as_string() { return nullptr; }
 
   /** Type appropriate push_back methods. Calling the wrong method is
    * undefined behavior. **/
-  virtual void push_back(int val) {};
-  virtual void push_back(bool val) {};
-  virtual void push_back(double val) {};
-  virtual void push_back(std::string val) {};
-
-  virtual void push_back_n(std::vector<int> vals) {};
-  virtual void push_back_n(std::vector<bool> vals) {};
-  virtual void push_back_n(std::vector<double> vals) {};
-  virtual void push_back_n(std::vector<std::string> vals) {};
+  virtual void push_back(int val, std::shared_ptr<KVStore> store) {};
+  virtual void push_back(bool val, std::shared_ptr<KVStore> store) {};
+  virtual void push_back(double val, std::shared_ptr<KVStore> store) {};
+  virtual void push_back(std::string val, std::shared_ptr<KVStore> store) {};
 
   /** Return the type of this column as a char: 'S', 'B', 'I' and 'D'.*/
   virtual char get_type() = 0;
 
   virtual void serialize(Serializer& ser) { }
+
+  virtual std::string gen_name_()
+  {
+    const int len = 100;
+    std::string ret = "";
+    static const char alphanum[] =
+        "0123456789"
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        "abcdefghijklmnopqrstuvwxyz";
+
+    for (int i = 0; i < len; ++i) {
+        ret += alphanum[rand() % (sizeof(alphanum) - 1)];
+    }
+    return ret;
+  }
 };
 
 /*************************************************************************
@@ -89,23 +99,29 @@ public:
    * Given absolute idx value, return the value in cache if it exists. Else,
    * query the KVStore for the correct chunk, and retrieve the value there.
    */
-  bool get(size_t idx, KVStore* store) {
+  bool get(size_t idx, std::shared_ptr<KVStore> store) {
     assert(idx < sz_);
     size_t chunk_idx = idx / MAX_CHUNK_SIZE;
     size_t element_idx = idx % MAX_CHUNK_SIZE;
     if (chunk_idx == keys_.size())
     {
+      std::cout << "chunk idx is: " << chunk_idx << ", keys size is" << keys_.size() << std::endl;
+      std::cout << "helloooo" << std::endl;
       return cached_chunk_.at(element_idx);
     } else
     {
+      std::cout << "in else case!" << std::endl;
       Value v = store->get(keys_.at(chunk_idx));
+      std::cout << "got value" << std::endl;
       Deserializer dser(v.data(), v.length());
-      BoolColumnChunk* bcc = BoolColumnChunk::deserialize(dser);
+      std::cout << "deserialized" << std::endl;
+      auto bcc = BoolColumnChunk::deserialize(dser);
+      std::cout << "got the chunk" << std::endl;
       return bcc->get(element_idx);
     }
   }
 
-  BoolColumn *as_bool() { return this; }
+  std::shared_ptr<BoolColumn> as_bool() { return std::shared_ptr<BoolColumn>(this); }
 
   virtual char get_type() { return 'B'; }
 
@@ -113,20 +129,25 @@ public:
    * Inserts element into cache. If cache is full, serialize it and store it in
    * the KV store, and empty the cache.
    */
-  virtual void push_back(bool b, KVStore* store) {
+  virtual void push_back(bool b, std::shared_ptr<KVStore> store) {
+    std::cout << "about to push back: " << b << std::endl;
     if (cached_chunk_.size() >= MAX_CHUNK_SIZE)
     {
       BoolColumnChunk chunk(cached_chunk_);
       Serializer ser;
       chunk.serialize(ser);
-      std::string keyName = ""; // TODO: create unique key name
+      std::string keyName = gen_name_();
       size_t node = (sz_ / MAX_CHUNK_SIZE) % store->num_nodes();
-      Key k(keyName, node);
-      Value v(ser.data(), ser.length());
-      store->put(k, v); // TODO: may need to allocate k and v on heap
+      auto k = std::make_shared<Key>(keyName, node);
+      auto v = std::make_shared<Value>(ser.data(), ser.length());
+      store->put(*k, *v);
+      keys_.push_back(*k);
+      std::cout << "serialized!" << std::endl;
       cached_chunk_.clear();
+    } else
+    {
+      cached_chunk_.push_back(b);
     }
-    cached_chunk_.push_back(b);
     sz_++;
   }
   
@@ -138,14 +159,14 @@ public:
     ser.write_bool_vector(cached_chunk_);
   }
 
-  static BoolColumn* deserialize(Deserializer &dser) {
+  static std::shared_ptr<BoolColumn> deserialize(Deserializer &dser) {
     size_t num_chunks = dser.read_size_t();
     std::vector<Key> arr;
     for (size_t i=0; i<num_chunks; i++) {
       arr.push_back(*Key::deserialize(dser));
     }
     std::vector<bool> cache = dser.read_bool_vector();
-    return new BoolColumn(arr, cache);
+    return std::make_shared<BoolColumn>(arr, cache);
   }
 };
 
@@ -171,7 +192,7 @@ public:
    * Given absolute idx value, return the value in cache if it exists. Else,
    * query the KVStore for the correct chunk, and retrieve the value there.
    */
-  int get(size_t idx, KVStore* store) {
+  int get(size_t idx, std::shared_ptr<KVStore> store) {
     assert(idx < sz_);
     size_t chunk_idx = idx / MAX_CHUNK_SIZE;
     size_t element_idx = idx % MAX_CHUNK_SIZE;
@@ -182,12 +203,12 @@ public:
     {
       Value v = store->get(keys_.at(chunk_idx));
       Deserializer dser(v.data(), v.length());
-      IntColumnChunk* chunk = IntColumnChunk::deserialize(dser);
+      auto chunk = IntColumnChunk::deserialize(dser);
       return chunk->get(element_idx);
     }
   }
 
-  IntColumn *as_int() { return this; }
+  std::shared_ptr<IntColumn> as_int() { return std::shared_ptr<IntColumn>(this); }
 
   virtual char get_type() { return 'I'; }
 
@@ -195,17 +216,17 @@ public:
    * Inserts element into cache. If cache is full, serialize it and store it in
    * the KV store, and empty the cache.
    */
-  virtual void push_back(int i, KVStore* store) {
+  virtual void push_back(int i, std::shared_ptr<KVStore> store) {
     if (cached_chunk_.size() >= MAX_CHUNK_SIZE)
     {
       IntColumnChunk chunk(cached_chunk_);
       Serializer ser;
       chunk.serialize(ser);
-      std::string keyName = ""; // TODO: create unique key name
+      std::string keyName = gen_name_();
       size_t node = (sz_ / MAX_CHUNK_SIZE) % store->num_nodes();
-      Key k(keyName, node);
-      Value v(ser.data(), ser.length());
-      store->put(k, v); // TODO: may need to allocate k and v on heap
+      auto k = std::make_shared<Key>(keyName, node);
+      auto v = std::make_shared<Value>(ser.data(), ser.length());
+      store->put(*k, *v); // TODO: may need to allocate k and v on heap
       cached_chunk_.clear();
     }
     cached_chunk_.push_back(i);
@@ -220,14 +241,14 @@ public:
     ser.write_int_vector(cached_chunk_);
   }
 
-  static IntColumn* deserialize(Deserializer &dser) {
+  static std::shared_ptr<IntColumn> deserialize(Deserializer &dser) {
     size_t num_chunks = dser.read_size_t();
     std::vector<Key> arr;
     for (size_t i=0; i<num_chunks; i++) {
       arr.push_back(*Key::deserialize(dser));
     }
     std::vector<int> cache = dser.read_int_vector();
-    return new IntColumn(arr, cache);
+    return std::make_shared<IntColumn>(arr, cache);
   }
 };
 
@@ -253,7 +274,7 @@ public:
    * Given absolute idx value, return the value in cache if it exists. Else,
    * query the KVStore for the correct chunk, and retrieve the value there.
    */
-  double get(size_t idx, KVStore* store) {
+  double get(size_t idx, std::shared_ptr<KVStore> store) {
     assert(idx < sz_);
     size_t chunk_idx = idx / MAX_CHUNK_SIZE;
     size_t element_idx = idx % MAX_CHUNK_SIZE;
@@ -264,12 +285,12 @@ public:
     {
       Value v = store->get(keys_.at(chunk_idx));
       Deserializer dser(v.data(), v.length());
-      DoubleColumnChunk* chunk = DoubleColumnChunk::deserialize(dser);
+      auto chunk = DoubleColumnChunk::deserialize(dser);
       return chunk->get(element_idx);
     }
   }
 
-  DoubleColumn *as_double() { return this; }
+  std::shared_ptr<DoubleColumn> as_double() { return std::shared_ptr<DoubleColumn>(this); }
 
   virtual char get_type() { return 'D'; }
 
@@ -277,17 +298,17 @@ public:
    * Inserts element into cache. If cache is full, serialize it and store it in
    * the KV store, and empty the cache.
    */
-  virtual void push_back(double d, KVStore* store) {
+  virtual void push_back(double d, std::shared_ptr<KVStore> store) {
     if (cached_chunk_.size() >= MAX_CHUNK_SIZE)
     {
       DoubleColumnChunk chunk(cached_chunk_);
       Serializer ser;
       chunk.serialize(ser);
-      std::string keyName = ""; // TODO: create unique key name
+      std::string keyName = gen_name_();
       size_t node = (sz_ / MAX_CHUNK_SIZE) % store->num_nodes();
-      Key k(keyName, node);
-      Value v(ser.data(), ser.length());
-      store->put(k, v); // TODO: may need to allocate k and v on heap
+      auto k = std::make_shared<Key>(keyName, node);
+      auto v = std::make_shared<Value>(ser.data(), ser.length());
+      store->put(*k, *v);
       cached_chunk_.clear();
     }
     cached_chunk_.push_back(d);
@@ -302,14 +323,14 @@ public:
     ser.write_double_vector(cached_chunk_);
   }
 
-  static DoubleColumn* deserialize(Deserializer &dser) {
+  static std::shared_ptr<DoubleColumn> deserialize(Deserializer &dser) {
     size_t num_chunks = dser.read_size_t();
     std::vector<Key> arr;
     for (size_t i=0; i<num_chunks; i++) {
       arr.push_back(*Key::deserialize(dser));
     }
     std::vector<double> cache = dser.read_double_vector();
-    return new DoubleColumn(arr, cache);
+    return std::make_shared<DoubleColumn>(arr, cache);
   }
 };
 
@@ -336,7 +357,7 @@ public:
    * Given absolute idx value, return the value in cache if it exists. Else,
    * query the KVStore for the correct chunk, and retrieve the value there.
    */
-  std::string get(size_t idx, KVStore* store) {
+  std::string get(size_t idx, std::shared_ptr<KVStore> store) {
     assert(idx < sz_);
     size_t chunk_idx = idx / MAX_CHUNK_SIZE;
     size_t element_idx = idx % MAX_CHUNK_SIZE;
@@ -347,12 +368,12 @@ public:
     {
       Value v = store->get(keys_.at(chunk_idx));
       Deserializer dser(v.data(), v.length());
-      StringColumnChunk* chunk = StringColumnChunk::deserialize(dser);
+      auto chunk = StringColumnChunk::deserialize(dser);
       return chunk->get(element_idx);
     }
   }
 
-  StringColumn *as_string() { return this; }
+  std::shared_ptr<StringColumn> as_string() { return std::shared_ptr<StringColumn>(this); }
 
   virtual char get_type() { return 'S'; }
 
@@ -360,17 +381,17 @@ public:
    * Inserts element into cache. If cache is full, serialize it and store it in
    * the KV store, and empty the cache.
    */
-  virtual void push_back(std::string s, KVStore* store) {
+  virtual void push_back(std::string s, std::shared_ptr<KVStore> store) {
     if (cached_chunk_.size() >= MAX_CHUNK_SIZE)
     {
       StringColumnChunk chunk(cached_chunk_);
       Serializer ser;
       chunk.serialize(ser);
-      std::string keyName = ""; // TODO: create unique key name
+      std::string keyName = gen_name_();
       size_t node = (sz_ / MAX_CHUNK_SIZE) % store->num_nodes();
-      Key k(keyName, node);
-      Value v(ser.data(), ser.length());
-      store->put(k, v); // TODO: may need to allocate k and v on heap
+      auto k = std::make_shared<Key>(keyName, node);
+      auto v = std::make_shared<Value>(ser.data(), ser.length());
+      store->put(*k, *v); // TODO: may need to allocate k and v on heap
       cached_chunk_.clear();
     }
     cached_chunk_.push_back(s);
@@ -385,13 +406,13 @@ public:
     ser.write_string_vector(cached_chunk_);
   }
 
-  static StringColumn* deserialize(Deserializer &dser) {
+  static std::shared_ptr<StringColumn> deserialize(Deserializer &dser) {
     size_t num_chunks = dser.read_size_t();
     std::vector<Key> arr;
     for (size_t i=0; i<num_chunks; i++) {
       arr.push_back(*Key::deserialize(dser));
     }
     std::vector<std::string> cache = dser.read_string_vector();
-    return new StringColumn(arr, cache);
+    return std::make_shared<StringColumn>(arr, cache);
   }
 };

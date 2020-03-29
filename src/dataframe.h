@@ -11,11 +11,9 @@
 
 #include "column.h"
 #include "fielder.h"
-#include "helper.h"
 #include "row.h"
 #include "rower.h"
 #include "schema.h"
-#include "kvstore.h"
 
 /****************************************************************************
  * DataFrame::
@@ -27,7 +25,7 @@
 class DataFrame {
  public:
   Schema &schema_;
-  std::vector<Column *> cols_;
+  std::vector<std::shared_ptr<Column>> cols_;
   static const int THREAD_COUNT = 4;
 
   /** Create a data frame with the same columns as the given df but with no rows
@@ -38,19 +36,19 @@ class DataFrame {
    * empty. */
   DataFrame(Schema &schema) : schema_(schema) {
     for (size_t i = 0; i < ncols(); ++i) {
-      Column *col;
+      std::shared_ptr<Column> col;
       switch (schema.col_type(i)) {
         case 'B':
-          col = new BoolColumn();
+          col = std::make_shared<BoolColumn>();
           break;
         case 'I':
-          col = new IntColumn();
+          col = std::make_shared<IntColumn>();
           break;
         case 'D':
-          col = new DoubleColumn();
+          col = std::make_shared<DoubleColumn>();
           break;
         case 'S':
-          col = new StringColumn();
+          col = std::make_shared<StringColumn>();
           break;
         default:
           throw std::runtime_error("bad column type!");
@@ -70,7 +68,7 @@ class DataFrame {
   /** Adds a column this dataframe, updates the schema, the new column
    * is external, and appears as the last column of the dataframe. A
    * nullptr column is undefined. */
-  void add_column(Column *col) {
+  void add_column(std::shared_ptr<Column> col) {
     if (col) {
       schema_.add_column(col->get_type());
       cols_.push_back(col);
@@ -79,21 +77,21 @@ class DataFrame {
 
   /** Add a row at the end of this dataframe. The row is expected to have
    *  the right schema and be filled with values, otherwise undefined.  */
-  void add_row(Row &row) {
+  void add_row(Row &row, std::shared_ptr<KVStore> store) {
     schema_.add_row();
     for (size_t i = 0; i < ncols(); ++i) {
       switch (row.col_type(i)) {
         case 'B':
-          cols_.at(i)->push_back(row.get_bool(i));
+          cols_.at(i)->push_back(row.get_bool(i), store);
           break;
         case 'I':
-          cols_.at(i)->push_back(row.get_int(i));
+          cols_.at(i)->push_back(row.get_int(i), store);
           break;
         case 'D':
-          cols_.at(i)->push_back(row.get_double(i));
+          cols_.at(i)->push_back(row.get_double(i), store);
           break;
         case 'S':
-          cols_.at(i)->push_back(row.get_string(i));
+          cols_.at(i)->push_back(row.get_string(i), store);
           break;
       }
     }
@@ -101,19 +99,19 @@ class DataFrame {
 
   /** Return the value at the given column and row. Accessing rows or
    *  columns out of bounds, or request the wrong type is undefined.*/
-  int get_int(size_t col, size_t row, KVStore* store) {
+  int get_int(size_t col, size_t row, std::shared_ptr<KVStore> store) {
     return cols_.at(col)->as_int()->get(row, store);
   }
 
-  bool get_bool(size_t col, size_t row, KVStore* store) {
+  bool get_bool(size_t col, size_t row, std::shared_ptr<KVStore> store) {
     return cols_.at(col)->as_bool()->get(row, store);
   }
 
-  double get_double(size_t col, size_t row, KVStore* store) {
+  double get_double(size_t col, size_t row, std::shared_ptr<KVStore> store) {
     return cols_.at(col)->as_double()->get(row, store);
   }
 
-  std::string get_string(size_t col, size_t row, KVStore* store) {
+  std::string get_string(size_t col, size_t row, std::shared_ptr<KVStore> store) {
     return cols_.at(col)->as_string()->get(row, store);
   }
 
@@ -121,9 +119,9 @@ class DataFrame {
    * the given offset.  If the row is not from the same schema as the
    * dataframe, results are undefined.
    */
-  void fill_row(size_t idx, Row &row, KVStore* store) {
+  void fill_row(size_t idx, Row &row, std::shared_ptr<KVStore> store) {
     for (size_t i = 0; i < ncols(); i++) {
-      Column *col = cols_.at(i);
+      auto col = cols_.at(i);
       switch (col->get_type()) {
         case 'B':
           row.set(i, col->as_bool()->get(idx, store));
@@ -178,13 +176,13 @@ class DataFrame {
     }
   }
 
-  static DataFrame* deserialize(Deserializer& dser) 
+  static std::shared_ptr<DataFrame> deserialize(Deserializer& dser) 
   {
-    Schema* schema = Schema::deserialize(dser);
+    auto schema = Schema::deserialize(dser);
 
-    std::vector<Column*> cols;
+    std::vector<std::shared_ptr<Column>> cols;
     for (size_t i=0; i<schema->width(); i++) {
-      Column* c;
+      std::shared_ptr<Column> c;
       switch (schema->col_type(i)) {
         case 'B':
           c = BoolColumn::deserialize(dser);
@@ -204,18 +202,18 @@ class DataFrame {
       cols.push_back(c);
     }
 
-    DataFrame* df = new DataFrame(*schema);
+    auto df = std::make_shared<DataFrame>(*schema);
     df->cols_ = cols;
     return df;
   }
 
   /** Returns a dataframe with sz values and puts it in the key value store
    *  under the key */
-  static DataFrame *fromArray(Key *key, KVStore *store, std::vector<double> vals) 
+  static std::shared_ptr<DataFrame> fromArray(std::shared_ptr<Key> key, std::shared_ptr<KVStore> store, std::vector<double> vals) 
   {
     Schema s;
-    DataFrame *res = new DataFrame(s);
-    DoubleColumn *dc = new DoubleColumn();
+    auto res = std::make_shared<DataFrame>(s);
+    auto dc = std::make_shared<DoubleColumn>();
     for (double val : vals)
     {
       dc->push_back(val, store);
@@ -224,23 +222,23 @@ class DataFrame {
 
     Serializer ser;
     res->serialize(ser);
-    Value* value = new Value(ser.data(), ser.length());
+    auto value = std::make_shared<Value>(ser.data(), ser.length());
     store->put(*key, *value);
     return res;
   }
 
   /** Returns a dataframe with a single scalar value */
-  static DataFrame *fromScalar(Key *key, KVStore *store, double val) 
+  static std::shared_ptr<DataFrame> fromScalar(std::shared_ptr<Key> key, std::shared_ptr<KVStore> store, double val) 
   {
     Schema s;
-    DataFrame *res = new DataFrame(s);
-    DoubleColumn *dc = new DoubleColumn();
+    auto res = std::make_shared<DataFrame>(s);
+    auto dc = std::make_shared<DoubleColumn>();
     dc->push_back(val, store);
     res->add_column(dc);
 
     Serializer ser;
     res->serialize(ser);
-    Value* value = new Value(ser.data(), ser.length());
+    auto value = std::make_shared<Value>(ser.data(), ser.length());
     store->put(*key, *value);
     return res;
   }

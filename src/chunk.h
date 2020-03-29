@@ -19,18 +19,19 @@ class StringColumnChunk;
 /**************************************************************************
  * ColumnChunk ::
  * Represents a chunk of a column */
-class ColumnChunk {
- public:
+class ColumnChunk
+{
+public:
   ColumnChunk() = default;
 
   virtual ~ColumnChunk() = default;
 
   /** Type converters: Return same column under its actual type, or
    *  nullptr if of the wrong type.  */
-  virtual IntColumnChunk *as_int() { return nullptr; }
-  virtual BoolColumnChunk *as_bool() { return nullptr; }
-  virtual DoubleColumnChunk *as_double() { return nullptr; }
-  virtual StringColumnChunk *as_string() { return nullptr; }
+  virtual std::shared_ptr<IntColumnChunk> as_int() { return nullptr; }
+  virtual std::shared_ptr<BoolColumnChunk> as_bool() { return nullptr; }
+  virtual std::shared_ptr<DoubleColumnChunk> as_double() { return nullptr; }
+  virtual std::shared_ptr<StringColumnChunk> as_string() { return nullptr; }
 
   /** Type appropriate push_back methods. Calling the wrong method is
    * undefined behavior. **/
@@ -45,7 +46,8 @@ class ColumnChunk {
   virtual void serialize(Serializer &ser) {}
 };
 
-class IntColumnChunk : public ColumnChunk{
+class IntColumnChunk : public ColumnChunk
+{
 public:
   std::vector<int> vals_;
 
@@ -55,7 +57,7 @@ public:
 
   ~IntColumnChunk() { vals_.clear(); }
 
-  IntColumnChunk *as_int() { return this; }
+  std::shared_ptr<IntColumnChunk> as_int() { return std::shared_ptr<IntColumnChunk>(this); }
 
   int get(size_t idx) { return vals_.at(idx); }
 
@@ -65,13 +67,15 @@ public:
 
   void serialize(Serializer &ser) { ser.write_int_vector(vals_); }
 
-  static IntColumnChunk *deserialize(Deserializer &dser) {
+  static std::shared_ptr<IntColumnChunk> deserialize(Deserializer &dser)
+  {
     std::vector<int> arr = dser.read_int_vector();
-    return new IntColumnChunk(arr);
+    return std::make_shared<IntColumnChunk>(arr);
   }
 };
 
-class BoolColumnChunk : public ColumnChunk{
+class BoolColumnChunk : public ColumnChunk
+{
 public:
   std::vector<bool> vals_;
 
@@ -81,7 +85,7 @@ public:
 
   ~BoolColumnChunk() { vals_.clear(); }
 
-  BoolColumnChunk *as_bool() { return this; }
+  std::shared_ptr<BoolColumnChunk> as_bool() { return std::shared_ptr<BoolColumnChunk>(this); }
 
   bool get(size_t idx) { return vals_.at(idx); }
 
@@ -91,13 +95,16 @@ public:
 
   void serialize(Serializer &ser) { ser.write_bool_vector(vals_); }
 
-  static BoolColumnChunk *deserialize(Deserializer &dser) {
+  static std::shared_ptr<BoolColumnChunk> deserialize(Deserializer &dser)
+  {
     std::vector<bool> arr = dser.read_bool_vector();
-    return new BoolColumnChunk(arr);
+    std::cout << "deserializing bool col chunk of size " << dser.length() << std::endl;
+    return std::make_shared<BoolColumnChunk>(arr);
   }
 };
 
-class DoubleColumnChunk : public ColumnChunk{
+class DoubleColumnChunk : public ColumnChunk
+{
 public:
   std::vector<double> vals_;
 
@@ -107,7 +114,7 @@ public:
 
   ~DoubleColumnChunk() { vals_.clear(); }
 
-  DoubleColumnChunk *as_double() { return this; }
+  std::shared_ptr<DoubleColumnChunk> as_double() { return std::shared_ptr<DoubleColumnChunk>(this); }
 
   double get(size_t idx) { return vals_.at(idx); }
 
@@ -117,13 +124,15 @@ public:
 
   void serialize(Serializer &ser) { ser.write_double_vector(vals_); }
 
-  static DoubleColumnChunk *deserialize(Deserializer &dser) {
+  static std::shared_ptr<DoubleColumnChunk> deserialize(Deserializer &dser)
+  {
     std::vector<double> arr = dser.read_double_vector();
-    return new DoubleColumnChunk(arr);
+    return std::make_shared<DoubleColumnChunk>(arr);
   }
 };
 
-class StringColumnChunk : public ColumnChunk{
+class StringColumnChunk : public ColumnChunk
+{
 public:
   std::vector<std::string> vals_;
 
@@ -133,7 +142,7 @@ public:
 
   ~StringColumnChunk() { vals_.clear(); }
 
-  StringColumnChunk *as_string() { return this; }
+  std::shared_ptr<StringColumnChunk> as_string() { return std::shared_ptr<StringColumnChunk>(this); }
 
   std::string get(size_t idx) { return vals_.at(idx); }
 
@@ -143,8 +152,9 @@ public:
 
   void serialize(Serializer &ser) { ser.write_string_vector(vals_); }
 
-  static StringColumnChunk *deserialize(Deserializer &dser) {
+  static std::shared_ptr<StringColumnChunk> deserialize(Deserializer &dser)
+  {
     std::vector<std::string> arr = dser.read_string_vector();
-    return new StringColumnChunk(arr);
+    return std::make_shared<StringColumnChunk>(arr);
   }
 };

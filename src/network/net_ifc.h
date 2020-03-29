@@ -26,13 +26,13 @@ class NetworkIfc {
   virtual void register_node(size_t idx) {}
 
   /** Return the index of the node */
-  virtual size_t index() {}
+  virtual size_t index() { return 0; }
 
   /** Sends a message, msg is consumed (deleted) */
-  virtual void send_msg(Message* msg) = 0;
+  virtual void send_msg(std::shared_ptr<Message> msg) = 0;
 
   /** Waits for a message to arrive, message becomes owned */
-  virtual Message* recv_msg() = 0;
+  virtual std::shared_ptr<Message> recv_msg() = 0;
 };
 
 /**
@@ -43,24 +43,25 @@ class NetworkIfc {
 class NetworkPseudo : public NetworkIfc {
  public:
   ThreadNodeMap threads_;  // map thread ids to size_t
-  std::vector<MessageQueue*> msg_queues_;  // array of message queues, 1 per thread
+  std::vector<std::shared_ptr<MessageQueue>> msg_queues_;  // array of message queues, 1 per thread
 
   NetworkPseudo(size_t num_nodes) {
     for (size_t i = 0; i < num_nodes; i++) {
-      msg_queues_.push_back(new MessageQueue());
+      msg_queues_.push_back(std::make_shared<MessageQueue>());
     }
   };
 
   void register_node(size_t idx) {
     std::string tid = Thread::thread_id();
+    std::cout << "Mapping thread ID " << tid << " with idx " << idx << std::endl;
     threads_.set_u(tid, idx);
   }
 
-  void send_msg(Message* msg) {
+  void send_msg(std::shared_ptr<Message> msg) {
     msg_queues_.at(msg->target_)->push(msg);
   }
 
-  Message* recv_msg() {
+  std::shared_ptr<Message> recv_msg() {
     std::string tid = Thread::thread_id();
     size_t i = threads_.get(tid);
     return msg_queues_.at(i)->pop();

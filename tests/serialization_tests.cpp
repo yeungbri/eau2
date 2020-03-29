@@ -7,7 +7,7 @@
 
 #include "../src/column.h"
 #include "../src/helper.h"
-#include "../src/message.h"
+#include "../src/network/message.h"
 #include "../src/schema.h"
 #include "../src/serial.h"
 #include "../src/dataframe.h"
@@ -21,12 +21,11 @@ void test_ackmsg() {
   Serializer ser;
   ackmsg.serialize(ser);
   Deserializer dser(ser.data(), ser.length());
-  Message *d_ackmsg = ackmsg.deserialize(dser);
+  auto d_ackmsg = ackmsg.deserialize(dser);
   ASSERT_TRUE(ackmsg.kind_ == d_ackmsg->kind_);
   ASSERT_TRUE(ackmsg.sender_ == d_ackmsg->sender_);
   ASSERT_TRUE(ackmsg.target_ == d_ackmsg->target_);
   ASSERT_TRUE(ackmsg.id_ == d_ackmsg->id_);
-  delete d_ackmsg;
   exit(0);
 }
 
@@ -100,20 +99,23 @@ void test_double() {
 TEST(serial, test_double) { ASSERT_EXIT_ZERO(test_double) }
 
 void test_double_column() {
+  auto store = std::make_shared<KVStore>(0, nullptr);
   std::vector<double> fv = {0.1, 0.123, 1.80};
-  DoubleColumn fc(fv);
+  DoubleColumn fc;
+  for (double d : fv)
+  {
+    fc.push_back(d, store);
+  }
 
   Serializer ser;
   fc.serialize(ser);
 
   Deserializer dser(ser.data(), ser.length());
-  DoubleColumn *fc2 = fc.deserialize(dser);
+  auto fc2 = fc.deserialize(dser);
 
   for (int i = 0; i < fv.size(); i++) {
-    ASSERT_TRUE(fc.get(i) == fc2->get(i));
+    ASSERT_TRUE(fc.get(i, store) == fc2->get(i, store));
   }
-
-  delete fc2;
   exit(0);
 }
 
@@ -125,7 +127,7 @@ void test_schema() {
   s.serialize(ser);
 
   Deserializer dser(ser.data(), ser.length());
-  Schema* s2 = s.deserialize(dser);
+  auto s2 = s.deserialize(dser);
 
   ASSERT_TRUE(s.width() == s2->width());
   for (int i=0; i<3; i++) {
@@ -140,39 +142,56 @@ TEST(serial, test_schema) { ASSERT_EXIT_ZERO(test_schema) }
 
 void test_dataframe() {
   Schema s("D");
+  auto store = std::make_shared<KVStore>(0, nullptr);
 
   std::vector<double> fv = {0.1, 0.123, 1.80};
-  DoubleColumn fc(fv);
+  std::shared_ptr<DoubleColumn> fc;
+  for (double d : fv)
+  {
+    fc->push_back(d, store);
+  }
   std::vector<int> iv = {1, 2, 3};
-  IntColumn ic(iv);
+  std::shared_ptr<IntColumn> ic;
+  for (int i : iv)
+  {
+    ic->push_back(i, store);
+  }
   std::vector<bool> bv = {0, 1, 1};
-  BoolColumn bc(bv);
+  std::shared_ptr<BoolColumn> bc;
+  for (bool b : bv)
+  {
+    bc->push_back(b, store);
+  }
   std::vector<std::string> sv = {"hello", "good", "bye"};
-  StringColumn sc(sv);
+  std::shared_ptr<StringColumn> sc;
+  for (std::string s : sv)
+  {
+    sc->push_back(s, store);
+  }
 
   DataFrame df(s);
-  df.add_column(&fc, "My double col");
-  df.add_column(&ic, "int col");
-  df.add_column(&bc, "bool col");
-  df.add_column(&sc, "string col");
+  df.add_column(fc);
+  df.add_column(ic);
+  df.add_column(bc);
+  df.add_column(sc);
   
   Serializer ser;
   df.serialize(ser);
 
   Deserializer dser(ser.data(), ser.length());
-  DataFrame* df2 = DataFrame::deserialize(dser);
+  auto df2 = DataFrame::deserialize(dser);
 
-  ASSERT_FLOAT_EQ(df2->get_double(1, 0), fv[0]);
-  ASSERT_FLOAT_EQ(df2->get_double(1, 1), fv[1]);
-  ASSERT_FLOAT_EQ(df2->get_double(1, 2), fv[2]);
+  ASSERT_FLOAT_EQ(df2->get_double(1, 0, store), fv[0]);
+  ASSERT_FLOAT_EQ(df2->get_double(1, 1, store), fv[1]);
+  ASSERT_FLOAT_EQ(df2->get_double(1, 2, store), fv[2]);
 
   for (int i; i<iv.size(); i++) {
-    ASSERT_EQ(df.get_int(2, i), iv[i]);
+    ASSERT_EQ(df.get_int(2, i, store), iv[i]);
   }
 
-  ASSERT_EQ(df.get_bool(3, 0), bv[0]);
+  ASSERT_EQ(df.get_bool(3, 0, store), bv[0]);
 
-  ASSERT_EQ(df.get_string(4, 0), sv[0]);
+  ASSERT_EQ(df.get_string(4, 0, store), sv[0]);
   
   exit(0);
 }

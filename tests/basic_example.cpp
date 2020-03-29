@@ -6,10 +6,11 @@
 
 int main()
 {
-    DataFrame* df = getDataFrame("../data/test2.sor");
-    df->print();
+    auto store = std::make_shared<KVStore>();
+    auto df = getDataFrame("../data/test2.sor", store);
+    //df->print();
     CounterRower countRower;
-    df->map(countRower);
+    //df->map(countRower);
 
     return 0;
 }

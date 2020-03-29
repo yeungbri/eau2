@@ -7,11 +7,10 @@
 
 #pragma once
 #include <netinet/in.h>
-
 #include <string>
 #include <vector>
 
-#include "../serial.h"
+#include "../kvstore/kv.h"
 
 /** Types of messages */
 enum class MsgKind {
@@ -56,7 +55,7 @@ class Message {
     ser.write_size_t(id_);
   }
 
-  static Message* deserialize(Deserializer& d);
+  static std::shared_ptr<Message> deserialize(Deserializer& d);
 };
 
 /** Acknowledgement message for confirming a message
@@ -170,13 +169,15 @@ class Directory : public Message {
   };
 };
 
-Message* Message::deserialize(Deserializer& d) {
+std::shared_ptr<Message> Message::deserialize(Deserializer& d) {
   size_t msg_type = d.read_size_t();
   d.set_index(0);
   switch ((MsgKind)msg_type) {
     case MsgKind::Ack:
-      return new Ack(d);
+      return std::make_shared<Ack>(d);
     case MsgKind::Status:
-      return new Status(d);
+      return std::make_shared<Status>(d);
+    default:
+      return nullptr;
   }
 }

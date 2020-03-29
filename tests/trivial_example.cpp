@@ -6,8 +6,8 @@
 
 int main()
 {
-    Trivial t(0);
-    t.run_();
+    //Trivial t(0);
+    //t.run_();
 
     return 0;
 }

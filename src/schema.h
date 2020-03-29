@@ -21,7 +21,7 @@
 class Schema {
  public:
   std::vector<std::string> _types;
-  size_t nrows_;
+  size_t nrows_ = 0;
 
   /** Copying constructor */
   Schema(Schema &from) {
@@ -30,6 +30,7 @@ class Schema {
         _types.push_back(s);
       }
     }
+    nrows_ = from.nrows_;
   }
 
   /** Create an empty schema **/
@@ -55,11 +56,11 @@ class Schema {
     ser.write_string_vector(_types);
   }
 
-  static Schema* deserialize(Deserializer& dser) {
+  static std::shared_ptr<Schema> deserialize(Deserializer& dser) {
     std::vector<std::string> types = dser.read_string_vector();
     std::vector<std::string> row_names = dser.read_string_vector();
     std::vector<std::string> col_names = dser.read_string_vector();
-    return new Schema(types, row_names, col_names);
+    return std::make_shared<Schema>(types, row_names, col_names);
   }
 
   virtual ~Schema() {
@@ -74,7 +75,7 @@ class Schema {
   }
 
   void add_row() {
-    nrows_++;
+    nrows_ += 1;
   }
 
   /** Return type of column at idx. An idx >= width is undefined. */

@@ -46,20 +46,14 @@ public:
     } val;
   };
 
-  std::vector<struct Data *> _elements;
-
-  /** Build a row following a schema. */
-  Row(Schema &scm, std::string name) : Row(scm)
-  {
-    _name = name;
-  }
+  std::vector<std::shared_ptr<Data>> _elements;
 
   Row(Schema &scm)
   {
     _schema = scm;
     for (size_t i = 0; i < _schema.width(); i++)
     {
-      struct Data* element = new struct Data();
+      auto element = std::make_shared<Data>();
       element->type = Data::is_missing;
       element->val.mval = new char[0];
       _elements.push_back(element);
@@ -72,7 +66,7 @@ public:
     _idx = row._idx;
     for (size_t i = 0; i < _schema.width(); ++i)
     {
-      struct Data *element = new struct Data();
+      auto element = std::make_shared<Data>();
       element->type = row._elements[i]->type;
       element->val = row._elements[i]->val;
       _elements.push_back(element);
@@ -81,12 +75,6 @@ public:
 
   virtual ~Row()
   {
-    for (auto field : _elements)
-    {
-      //delete field->val.sval;
-      //delete field->val.mval;
-      delete field;
-    }
     _elements.clear();
   }
 
@@ -123,7 +111,6 @@ public:
     if (_schema.col_type(col) == 'S')
     {
       _elements[col]->type = Data::is_string;
-      //delete _elements[col]->val.sval;
       _elements[col]->val.sval = strdup(val.c_str());
     }
   }
@@ -242,7 +229,7 @@ public:
    */
   void push_back(bool b)
   {
-    struct Data *element = new struct Data();
+    auto element = std::make_shared<Data>();
     element->type = Data::is_bool;
     element->val.bval = b;
     _elements.push_back(element);
@@ -250,7 +237,7 @@ public:
 
   void push_back(int i)
   {
-    struct Data *element = new struct Data();
+    auto element = std::make_shared<Data>();
     element->type = Data::is_int;
     element->val.ival = i;
     _elements.push_back(element);;
@@ -258,7 +245,7 @@ public:
 
   void push_back(double f)
   {
-    struct Data *element = new struct Data();
+    auto element = std::make_shared<Data>();
     element->type = Data::is_double;
     element->val.fval = f;
     _elements.push_back(element);
@@ -266,7 +253,7 @@ public:
 
   void push_back(std::string s)
   {
-    struct Data *element = new struct Data();
+    auto element = std::make_shared<Data>();
     element->type = Data::is_string;
     element->val.sval = strdup(s.c_str());
     _elements.push_back(element);;

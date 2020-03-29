@@ -12,27 +12,28 @@
 #include <vector>
 
 #include "dataframe.h"
-#include "kvstore.h"
 
 class MessageCheckerThread : public Thread {
   size_t idx_;
-  KVStore* store_;
-  NetworkIfc* net_;
-  MessageCheckerThread(size_t idx, KVStore* store, NetworkIfc* net)
+  std::shared_ptr<KVStore> store_;
+  std::shared_ptr<NetworkIfc> net_;
+  MessageCheckerThread(size_t idx, std::shared_ptr<KVStore> store, std::shared_ptr<NetworkIfc> net)
       : idx_(idx), store_(store), net_(net) {}
 
   void run_() {
     // check if there are any new messages
-    MessageQueue* my_queue = dynamic_cast<NetworkPseudo*>(net_)->msg_queues_.at(idx_);
+    auto my_queue = std::dynamic_pointer_cast<NetworkPseudo>(net_)->msg_queues_.at(idx_);
     if (my_queue->size() > 0) {
-      Message* msg = my_queue->pop();
+      auto msg = my_queue->pop();
       switch(msg->kind_) {
         case MsgKind::Put:
-          Put* put_msg = dynamic_cast<Put*>(msg);
-          store_->put(put_msg->k_, put_msg->v_);
+          store_->put(std::dynamic_pointer_cast<Put>(msg)->k_, std::dynamic_pointer_cast<Put>(msg)->v_);
           break;
         case MsgKind::Get:
+          std::cout << "GET!" << std::endl;
           break;
+        default:
+          std::cout << "Unknown message type!" << std::endl;
       }
     };
   }
@@ -41,15 +42,15 @@ class MessageCheckerThread : public Thread {
 /** An application runs on a node and owns one local kvstore */
 class Application {
  public:
-  size_t idx_;  // index of node it is running on
-  KVStore kv;   // local kvstore
+  size_t idx_;                 // index of node it is running on
+  std::shared_ptr<KVStore> kv; // local kvstore
 
-  Application(size_t idx, NetworkIfc* net) : idx_(idx) {
-    kv.set_net(net);
-    kv.register_node(idx);
+  Application(size_t idx, std::shared_ptr<NetworkIfc> net) : idx_(idx)
+  {
+    kv = std::make_shared<KVStore>(idx, net);
   }
 
-  ~Application() {}
+  ~Application() = default;
 
   /** Invoke to run the application */
   virtual void run_() {}
@@ -59,13 +60,14 @@ class Application {
 
 class Demo : public Application {
  public:
-  Key main = Key("main", 0);
-  Key verify = Key("verif", 0);
-  Key check = Key("ck", 0);
+  std::shared_ptr<Key> main = std::make_shared<Key>("main", 0);
+  std::shared_ptr<Key> verify = std::make_shared<Key>("verif", 0);
+  std::shared_ptr<Key> check = std::make_shared<Key>("ck", 0);
 
-  Demo(size_t idx, NetworkIfc* net) : Application(idx, net) {}
+  Demo(size_t idx, std::shared_ptr<NetworkIfc> net) : Application(idx, net) {}
 
   void run_() override {
+    kv->register_node();
     switch (this_node()) {
       case 0:
         producer();
@@ -86,34 +88,30 @@ class Demo : public Application {
       vals.push_back(i);
       sum += i;
     }
-    DataFrame::fromArray(&main, &kv, vals);
-    DataFrame::fromScalar(&check, &kv, sum);
+    DataFrame::fromArray(main, kv, vals);
+    DataFrame::fromScalar(check, kv, sum);
   }
 
   void counter() {
-    Value val = kv.waitAndGet(main);
+    Value val = kv->waitAndGet(*main);
     Deserializer dser(val.data(), val.length());
-    DataFrame* df = DataFrame::deserialize(dser);
+    auto df = DataFrame::deserialize(dser);
     size_t sum = 0;
-    for (size_t i = 0; i < 100 * 1000; ++i) sum += df->get_double(0, i, &kv);
+    for (size_t i = 0; i < 100 * 1000; ++i) sum += df->get_double(0, i, kv);
     std::cout << "The sum is  " << sum << "\n";
-    DataFrame::fromScalar(&verify, &kv, sum);
+    DataFrame::fromScalar(verify, kv, sum);
   }
 
   void summarizer() {
-    Value val = kv.waitAndGet(verify);
-    Deserializer dser(val.data(), val.length());
-    DataFrame* result = DataFrame::deserialize(dser);
+    Value val = kv->waitAndGet(*verify);
+    Deserializer dserVerify(val.data(), val.length());
+    auto result = DataFrame::deserialize(dserVerify);
 
-    Value val = kv.waitAndGet(check);
-    Deserializer dser(val.data(), val.length());
-    DataFrame* expected = DataFrame::deserialize(dser);
+    val = kv->waitAndGet(*check);
+    Deserializer dserCheck(val.data(), val.length());
+    auto expected = DataFrame::deserialize(dserCheck);
 
-    std::cout << (expected->get_double(0, 0, &kv) ==
-                          result->get_double(0, 0, &kv)
-                      ? "SUCCESS"
-                      : "FAILURE")
-              << "\n";
+    std::cout << (expected->get_double(0, 0, kv) == result->get_double(0, 0, kv) ? "SUCCESS" : "FAILURE") << "\n";
   }
 };
 

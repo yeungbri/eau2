@@ -6,7 +6,6 @@
 //lang::Cpp
 
 #pragma once
-#include "helper.h"
 #include <vector>
 
 /**
@@ -186,11 +185,14 @@ public:
 
   // Vectors of primitives
   std::vector<bool> read_bool_vector() {
+    std::cout << 1 << std::endl;
     size_t vector_size = read_size_t();
+    std::cout << "vector size is: " << vector_size << std::endl;
     std::vector<bool> res;
     for (size_t i=0; i<vector_size; i++) {
       res.push_back(read_bool());
     }
+    std::cout << 3 << std::endl;
     return res;
   }
 

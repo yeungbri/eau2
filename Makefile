@@ -7,8 +7,8 @@ build:
 	cd tests; g++ -std=c++17 -Wall -o demo_example demo_example.cpp; ./demo_example
 
 test:
-	make clean
-	cd ./tests; cmake .; make dataframe_tests && ./dataframe_tests; make serialization_tests && ./serialization_tests;
+	cd ./tests; cmake .; make dataframe_tests && ./dataframe_tests; 
+	#make serialization_tests && ./serialization_tests;
 
 valgrind:
 	make clean
@@ -19,6 +19,7 @@ valgrind:
 clean:
 	rm -f tests/serialization_tests
 	rm -f tests/trivial_example
+	rm -f tests/demo_example
 	rm -f tests/CMakeCache.txt
 	rm -f tests/basic_example
 	rm -rf tests/CMakeFiles/

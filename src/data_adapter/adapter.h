@@ -3,6 +3,7 @@ Authors: Zhichao Chen and Bryce Russell-Benoit
 */
 
 #include <iostream>
+#include <memory>
 #include <string>
 #include <fstream>
 #include <algorithm> 
@@ -252,7 +253,7 @@ void print_type(int type) {
     }
 }
 
-DataFrame* getDataFrame(std::string filePath)
+std::shared_ptr<DataFrame> getDataFrame(std::string filePath, std::shared_ptr<KVStore> store)
 {
     // default from flag to 0 and len flag to max
     size_t from = 0;
@@ -302,22 +303,22 @@ DataFrame* getDataFrame(std::string filePath)
     }
 
     // Construct Schema object from types
-    Schema* schema = new Schema();
+    auto schema = std::make_shared<Schema>();
     for (int type : types)
     {
         switch(type)
         {
             case 1:
-                schema->add_column('B', "");
+                schema->add_column('B');
                 break;
             case 2:
-                schema->add_column('I', "");
+                schema->add_column('I');
                 break;
             case 3:
-                schema->add_column('D', "");
+                schema->add_column('D');
                 break;
             case 4:
-                schema->add_column('S', "");
+                schema->add_column('S');
                 break;
             default:
                 throw std::runtime_error("Unknown type!");
@@ -325,14 +326,14 @@ DataFrame* getDataFrame(std::string filePath)
     }
 
     // store the content of the file
-    DataFrame* df = new DataFrame(*schema);
+    auto df = std::make_shared<DataFrame>(*schema);
 
     while (getline(file, line, '\n')) {
         // if exceed reading length, break
         if (file.tellg() > (len + from)) {
             break;
         }
-        Row* row = new Row(*schema, "");
+        auto row = std::make_shared<Row>(*schema);
         std::vector<std::string> fields = parse_line(line, &types, columns);
         for (size_t i = 0; i < fields.size(); ++i)
         {
@@ -359,7 +360,7 @@ DataFrame* getDataFrame(std::string filePath)
                 }
             }
         }
-        df->add_row(*row);
+        df->add_row(*row, store);
     }
 
     // close file

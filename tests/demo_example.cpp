@@ -6,22 +6,18 @@
 
 class DemoThread : public Thread {
  public:
-  Demo* d_;
-  DemoThread(Demo* d) : d_(d) {}
+  Demo d_;
+  DemoThread(int node, std::shared_ptr<NetworkPseudo> net) : d_(node, net) {};
 
-  void run() { d_->run_(); }
+  void run() { d_.run_(); }
 };
 
 int main() {
-  NetworkPseudo net(3);
+  auto net = std::make_shared<NetworkPseudo>(3);
 
-  Demo d0(0, &net);
-  Demo d1(1, &net);
-  Demo d2(2, &net);
-
-  DemoThread t1(&d0);
-  DemoThread t2(&d1);
-  DemoThread t3(&d2);
+  DemoThread t1(0, net);
+  DemoThread t2(1, net);
+  DemoThread t3(2, net);
 
   t1.start();
   t2.start();
