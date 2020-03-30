@@ -2,7 +2,7 @@
  * Authors: gao.d@husky.neu.edu and yeung.bri@husky.neu.edu
  */
 
-// Lang:: Cpp
+// lang::Cpp
 
 #pragma once
 #include <unistd.h>
@@ -47,7 +47,7 @@ public:
    * Reads the message at this socket to the provided buffer. Continues to
    * read until we have read the whole length.
    */
-  int readMsg(int sock, char* buf, size_t len, bool& teardown)
+  int readMsg(int sock, char *buf, size_t len, bool &teardown)
   {
     int bytesRead = 0;
     int result = 0;
@@ -64,7 +64,8 @@ public:
       {
         printf("Error in receiving registrations: %s", strerror(errno));
         assert(false);
-      } else
+      }
+      else
       {
         bytesRead += result;
       }
@@ -75,14 +76,14 @@ public:
   /**
    * Reads the server socket until it gets the whole length of the incoming message
    */
-  void readForLength(int sock, size_t* length, bool& teardown)
+  void readForLength(int sock, size_t *length, bool &teardown)
   {
     size_t toRead = sizeof(size_t);
     int bytesRead = 0;
     int result = 0;
     while (bytesRead < toRead)
     {
-      result = readMsg(sock, (char*)length, toRead - bytesRead, teardown);
+      result = readMsg(sock, (char *)length, toRead - bytesRead, teardown);
       if (teardown)
       {
         return;
@@ -93,7 +94,8 @@ public:
       {
         printf("Error in receiving registrations: %s\n", strerror(errno));
         assert(false);
-      } else
+      }
+      else
       {
         bytesRead += result;
       }

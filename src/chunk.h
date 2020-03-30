@@ -17,7 +17,11 @@ class StringColumnChunk;
 
 /**************************************************************************
  * ColumnChunk ::
- * Represents a chunk of a column */
+ * Represents a chunk of a column.
+ * 
+ * The Column that owns this chunk is respnsible for monitoring the size
+ * of this chunk. 
+ * */
 class ColumnChunk
 {
 public:
@@ -42,9 +46,13 @@ public:
   /** Returns the number of elements in the column. */
   virtual size_t size() = 0;
 
+  /** Serializes this chunk into bytes */
   virtual void serialize(Serializer &ser) {}
 };
 
+/**
+ * A column chunk of integers. Refer to parent class for relevant documentation.
+ */
 class IntColumnChunk : public ColumnChunk
 {
 public:
@@ -73,6 +81,9 @@ public:
   }
 };
 
+/**
+ * A column chunk of bools. Refer to parent class for relevant documentation.
+ */
 class BoolColumnChunk : public ColumnChunk
 {
 public:
@@ -101,6 +112,9 @@ public:
   }
 };
 
+/**
+ * A column chunk of doubles. Refer to parent class for relevant documentation.
+ */
 class DoubleColumnChunk : public ColumnChunk
 {
 public:
@@ -108,11 +122,7 @@ public:
 
   DoubleColumnChunk() {}
 
-  DoubleColumnChunk(std::vector<double> vals) : vals_(vals) {
-    for (double d : vals) {
-      //std::cout << "making double chunk: " << d << std::endl;
-    }
-  }
+  DoubleColumnChunk(std::vector<double> vals) : vals_(vals) {}
 
   ~DoubleColumnChunk() { vals_.clear(); }
 
@@ -133,6 +143,9 @@ public:
   }
 };
 
+/**
+ * A column chunk of Strings. Refer to parent class for relevant documentation.
+ */
 class StringColumnChunk : public ColumnChunk
 {
 public:

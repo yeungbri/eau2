@@ -3,7 +3,7 @@
  * Emails: yeung.bri@husky.neu.edu, gao.d@husky.neu.edu
  */
 
-//lang::Cpp
+// lang::Cpp
 
 #pragma once
 #include <iostream>
@@ -19,7 +19,7 @@
 class Rower
 {
 public:
-  virtual ~Rower() { }
+  virtual ~Rower() {}
 
   /** This method is called once per row. The row object is on loan and
       should not be retained as it is likely going to be reused in the next
@@ -39,24 +39,26 @@ public:
     return;
   }
 
-  virtual std::shared_ptr<Rower> clone() {
+  virtual std::shared_ptr<Rower> clone()
+  {
     return nullptr;
   }
 };
 
+/** Print rower for a dataframe */
 class PrintRower : public Rower
 {
 public:
   std::shared_ptr<Fielder> _fielder;
 
-  PrintRower() 
+  PrintRower()
   {
     _fielder = std::make_shared<PrintFielder>();
   }
 
   virtual ~PrintRower() = default;
 
-  virtual bool accept(Row& r)
+  virtual bool accept(Row &r)
   {
     r.visit(*_fielder);
     std::cout << "\n";
@@ -70,19 +72,21 @@ class StringSearchRower : public Rower
 public:
   std::string _search_str;
 
-  StringSearchRower(const char* search_str)
+  StringSearchRower(const char *search_str)
   {
     _search_str = std::string(search_str);
   }
 
-  virtual ~StringSearchRower() { }
+  virtual ~StringSearchRower() {}
 
-  virtual bool accept(Row& r)
+  virtual bool accept(Row &r)
   {
     for (size_t i = 0; i < r.width(); ++i)
     {
-      if (r.col_type(i) == 'S') {
-        if (r.get_string(i) == _search_str) {
+      if (r.col_type(i) == 'S')
+      {
+        if (r.get_string(i) == _search_str)
+        {
           return true;
         }
       }
@@ -104,11 +108,12 @@ public:
 
   virtual ~IntSumRower() = default;
 
-  virtual bool accept(Row& r)
+  virtual bool accept(Row &r)
   {
     for (size_t i = 0; i < r.width(); ++i)
     {
-      if (r.col_type(i) == 'I') {
+      if (r.col_type(i) == 'I')
+      {
         _sum += r.get_int(i);
       }
     }
@@ -136,7 +141,7 @@ public:
 
   virtual ~CounterRower() = default;
 
-  virtual bool accept(Row& r)
+  virtual bool accept(Row &r)
   {
     _count += r.width();
     return true;
@@ -166,17 +171,21 @@ public:
     _count = 0;
   }
 
-  virtual ~CharCountRower() {
+  virtual ~CharCountRower()
+  {
   }
 
-  virtual bool accept(Row& r)
+  virtual bool accept(Row &r)
   {
     for (size_t i = 0; i < r.width(); ++i)
     {
-      if (r.col_type(i) == 'S') {
+      if (r.col_type(i) == 'S')
+      {
         std::string str = r.get_string(i);
-        for (size_t j=0; j<str.length(); j++) {
-          if (str[j] == _search_char) {
+        for (size_t j = 0; j < str.length(); j++)
+        {
+          if (str[j] == _search_char)
+          {
             _count++;
           }
         }

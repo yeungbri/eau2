@@ -1,6 +1,5 @@
 /*
- * Authors: Brian Yeung, Daniel Gao
- * Emails: yeung.bri@husky.neu.edu, gao.d@husky.neu.edu
+ * Code is referenced from CS4500 lecture, authored by Prof. Jan Vitek.
  */
 
 // lang::Cpp
@@ -15,12 +14,14 @@
 
 /** A Thread wraps the thread operations in the standard library.
  *  author: vitekj@me.com */
-class Thread {
- public:
+class Thread
+{
+public:
   std::thread thread_;
 
   /** Starts running the thread, invoked the run() method. */
-  void start() {
+  void start()
+  {
     thread_ = std::thread([this] { this->run(); });
   }
 
@@ -31,7 +32,8 @@ class Thread {
   static void yield() { std::this_thread::yield(); }
 
   /** Sleep for millis milliseconds. */
-  static void sleep(size_t millis) {
+  static void sleep(size_t millis)
+  {
     std::this_thread::sleep_for(std::chrono::milliseconds(millis));
   }
 
@@ -41,7 +43,8 @@ class Thread {
   // there's a better way to get an CwC value out of a threadid, but this'll do
   // for now
   /** Return the id of the current thread */
-  static std::string thread_id() {
+  static std::string thread_id()
+  {
     std::stringstream buf;
     buf << std::this_thread::get_id();
     std::string buffer(buf.str());
@@ -50,8 +53,9 @@ class Thread {
 };
 
 /** A convenient lock and condition variable wrapper. */
-class Lock {
- public:
+class Lock
+{
+public:
   std::mutex mtx_;
   std::condition_variable_any cv_;
 

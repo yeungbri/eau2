@@ -3,7 +3,7 @@
  * Emails: yeung.bri@husky.neu.edu, gao.d@husky.neu.edu
  */
 
-//lang::Cpp
+// lang::Cpp
 
 #pragma once
 #include <string>
@@ -15,8 +15,8 @@
 class Fielder
 {
 public:
-  virtual ~Fielder() { }
-  
+  virtual ~Fielder() {}
+
   /** Called before visiting a row, the argument is the row offset in the
     dataframe. */
   virtual void start(size_t r) = 0;
@@ -31,10 +31,12 @@ public:
   virtual void done() = 0;
 };
 
+/**
+ * Fielder for printing a dataframe. 
+ */
 class PrintFielder : public Fielder
 {
 public:
-
   PrintFielder() = default;
 
   virtual ~PrintFielder() = default;

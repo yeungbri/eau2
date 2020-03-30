@@ -11,7 +11,8 @@
 /**
  * This class is a helper for parsing command line arguments.
  */
-class Parser {
+class Parser
+{
 public:
   /**
    * Checks if this string is convertible to an int.
@@ -19,15 +20,18 @@ public:
    * @param str  the string we are checking
    * @return true if the number is all digits, and false if the number is a double or string
    */
-  bool isInt(char* str) {
-    for (int i = 0; i < strlen(str); ++i) {
-      if (!isdigit(str[i])) {
+  bool isInt(char *str)
+  {
+    for (int i = 0; i < strlen(str); ++i)
+    {
+      if (!isdigit(str[i]))
+      {
         return false;
       }
     }
     return true;
   }
-  
+
   /**
    * Given an input flag and the entire command line input, this method parses 
    * the input for the flag, and retrieves the value if present. If present,
@@ -40,15 +44,21 @@ public:
    * @return the value of the specified flag. If DNE, returns empty string. If
    *         it is of the wrong type, returns -1.
    */
-  int parseForFlagInt(const char* flag, int argc, char** input) {
+  int parseForFlagInt(const char *flag, int argc, char **input)
+  {
     int ret = 0;
     bool found = false;
-    for (int i = 0; i < argc; ++i) {
-      if (strcmp(input[i], flag) == 0) {
-        if (!found && i < argc - 1 && isInt(input[i+1])) {
-          ret = atoi(input[i+1]);
+    for (int i = 0; i < argc; ++i)
+    {
+      if (strcmp(input[i], flag) == 0)
+      {
+        if (!found && i < argc - 1 && isInt(input[i + 1]))
+        {
+          ret = atoi(input[i + 1]);
           found = true;
-        } else {
+        }
+        else
+        {
           // malformed!
           ret = -1;
           break;
@@ -70,15 +80,21 @@ public:
    * @return the value of the specified flag. If DNE, returns empty string. If
    *         it is of the wrong type, returns NULL.
    */
-  char* parseForFlagString(const char* flag, int argc, char** input) {
-    char* ret = strdup("");
+  char *parseForFlagString(const char *flag, int argc, char **input)
+  {
+    char *ret = strdup("");
     bool found = false;
-    for (int i = 0; i < argc; ++i) {
-      if (strcmp(input[i], flag) == 0) {
-        if (!found && i < argc - 1) {
-          ret = input[i+1];
+    for (int i = 0; i < argc; ++i)
+    {
+      if (strcmp(input[i], flag) == 0)
+      {
+        if (!found && i < argc - 1)
+        {
+          ret = input[i + 1];
           found = true;
-        } else {
+        }
+        else
+        {
           // malformed!
           ret = NULL;
           break;
@@ -97,22 +113,32 @@ public:
    *
    * @return the optional ending string argument if provided, null if not
    */
-  char* parseForOptionalStr(int argc, char** input) {
-    char* ret = strdup("");
+  char *parseForOptionalStr(int argc, char **input)
+  {
+    char *ret = strdup("");
     bool found = false;
     bool precededByFlag = false;
-    for (int i = 1; i < argc; ++i) {
-      char* curr = input[i];
-      if (strcmp(curr, "-f") == 0 || strcmp(curr, "-i") == 0) {
+    for (int i = 1; i < argc; ++i)
+    {
+      char *curr = input[i];
+      if (strcmp(curr, "-f") == 0 || strcmp(curr, "-i") == 0)
+      {
         precededByFlag = true;
-      } else {
-        if (!precededByFlag && !found && i == argc - 1) {
+      }
+      else
+      {
+        if (!precededByFlag && !found && i == argc - 1)
+        {
           ret = curr;
           found = true;
-        } else if (!precededByFlag) {
+        }
+        else if (!precededByFlag)
+        {
           ret = NULL;
           break;
-        } else if (precededByFlag) {
+        }
+        else if (precededByFlag)
+        {
           precededByFlag = false;
         }
       }

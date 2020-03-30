@@ -2,7 +2,7 @@
  * Authors: gao.d@husky.neu.edu and yeung.bri@husky.neu.edu
  */
 
-// Lang::Cpp (<thread>, <chrono> libraries)
+// lang::Cpp
 
 #pragma once
 #include <thread>
@@ -22,14 +22,14 @@
 class Client
 {
 public:
-  int _sock = -1;                      // The socket connected to by this client.
-  std::vector<std::string> _client_adr;// addresses of connected clients as "IP:PORT"
-  std::string _serverIp;               // the rendezvous server ip
-  int _serverPort;                     // the rendezvous client ip
-  std::string _ip;                     // this client's ip
-  int _port;                           // this client's port
-  Network _n;                          // contains network helper functions
-  bool _teardown = false;              // if true, tear this client down
+  int _sock = -1;                       // The socket connected to by this client.
+  std::vector<std::string> _client_adr; // addresses of connected clients as "IP:PORT"
+  std::string _serverIp;                // the rendezvous server ip
+  int _serverPort;                      // the rendezvous client ip
+  std::string _ip;                      // this client's ip
+  int _port;                            // this client's port
+  Network _n;                           // contains network helper functions
+  bool _teardown = false;               // if true, tear this client down
 
 public:
   /**
@@ -121,11 +121,12 @@ public:
    */
   void listenToServer()
   {
-    while(!_teardown)
+    while (!_teardown)
     {
       size_t length = 0;
       _n.readForLength(_sock, &length, _teardown);
-      if (length > 0) {
+      if (length > 0)
+      {
         char buffer[length];
         _n.readMsg(_sock, buffer, length, _teardown);
         _processMsg(buffer, length);
@@ -138,7 +139,7 @@ public:
    * the client's list of other clients so it knows who is available for
    * communication.
    */
-  void _processBroadcast(char** tokens)
+  void _processBroadcast(char **tokens)
   {
     // blow everything away
     _client_adr.clear();
@@ -147,7 +148,7 @@ public:
     size_t numClients = std::stoi(tokens[1]);
     for (size_t i = 2; i < numClients + 2; ++i)
     {
-      char** addr = str_split(tokens[i], ':');
+      char **addr = str_split(tokens[i], ':');
       std::string ip = addr[0];
       int port = std::stoi(addr[1]);
       if (ip == _ip && port == _port)
@@ -158,7 +159,6 @@ public:
       address += ":";
       address += std::to_string(port);
       _client_adr.push_back(address);
-
     }
     printf("Available addresses:\n");
     for (size_t i = 0; i < _client_adr.size(); ++i)
@@ -170,17 +170,19 @@ public:
   /**
    * Sorts messages and sends them off to be processed based on message type.
    */
-  void _processMsg(char* msg, size_t length)
+  void _processMsg(char *msg, size_t length)
   {
-    char** tokens = str_split(msg, '\n');
+    char **tokens = str_split(msg, '\n');
     std::string msgType = tokens[0];
     if (msgType == DIRECTMSG)
     {
       printf("RECEIVED DM (CLIENT):\n%s\n", tokens[1]);
-    } else if (msgType == BROADCAST)
+    }
+    else if (msgType == BROADCAST)
     {
       _processBroadcast(tokens);
-    } else if (msgType == SHUTDOWN)
+    }
+    else if (msgType == SHUTDOWN)
     {
       _teardown = true;
       stop();

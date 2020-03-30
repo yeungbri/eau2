@@ -1,6 +1,5 @@
 /*
- * Authors: Brian Yeung, Daniel Gao
- * Emails: yeung.bri@husky.neu.edu, gao.d@husky.neu.edu
+ * Code is referenced from CS4500 lecture, authored by Prof. Jan Vitek.
  */
 
 // lang::Cpp
@@ -18,8 +17,9 @@
  * 
  * author: vitekj@me.com
  */
-class NetworkIfc {
- public:
+class NetworkIfc
+{
+public:
   /** Registers node with given index to the cluster */
   virtual void register_node(size_t idx) {}
 
@@ -38,28 +38,34 @@ class NetworkIfc {
  * 
  * author: vitekj@me.com
  */
-class NetworkPseudo : public NetworkIfc {
- public:
-  ThreadNodeMap threads_;  // map thread ids to size_t
-  std::vector<std::shared_ptr<MessageQueue>> msg_queues_;  // array of message queues, 1 per thread
+class NetworkPseudo : public NetworkIfc
+{
+public:
+  ThreadNodeMap threads_;                                 // map thread ids to size_t
+  std::vector<std::shared_ptr<MessageQueue>> msg_queues_; // array of message queues, 1 per thread
 
-  NetworkPseudo(size_t num_nodes) {
-    for (size_t i = 0; i < num_nodes; i++) {
+  NetworkPseudo(size_t num_nodes)
+  {
+    for (size_t i = 0; i < num_nodes; i++)
+    {
       msg_queues_.push_back(std::make_shared<MessageQueue>());
     }
   };
 
-  void register_node(size_t idx) {
+  void register_node(size_t idx)
+  {
     std::string tid = Thread::thread_id();
     std::cout << "Mapping thread ID " << tid << " with idx " << idx << std::endl;
     threads_.set_u(tid, idx);
   }
 
-  void send_msg(std::shared_ptr<Message> msg) {
+  void send_msg(std::shared_ptr<Message> msg)
+  {
     msg_queues_.at(msg->target_)->push(msg);
   }
 
-  std::shared_ptr<Message> recv_msg() {
+  std::shared_ptr<Message> recv_msg()
+  {
     std::string tid = Thread::thread_id();
     size_t i = threads_.get(tid);
     return msg_queues_.at(i)->pop();

@@ -166,6 +166,9 @@ class DataFrame {
     }
   }
 
+  /**
+   * Serializes this dataframe into a byte stream.
+   */
   void serialize(Serializer& ser) {
     schema_.serialize(ser);
     for (size_t i=0; i<ncols(); i++) {
@@ -173,6 +176,10 @@ class DataFrame {
     }
   }
 
+  /**
+   * Deserializes the dataframe given a byte stream, and returns a pointer
+   * to a new dataframe object.
+   */
   static std::shared_ptr<DataFrame> deserialize(Deserializer& dser) 
   {
     auto schema = Schema::deserialize(dser);

@@ -1,6 +1,5 @@
 /*
- * Authors: Brian Yeung, Daniel Gao
- * Emails: yeung.bri@husky.neu.edu, gao.d@husky.neu.edu
+ * Code is referenced from CS4500 lecture, authored by Prof. Jan Vitek.
  */
 
 // lang::Cpp

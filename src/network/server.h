@@ -2,7 +2,7 @@
  * Authors: gao.d@husky.neu.edu and yeung.bri@husky.neu.edu
  */
 
-// Lang::Cpp
+// lang::Cpp
 
 #include <thread>
 #include <chrono>

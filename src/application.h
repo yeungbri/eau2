@@ -11,38 +11,52 @@
 #include <vector>
 #include "dataframe.h"
 
-class MessageCheckerThread : public Thread {
+/**
+ * A thread for this node that is responsible for monitoring the node's message
+ * queue. If a message appears on this queue, this thread will query the KVStore
+ * and return the appropriate response.
+ */
+class MessageCheckerThread : public Thread
+{
   size_t idx_;
   std::shared_ptr<KVStore> store_;
   std::shared_ptr<NetworkIfc> net_;
   MessageCheckerThread(size_t idx, std::shared_ptr<KVStore> store, std::shared_ptr<NetworkIfc> net)
       : idx_(idx), store_(store), net_(net) {}
 
-  void run_() {
+  void run_()
+  {
     // check if there are any new messages
     auto my_queue = std::dynamic_pointer_cast<NetworkPseudo>(net_)->msg_queues_.at(idx_);
-    if (my_queue->size() > 0) {
+    if (my_queue->size() > 0)
+    {
       auto msg = my_queue->pop();
-      switch(msg->kind_) {
-        case MsgKind::Put:
-          store_->put(std::dynamic_pointer_cast<Put>(msg)->k_, std::dynamic_pointer_cast<Put>(msg)->v_);
-          break;
-        case MsgKind::Get:
-          std::cout << "GET!" << std::endl;
-          break;
-        default:
-          std::cout << "Unknown message type!" << std::endl;
+      switch (msg->kind_)
+      {
+      case MsgKind::Put:
+        store_->put(std::dynamic_pointer_cast<Put>(msg)->k_, std::dynamic_pointer_cast<Put>(msg)->v_);
+        break;
+      case MsgKind::Get:
+        std::cout << "GET!" << std::endl;
+        break;
+      default:
+        std::cout << "Unknown message type!" << std::endl;
       }
     };
   }
 };
 
 /** An application runs on a node and owns one local kvstore */
-class Application {
- public:
+class Application
+{
+public:
   size_t idx_;                 // index of node it is running on
   std::shared_ptr<KVStore> kv; // local kvstore
 
+  /**
+   * Creates an application with a KVStore, given its index (node #) and a
+   * network interface to communicate with.
+   */
   Application(size_t idx, std::shared_ptr<NetworkIfc> net) : idx_(idx)
   {
     kv = std::make_shared<KVStore>(idx, net);
@@ -50,39 +64,51 @@ class Application {
 
   ~Application() = default;
 
-  /** Invoke to run the application */
+  /** Invoke to run the application. Application subclasses implement this. */
   virtual void run_() {}
 
+  /** Returns this application's home node. */
   size_t this_node() { return idx_; }
 };
 
-class Demo : public Application {
- public:
+/**
+ * A Demo application pulled from Milestone 3. Modified to use C++11 features
+ * such as smart pointers. This application sums doubles from 1 to some n, and
+ * verifies that the sum is stored and retrieved correctly across distributed
+ * nodes. 
+ */
+class Demo : public Application
+{
+public:
   std::shared_ptr<Key> main = std::make_shared<Key>("main", 0);
   std::shared_ptr<Key> verify = std::make_shared<Key>("verif", 0);
   std::shared_ptr<Key> check = std::make_shared<Key>("ck", 0);
 
   Demo(size_t idx, std::shared_ptr<NetworkIfc> net) : Application(idx, net) {}
 
-  void run_() override {
+  void run_() override
+  {
     kv->register_node();
-    switch (this_node()) {
-      case 0:
-        producer();
-        break;
-      case 1:
-        counter();
-        break;
-      case 2:
-        summarizer();
+    switch (this_node())
+    {
+    case 0:
+      producer();
+      break;
+    case 1:
+      counter();
+      break;
+    case 2:
+      summarizer();
     }
   }
 
-  void producer() {
+  void producer()
+  {
     size_t SZ = 100 * 1000;
     std::vector<double> vals;
     double sum = 0;
-    for (size_t i = 0; i < SZ; ++i) {
+    for (size_t i = 0; i < SZ; ++i)
+    {
       vals.push_back(i);
       sum += i;
     }
@@ -90,17 +116,20 @@ class Demo : public Application {
     DataFrame::fromScalar(check, kv, sum);
   }
 
-  void counter() {
+  void counter()
+  {
     Value val = kv->waitAndGet(*main);
     Deserializer dser(val.data(), val.length());
     auto df = DataFrame::deserialize(dser);
     size_t sum = 0;
-    for (size_t i = 0; i < 100 * 1000; ++i) sum += df->get_double(0, i, kv);
+    for (size_t i = 0; i < 100 * 1000; ++i)
+      sum += df->get_double(0, i, kv);
     std::cout << "The sum is  " << sum << "\n";
     DataFrame::fromScalar(verify, kv, sum);
   }
 
-  void summarizer() {
+  void summarizer()
+  {
     Value val = kv->waitAndGet(*verify);
     Deserializer dserVerify(val.data(), val.length());
     auto result = DataFrame::deserialize(dserVerify);

@@ -3,7 +3,7 @@
  * Emails: yeung.bri@husky.neu.edu, gao.d@husky.neu.edu
  */
 
-//lang::Cpp
+// lang::Cpp
 
 #pragma once
 #include <string>
@@ -42,13 +42,16 @@ public:
       int ival;
       double fval;
       bool bval;
-      char* sval;
-      char* mval;
+      char *sval;
+      char *mval;
     } val;
   };
 
   std::vector<std::shared_ptr<Data>> _elements;
 
+  /**
+   * Constructs a row given a schema. All elements are missing at initialization.
+   */
   Row(Schema &scm)
   {
     _schema = scm;
@@ -61,6 +64,9 @@ public:
     }
   }
 
+  /**
+   * Row copy constructor. Fills in the values from the old row.
+   */
   Row(Row &row)
   {
     _schema = row._schema;
@@ -241,7 +247,8 @@ public:
     auto element = std::make_shared<Data>();
     element->type = Data::is_int;
     element->val.ival = i;
-    _elements.push_back(element);;
+    _elements.push_back(element);
+    ;
   }
 
   void push_back(double f)
@@ -257,6 +264,7 @@ public:
     auto element = std::make_shared<Data>();
     element->type = Data::is_string;
     element->val.sval = strdup(s.c_str());
-    _elements.push_back(element);;
+    _elements.push_back(element);
+    ;
   }
 };
