@@ -24,6 +24,8 @@ class MessageCheckerThread : public Thread
   MessageCheckerThread(size_t idx, std::shared_ptr<KVStore> store, std::shared_ptr<NetworkIfc> net)
       : idx_(idx), store_(store), net_(net) {}
 
+  virtual ~MessageCheckerThread() = default;
+
   void run_()
   {
     // check if there are any new messages

@@ -19,6 +19,9 @@ class Thread
 public:
   std::thread thread_;
 
+  Thread() = default;
+  virtual ~Thread() = default;
+
   /** Starts running the thread, invoked the run() method. */
   void start()
   {

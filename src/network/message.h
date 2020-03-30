@@ -43,6 +43,8 @@ public:
     id_ = id;
   }
 
+  virtual ~Message() = default;
+
   Message(Deserializer &d)
   {
     kind_ = (MsgKind)d.read_size_t();

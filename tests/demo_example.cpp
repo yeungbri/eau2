@@ -10,7 +10,10 @@
 class DemoThread : public Thread {
  public:
   Demo d_;
+  
   DemoThread(int node, std::shared_ptr<NetworkPseudo> net) : d_(node, net) {};
+  
+  ~DemoThread() = default;
 
   void run() { d_.run_(); }
 };

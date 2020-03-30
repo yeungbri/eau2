@@ -20,6 +20,9 @@
 class NetworkIfc
 {
 public:
+  NetworkIfc() = default;
+  virtual ~NetworkIfc() = default;
+
   /** Registers node with given index to the cluster */
   virtual void register_node(size_t idx) {}
 
@@ -51,6 +54,8 @@ public:
       msg_queues_.push_back(std::make_shared<MessageQueue>());
     }
   };
+
+  virtual ~NetworkPseudo() = default;
 
   void register_node(size_t idx)
   {

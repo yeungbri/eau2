@@ -39,12 +39,13 @@ class KVStore
 {
 public:
   std::map<Key, Value, KeyCompare> store_;
-  std::shared_ptr<NetworkIfc> net_;
   size_t idx_;
+  std::shared_ptr<NetworkIfc> net_;
   Lock lock_;
   size_t num_nodes_ = 1;
 
   KVStore(size_t idx, std::shared_ptr<NetworkIfc> net) : idx_(idx), net_(net) {}
+  ~KVStore() = default;
 
   size_t num_nodes() { return num_nodes_; }
 

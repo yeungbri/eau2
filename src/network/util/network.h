@@ -24,6 +24,9 @@
 class Network
 {
 public:
+  Network() = default;
+  virtual ~Network() = default;
+
   /**
    * Sends the given message with the given length to the server of this client.
    */
