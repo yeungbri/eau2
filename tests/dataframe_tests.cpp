@@ -7,9 +7,9 @@
 
 #include <gtest/gtest.h>
 #include <iostream>
-#include "../src/dataframe.h"
 #include <string>
 #include <vector>
+#include "../src/dataframe.h"
 
 #define ASSERT_EXIT_ZERO(a) ASSERT_EXIT(a(), ::testing::ExitedWithCode(0), ".*")
 
@@ -240,16 +240,24 @@ TEST(dataframe, testGetSet)
     auto row = rows[i];
     df.add_row(*row, store);
   }
-  df.print(store);
   EXPECT_EQ(df.nrows(), 10);
   EXPECT_EQ(df.ncols(), 4);
-  EXPECT_FLOAT_EQ(df.get_double(0, 5, store), 5.5);
-  EXPECT_FLOAT_EQ(df.get_double(0, 0, store), 0.5);
-  EXPECT_EQ(df.get_int(1, 5, store), 10);
-  EXPECT_EQ(df.get_int(1, 0, store), 0);
-  EXPECT_EQ(df.get_bool(2, 5, store), false);
-  EXPECT_EQ(df.get_bool(2, 0, store), true);
-  EXPECT_EQ(df.get_string(3, 0, store), "Hello");
+  for (int i = 0; i < 10; ++i)
+  {
+    EXPECT_FLOAT_EQ(df.get_double(0, i, store), double(0.5 + i * 1.0));
+  }
+  for (int i = 0; i < 10; ++i)
+  {
+    EXPECT_EQ(df.get_int(1, i, store), i * 2);
+  }
+  for (int i = 0; i < 10; ++i)
+  {
+    EXPECT_EQ(df.get_bool(2, i, store), i % 2 == 0);
+  }
+  for (int i = 0; i < 10; ++i)
+  {
+    EXPECT_EQ(df.get_string(3, i, store), "Hello");
+  }
 }
 
 TEST(dataframe, testFillRow)

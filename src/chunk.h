@@ -8,7 +8,6 @@
 #pragma once
 #include <iostream>
 #include <vector>
-
 #include "serial.h"
 
 class IntColumnChunk;
@@ -111,7 +110,7 @@ public:
 
   DoubleColumnChunk(std::vector<double> vals) : vals_(vals) {
     for (double d : vals) {
-      std::cout << "making double chunk: " << d << std::endl;
+      //std::cout << "making double chunk: " << d << std::endl;
     }
   }
 

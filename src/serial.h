@@ -8,6 +8,7 @@
 #pragma once
 #include <vector>
 #include <string>
+#include <cstring>
 
 /**
  * Serializer::
@@ -24,7 +25,7 @@ public:
   size_t capacity_ = 1024;      // amount of bytes data can hold
 
   ~Serializer() {
-    //delete[] data_;
+    delete[] data_;
   }
 
   /** Doubles data capacity when it runs out of room */
@@ -127,9 +128,15 @@ public:
   size_t index_;  // index in the data to start deserializing at
 
   Deserializer(char* data, size_t length) {
-    data_ = data;
+    data_ = new char[length];
+    memcpy(data_, data, length);
     length_ = length;
     index_ = 0;
+  }
+
+  ~Deserializer()
+  {
+    delete[] data_;
   }
 
   /** Used for "seeking" to the binary data, user must

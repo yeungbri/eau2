@@ -8,7 +8,6 @@
 #pragma once
 
 #include <thread>
-
 #include "column.h"
 #include "fielder.h"
 #include "row.h"

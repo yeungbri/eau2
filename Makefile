@@ -7,14 +7,15 @@ build:
 	cd tests; g++ -std=c++17 -Wall -o demo_example demo_example.cpp; ./demo_example
 
 test:
-	# cd ./tests; cmake .; make dataframe_tests && ./dataframe_tests;
+	cd ./tests; cmake .; make dataframe_tests && ./dataframe_tests;
 	cd ./tests; cmake .; make serialization_tests && ./serialization_tests;
 
 valgrind:
 	make clean
 	docker build -t memory-test:0.1 .
-	# docker run -ti -v "$$(pwd)":/test memory-test:0.1 bash -c "cd ./test/tests; cmake .; make dataframe_tests && valgrind --leak-check=full ./dataframe_tests"
-	docker run -ti -v "$$(pwd)":/test memory-test:0.1 bash -c "cd ./test/tests; g++ -std=c++17 -Wall -g -o trivial_example trivial_example.cpp; valgrind --show-leak-kinds=all --leak-check=full ./trivial_example"
+	#docker run -ti -v "$$(pwd)":/test memory-test:0.1 bash -c "cd ./test/tests; cmake .; make dataframe_tests && valgrind --show-leak-kinds=all --leak-check=full ./dataframe_tests"
+	docker run -ti -v "$$(pwd)":/test memory-test:0.1 bash -c "cd ./test/tests; cmake .; make serialization_tests && valgrind --show-leak-kinds=all --leak-check=full ./serialization_tests"
+	#docker run -ti -v "$$(pwd)":/test memory-test:0.1 bash -c "cd ./test/tests; g++ -std=c++17 -Wall -g -o trivial_example trivial_example.cpp; valgrind --show-leak-kinds=all --leak-check=full ./trivial_example"
 
 clean:
 	rm -f tests/serialization_tests

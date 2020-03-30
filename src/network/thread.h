@@ -11,6 +11,7 @@
 #include <mutex>
 #include <sstream>
 #include <thread>
+#include <cassert>
 
 /** A Thread wraps the thread operations in the standard library.
  *  author: vitekj@me.com */

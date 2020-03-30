@@ -5,12 +5,12 @@
 
 // lang::CwC
 
+#include <gtest/gtest.h>
 #include "../src/column.h"
 #include "../src/network/message.h"
 #include "../src/schema.h"
 #include "../src/serial.h"
 #include "../src/dataframe.h"
-#include <gtest/gtest.h>
 
 #define ASSERT_EXIT_ZERO(a) \
   ASSERT_EXIT(a(), ::testing::ExitedWithCode(0), ".*");
@@ -20,7 +20,7 @@ void test_ackmsg() {
   Serializer ser;
   ackmsg.serialize(ser);
   Deserializer dser(ser.data(), ser.length());
-  auto d_ackmsg = ackmsg.deserialize(dser);
+  auto d_ackmsg = Message::deserialize(dser);
   ASSERT_TRUE(ackmsg.kind_ == d_ackmsg->kind_);
   ASSERT_TRUE(ackmsg.sender_ == d_ackmsg->sender_);
   ASSERT_TRUE(ackmsg.target_ == d_ackmsg->target_);
@@ -97,9 +97,55 @@ void test_double() {
 
 TEST(serial, test_double) { ASSERT_EXIT_ZERO(test_double) }
 
+void test_bool_column() {
+  auto store = std::make_shared<KVStore>(0, nullptr);
+  std::vector<bool> bv = {true, true, false, false, true, true, false, false};
+  BoolColumn bc;
+  for (bool b : bv)
+  {
+    bc.push_back(b, store);
+  }
+
+  Serializer ser;
+  bc.serialize(ser);
+
+  Deserializer dser(ser.data(), ser.length());
+  auto bc2 = BoolColumn::deserialize(dser);
+
+  for (int i = 0; i < bv.size(); i++) {
+    ASSERT_TRUE(bc.get(i, store) == bc2->get(i, store));
+  }
+  exit(0);
+}
+
+TEST(serial, test_bool_column) { ASSERT_EXIT_ZERO(test_bool_column) }
+
+void test_int_column() {
+  auto store = std::make_shared<KVStore>(0, nullptr);
+  std::vector<int> iv = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+  IntColumn ic;
+  for (int i : iv)
+  {
+    ic.push_back(i, store);
+  }
+
+  Serializer ser;
+  ic.serialize(ser);
+
+  Deserializer dser(ser.data(), ser.length());
+  auto ic2 = IntColumn::deserialize(dser);
+
+  for (int i = 0; i < iv.size(); i++) {
+    ASSERT_TRUE(ic.get(i, store) == ic2->get(i, store));
+  }
+  exit(0);
+}
+
+TEST(serial, test_int_column) { ASSERT_EXIT_ZERO(test_int_column) }
+
 void test_double_column() {
   auto store = std::make_shared<KVStore>(0, nullptr);
-  std::vector<double> fv = {0.1, 0.123, 1.80};
+  std::vector<double> fv = {0.5, 1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5, 8.5, 9.5};
   DoubleColumn fc;
   for (double d : fv)
   {
@@ -110,7 +156,7 @@ void test_double_column() {
   fc.serialize(ser);
 
   Deserializer dser(ser.data(), ser.length());
-  auto fc2 = fc.deserialize(dser);
+  auto fc2 = DoubleColumn::deserialize(dser);
 
   for (int i = 0; i < fv.size(); i++) {
     ASSERT_TRUE(fc.get(i, store) == fc2->get(i, store));
@@ -119,6 +165,29 @@ void test_double_column() {
 }
 
 TEST(serial, test_double_column) { ASSERT_EXIT_ZERO(test_double_column) }
+
+void test_string_column() {
+  auto store = std::make_shared<KVStore>(0, nullptr);
+  std::vector<std::string> sv = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10"};
+  StringColumn sc;
+  for (auto s : sv)
+  {
+    sc.push_back(s, store);
+  }
+
+  Serializer ser;
+  sc.serialize(ser);
+
+  Deserializer dser(ser.data(), ser.length());
+  auto sc2 = StringColumn::deserialize(dser);
+
+  for (int i = 0; i < sv.size(); i++) {
+    ASSERT_TRUE(sc.get(i, store) == sc2->get(i, store));
+  }
+  exit(0);
+}
+
+TEST(serial, test_string_column) { ASSERT_EXIT_ZERO(test_string_column) }
 
 void test_schema() {
   Schema s("DDD");

@@ -8,7 +8,6 @@
 #pragma once
 #include <vector>
 #include <map>
-
 #include "thread.h"
 #include "message.h"
 

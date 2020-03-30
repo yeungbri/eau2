@@ -9,7 +9,6 @@
 #include <netinet/in.h>
 #include <string>
 #include <vector>
-
 #include "../kvstore/kv.h"
 
 /** Types of messages */

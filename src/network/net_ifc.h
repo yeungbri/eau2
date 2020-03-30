@@ -6,9 +6,7 @@
 // lang::Cpp
 
 #pragma once
-
 #include <vector>
-
 #include "message.h"
 #include "queue.h"
 #include "thread.h"

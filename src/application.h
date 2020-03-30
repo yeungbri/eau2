@@ -6,11 +6,9 @@
 // lang::Cpp
 
 #pragma once
-#include <assert.h>
-
+#include <cassert>
 #include <string>
 #include <vector>
-
 #include "dataframe.h"
 
 class MessageCheckerThread : public Thread {

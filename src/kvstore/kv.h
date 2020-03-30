@@ -7,7 +7,7 @@
 
 #pragma once
 #include <map>
-
+#include <memory>
 #include "../serial.h"
 
 /** Key of a key-value store which consists of a name and
@@ -18,18 +18,12 @@ class Key {
   size_t home_;       // index of home node
   Key(std::string name, size_t home) : name_(name), home_(home) {}
 
-  // TODO: explain what this is doing
-  /** Comparator for using Key in a std::map */
-  bool operator==(const Key& other) {
-    return name_ == other.name_ && home_ == other.home_;
-  }
-
-  void serialize(Serializer ser) {
+  void serialize(Serializer& ser) {
     ser.write_string(name_);
     ser.write_size_t(home_);
   }
 
-  static std::shared_ptr<Key> deserialize(Deserializer dser) {
+  static std::shared_ptr<Key> deserialize(Deserializer& dser) {
     std::string name = dser.read_string();
     size_t home = dser.read_size_t();
     return std::make_shared<Key>(name, home);
@@ -57,12 +51,12 @@ class Value {
 
   size_t length() { return length_; }
 
-  void serialize(Serializer ser) {
+  void serialize(Serializer& ser) {
     ser.write_size_t(length_);
     ser.write_chars(data_, length_);
   }
 
-  static std::shared_ptr<Value> deserialize(Deserializer dser) {
+  static std::shared_ptr<Value> deserialize(Deserializer& dser) {
     size_t len = dser.read_size_t();
     char* data = dser.read_chars(len);
     return std::make_shared<Value>(data, len);

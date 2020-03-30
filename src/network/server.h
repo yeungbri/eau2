@@ -2,15 +2,15 @@
  * Authors: gao.d@husky.neu.edu and yeung.bri@husky.neu.edu
  */
 
-// Lang::CwC (<thread>, <chrono> libraries)
+// Lang::Cpp
 
-#include "util/network.h"
-#include "util/message.h"
-#include "util/helper.h"
 #include <thread>
 #include <chrono>
 #include <vector>
 #include <string>
+#include "util/network.h"
+#include "util/message.h"
+#include "util/helper.h"
 
 /**
  * A server wrapper around C POSIX TCP functions. This server is able to

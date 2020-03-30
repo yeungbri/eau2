@@ -6,10 +6,11 @@
 //lang::Cpp
 
 #pragma once
+#include <string>
+#include <cstring>
+#include <vector>
 #include "schema.h"
 #include "fielder.h"
-#include <string>
-#include <vector>
 
 /*************************************************************************
  * Row::

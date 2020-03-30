@@ -5,13 +5,13 @@
 // Lang::Cpp (<thread>, <chrono> libraries)
 
 #pragma once
-#include "util/network.h"
-#include "util/message.h"
-#include "util/helper.h"
 #include <thread>
 #include <chrono>
 #include <vector>
 #include <string>
+#include "util/network.h"
+#include "util/message.h"
+#include "util/helper.h"
 
 /**
  * A network client wrapper over C POSIX functions. This client is able to

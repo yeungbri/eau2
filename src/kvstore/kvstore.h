@@ -7,7 +7,6 @@
 
 #pragma once
 #include <map>
-
 #include "../network/net_ifc.h"
 #include "../serial.h"
 
@@ -15,7 +14,7 @@
 /** Used for comparing keys in a std::map */
 struct KeyCompare {
   bool operator()(const Key& lhs, const Key& rhs) const {
-    return lhs.home_ < rhs.home_;
+    return lhs.name_ < rhs.name_;
   }
 };
 
