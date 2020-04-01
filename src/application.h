@@ -18,6 +18,7 @@
  */
 class MessageCheckerThread : public Thread
 {
+public:
   size_t idx_;
   std::shared_ptr<KVStore> store_;
   std::shared_ptr<NetworkIfc> net_;
@@ -26,25 +27,56 @@ class MessageCheckerThread : public Thread
 
   virtual ~MessageCheckerThread() = default;
 
-  void run_()
+  void handle_get(std::shared_ptr<Message> msg)
   {
-    // check if there are any new messages
-    auto my_queue = std::dynamic_pointer_cast<NetworkPseudo>(net_)->msg_queues_.at(idx_);
-    if (my_queue->size() > 0)
+    auto get_msg = std::dynamic_pointer_cast<Get>(msg);
+    std::cout << "About to get a key for " << get_msg->sender_ << " from KVSTORE!!!!U!^(!@^&&!@^*!" << std::endl;
+    auto val = store_->get(get_msg->k_);
+    std::cout << "Got key!!!!!!!" << std::endl;
+    auto reply_msg = std::make_shared<Reply>(
+      MsgKind::Reply, idx_, get_msg->sender_, 0, val.data(), val.length());
+    std::cout << idx_ << " sent a reply to " << get_msg->sender_ << "!!!" << std::endl;
+    net_->send_msg(reply_msg);
+  }
+
+  void handle_reply(std::shared_ptr<Message> msg)
+  {
+    std::cout << "REPLY!!!!!!!!!!!!!" << std::endl;
+  }
+
+  virtual void run()
+  {
+    while (true)
     {
-      auto msg = my_queue->pop();
-      switch (msg->kind_)
+      // check if there are any new messages
+      auto my_queue = std::dynamic_pointer_cast<NetworkPseudo>(net_)->msg_queues_.at(idx_);
+      if (my_queue->size() > 0)
       {
-      case MsgKind::Put:
-        store_->put(std::dynamic_pointer_cast<Put>(msg)->k_, std::dynamic_pointer_cast<Put>(msg)->v_);
-        break;
-      case MsgKind::Get:
-        std::cout << "GET!" << std::endl;
-        break;
-      default:
-        std::cout << "Unknown message type!" << std::endl;
+        auto msg = my_queue->pop();
+        switch (msg->kind_)
+        {
+        case MsgKind::Put:
+          std::cout << idx_ << " received a PUT MESSAGE!!!!" << std::endl;
+          store_->put(std::dynamic_pointer_cast<Put>(msg)->k_, std::dynamic_pointer_cast<Put>(msg)->v_);
+          break;
+        case MsgKind::Get:
+          std::cout << idx_ << " received a GET MESSAGE!!!!" << std::endl;
+          handle_get(msg);
+          break;
+        case MsgKind::Reply:
+          std::cout << idx_ << " received a REPLY MESSAGE!!!!" << std::endl;
+          handle_reply(msg);
+          break;
+        default:
+          std::cout << "Unknown message type!" << std::endl;
+        }
       }
-    };
+      else
+      {
+        std::cout << "no messages yet for node " << idx_ << " yet..." << std::endl;
+        Thread::sleep(1000);
+      }
+    }
   }
 };
 
@@ -83,14 +115,22 @@ class Demo : public Application
 {
 public:
   std::shared_ptr<Key> main = std::make_shared<Key>("main", 0);
-  std::shared_ptr<Key> verify = std::make_shared<Key>("verif", 0);
+  std::shared_ptr<Key> verify = std::make_shared<Key>("verif", 1);
   std::shared_ptr<Key> check = std::make_shared<Key>("ck", 0);
+  MessageCheckerThread message_checker_;
 
-  Demo(size_t idx, std::shared_ptr<NetworkIfc> net) : Application(idx, net) {}
+  Demo(size_t idx, std::shared_ptr<NetworkIfc> net)
+      : Application(idx, net), message_checker_(idx, kv, net) {}
+
+  virtual ~Demo()
+  {
+    message_checker_.join();
+  }
 
   void run_() override
   {
     kv->register_node();
+    message_checker_.start();
     switch (this_node())
     {
     case 0:
@@ -106,7 +146,8 @@ public:
 
   void producer()
   {
-    size_t SZ = 100 * 1000;
+    std::cout << this_node() << ": Producer about to start..." << std::endl;
+    size_t SZ = 10;
     std::vector<double> vals;
     double sum = 0;
     for (size_t i = 0; i < SZ; ++i)
@@ -116,23 +157,29 @@ public:
     }
     DataFrame::fromArray(main, kv, vals);
     DataFrame::fromScalar(check, kv, sum);
+    std::cout << this_node() << ": Producer is done" << std::endl;
   }
 
   void counter()
   {
+    std::cout << this_node() << ": Counter about to start..." << std::endl;
     Value val = kv->waitAndGet(*main);
+    std::cout << this_node() << ": Counter got value from main key!" << std::endl;
     Deserializer dser(val.data(), val.length());
     auto df = DataFrame::deserialize(dser);
     size_t sum = 0;
     for (size_t i = 0; i < 100 * 1000; ++i)
       sum += df->get_double(0, i, kv);
-    std::cout << "The sum is  " << sum << "\n";
+    std::cout << this_node() << ": The sum is  " << sum << "\n";
     DataFrame::fromScalar(verify, kv, sum);
+    std::cout << this_node() << ": Counter is done" << std::endl;
   }
 
   void summarizer()
   {
+    std::cout << this_node() << ": Summarizer is about to start.." << std::endl;
     Value val = kv->waitAndGet(*verify);
+    std::cout << this_node() << ": Summarizer got value from verify key!" << std::endl;
     Deserializer dserVerify(val.data(), val.length());
     auto result = DataFrame::deserialize(dserVerify);
 

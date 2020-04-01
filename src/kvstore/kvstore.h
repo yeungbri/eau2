@@ -56,28 +56,34 @@ public:
    * this will print an error and return a nullptr value. This get is
    * non-blocking and assumes that the given key exists on this node.
    */
-  Value get(Key &k)
+  Value& get(Key &k)
   {
-    Value res(nullptr, 0);
+    std::cout << "INSIDE GET" << std::endl;
+    int tries = 0;
     lock_.lock();
-    auto search = store_.find(k);
-    if (search != store_.end())
+    while (tries < 5)
     {
-      res = search->second;
+      std::cout << "LOOPING....." << std::endl;
+
+      auto search = store_.find(k);
+      if (search != store_.end())
+      {
+        lock_.unlock();
+        std::cout << "Got key!!!" << std::endl;
+        return search->second;
+      }
+      Thread::sleep(100);
+      tries += 1;
     }
-    else
-    {
-      std::cout << "Cannot get key " << k.name_ << "\n";
-    }
-    lock_.unlock();
-    return res;
+    std::cout << "Cannot get key " << k.name_ << "\n";
+    assert(false);
   }
 
   /** 
    * This calls the non-blocking value if the key exists on this node. Otherwise,
    * it queries another node for the value, and blocks until it returns. 
    */
-  Value waitAndGet(Key &k)
+  Value& waitAndGet(Key &k)
   {
     size_t target_idx = k.home_;
     if (target_idx == idx_)
@@ -90,8 +96,8 @@ public:
       auto get_msg = std::make_shared<Get>(MsgKind::Get, idx_, target_idx, 0, k);
       net_->send_msg(get_msg);
       auto re_msg = std::dynamic_pointer_cast<Reply>(net_->recv_msg());
-      Value res = Value(re_msg->data_, re_msg->len_);
-      return res;
+      auto res = std::make_shared<Value>(re_msg->data_, re_msg->len_);
+      return *res;
     }
   }
 
@@ -113,6 +119,7 @@ public:
     }
     else
     {
+      std::cout << "currently on node " << idx_ << " but message needs to go to node " << target_idx << std::endl;
       auto put_msg = std::make_shared<Put>(MsgKind::Put, idx_, target_idx, 0, k, v);
       net_->send_msg(put_msg);
     }

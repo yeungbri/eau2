@@ -60,7 +60,6 @@ public:
   void register_node(size_t idx)
   {
     std::string tid = Thread::thread_id();
-    std::cout << "Mapping thread ID " << tid << " with idx " << idx << std::endl;
     threads_.set_u(tid, idx);
   }
 

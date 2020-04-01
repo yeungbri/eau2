@@ -177,7 +177,7 @@ public:
     if (cached_chunk_.size() >= MAX_CHUNK_SIZE)
     {
       BoolColumnChunk chunk(cached_chunk_);
-      store_chunk(chunk, store);
+      store_chunk(chunk, store); // TODO: Distribute these chunks among all nodes
       cached_chunk_.clear();
     }
     cached_chunk_.push_back(b);

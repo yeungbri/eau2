@@ -26,20 +26,22 @@ public:
   {
     lock_.lock();
     queue_.push_back(msg);
-    lock_.notify_all();
+    std::cout << "message from " << msg->sender_ << " to " << msg->target_ << " pushed onto queue!" << std::endl;
     lock_.unlock();
+    lock_.notify_all();
   }
 
   std::shared_ptr<Message> pop()
   {
-    lock_.lock();
     while (queue_.size() == 0)
     {
       lock_.wait();
     }
+    lock_.lock();
     auto result = queue_.back();
     queue_.pop_back();
     lock_.unlock();
+    lock_.notify_all();
     return result;
   }
 
