@@ -51,6 +51,12 @@ public:
   char *data_;    // serialized data
   size_t length_; // length of serialized data
 
+  Value() 
+  {
+    data_ = nullptr;
+    length_ = 0;
+  }
+
   Value(char *data, size_t length) : length_(length)
   {
     data_ = new char[length];

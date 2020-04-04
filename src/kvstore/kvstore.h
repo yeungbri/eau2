@@ -58,18 +58,19 @@ public:
    */
   Value& get(Key &k)
   {
-    std::cout << "INSIDE GET" << std::endl;
+    //std::cout << "INSIDE GET" << std::endl;
     int tries = 0;
     lock_.lock();
     while (tries < 5)
     {
-      std::cout << "LOOPING....." << std::endl;
+      //std::cout << "LOOPING....." << tries << std::endl;
 
       auto search = store_.find(k);
       if (search != store_.end())
       {
+        auto ret = search->second;
         lock_.unlock();
-        std::cout << "Got key!!!" << std::endl;
+        //std::cout << "Got key!!!" << std::endl;
         return search->second;
       }
       Thread::sleep(100);
@@ -95,9 +96,10 @@ public:
       // ask cluster
       auto get_msg = std::make_shared<Get>(MsgKind::Get, idx_, target_idx, 0, k);
       net_->send_msg(get_msg);
-      auto re_msg = std::dynamic_pointer_cast<Reply>(net_->recv_msg());
-      auto res = std::make_shared<Value>(re_msg->data_, re_msg->len_);
-      return *res;
+      //auto re_msg = std::dynamic_pointer_cast<Reply>(net_->recv_msg());
+      //auto res = std::make_shared<Value>(re_msg->data_, re_msg->len_);
+      Value val;
+      return val;
     }
   }
 

@@ -30,11 +30,12 @@ public:
   void handle_get(std::shared_ptr<Message> msg)
   {
     auto get_msg = std::dynamic_pointer_cast<Get>(msg);
-    std::cout << "About to get a key for " << get_msg->sender_ << " from KVSTORE!!!!U!^(!@^&&!@^*!" << std::endl;
+    std::cout << "1" << std::endl;
     auto val = store_->get(get_msg->k_);
-    std::cout << "Got key!!!!!!!" << std::endl;
+    std::cout << "2" << std::endl;
     auto reply_msg = std::make_shared<Reply>(
       MsgKind::Reply, idx_, get_msg->sender_, 0, val.data(), val.length());
+    std::cout << "3" << std::endl;
     std::cout << idx_ << " sent a reply to " << get_msg->sender_ << "!!!" << std::endl;
     net_->send_msg(reply_msg);
   }
@@ -46,10 +47,13 @@ public:
 
   virtual void run()
   {
+    auto my_queue = std::dynamic_pointer_cast<NetworkPseudo>(net_)->msg_queues_.at(idx_);
     while (true)
     {
+      if (idx_ == 0){
+        std::cout << idx_ << "LOOPING!!" << std::endl;
+      }
       // check if there are any new messages
-      auto my_queue = std::dynamic_pointer_cast<NetworkPseudo>(net_)->msg_queues_.at(idx_);
       if (my_queue->size() > 0)
       {
         auto msg = my_queue->pop();
@@ -73,8 +77,8 @@ public:
       }
       else
       {
-        std::cout << "no messages yet for node " << idx_ << " yet..." << std::endl;
-        Thread::sleep(1000);
+        std::cout << "no messages for node " << idx_ << " yet..." << std::endl;
+        Thread::sleep(500);
       }
     }
   }

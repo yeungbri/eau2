@@ -33,11 +33,11 @@ public:
 
   std::shared_ptr<Message> pop()
   {
+    lock_.lock();
     while (queue_.size() == 0)
     {
       lock_.wait();
     }
-    lock_.lock();
     auto result = queue_.back();
     queue_.pop_back();
     lock_.unlock();
