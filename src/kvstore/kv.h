@@ -20,6 +20,11 @@ public:
   std::string name_; // name to refer to key
   size_t home_;      // index of home node
   Key(std::string name, size_t home) : name_(name), home_(home) {}
+  Key(const Key& other)
+  {
+    name_ = other.name_;
+    home_ = other.home_;
+  }
   ~Key() = default;
 
   /**

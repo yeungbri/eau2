@@ -30,6 +30,7 @@ public:
   void handle_get(std::shared_ptr<Message> msg)
   {
     auto get_msg = std::dynamic_pointer_cast<Get>(msg);
+    std::cout << idx_ << " received a GET MESSAGE, key name: " << get_msg->k_.name_ << std::endl;
     std::cout << "1" << std::endl;
     auto val = store_->get(get_msg->k_);
     std::cout << "2" << std::endl;
@@ -64,7 +65,6 @@ public:
           store_->put(std::dynamic_pointer_cast<Put>(msg)->k_, std::dynamic_pointer_cast<Put>(msg)->v_);
           break;
         case MsgKind::Get:
-          std::cout << idx_ << " received a GET MESSAGE!!!!" << std::endl;
           handle_get(msg);
           break;
         case MsgKind::Reply:

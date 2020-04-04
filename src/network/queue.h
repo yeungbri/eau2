@@ -26,7 +26,19 @@ public:
   {
     lock_.lock();
     queue_.push_back(msg);
-    std::cout << "message from " << msg->sender_ << " to " << msg->target_ << " pushed onto queue!" << std::endl;
+    if (msg->kind_ == MsgKind::Get)
+    {
+      std::cout << "GET message pushed, key name is: " << std::dynamic_pointer_cast<Get>(msg)->k_.name_ << std::endl;
+    } else 
+    {
+      std::cout << "message from " << msg->sender_ << " to " << msg->target_ << " pushed onto queue!" << std::endl;
+    }
+    std::cout << "All GET MESSAGES: " << std::endl;
+    for (auto m : queue_)
+    {
+      std::cout << std::dynamic_pointer_cast<Get>(m)->k_.name_ << std::endl;
+    }
+    std::cout << "Size of message queue is now: " << queue_.size() << std::endl;
     lock_.unlock();
     lock_.notify_all();
   }

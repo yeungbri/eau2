@@ -45,7 +45,8 @@ public:
     for (int i = 0; i < 10; ++i)
     {
       std::string name = std::to_string(i);
-      auto key = std::make_shared<Key>(name, 0);
+      auto key = std::make_shared<Key>(name, 0); // TODO: bug, this uses the same pointer address every time?
+      std::cout << "About to request Key with address: " << key.get() << std::endl;
       Value val = kv->waitAndGet(*key);
       if (val.data() != nullptr)
       {
