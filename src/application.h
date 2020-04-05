@@ -73,8 +73,7 @@ public:
       }
       else
       {
-        std::cout << "no messages for node " << idx_ << " yet..." << std::endl;
-        Thread::sleep(500);
+        Thread::sleep(50);
       }
     }
   }
