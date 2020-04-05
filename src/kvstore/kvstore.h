@@ -8,7 +8,7 @@
 #pragma once
 #include <map>
 #include "../network/net_ifc.h"
-#include "../serial.h"
+#include "../util/serial.h"
 
 /** 
  * Used for comparing keys in a std::map. Needed to maintain order and

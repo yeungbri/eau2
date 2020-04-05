@@ -10,9 +10,9 @@
 #include <vector>
 #include <cassert>
 #include <cmath>
-#include "kvstore/kvstore.h"
+#include "../kvstore/kvstore.h"
+#include "../util/serial.h"
 #include "chunk.h"
-#include "serial.h"
 
 class IntColumn;
 class BoolColumn;

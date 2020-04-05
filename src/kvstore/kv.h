@@ -8,7 +8,7 @@
 #pragma once
 #include <map>
 #include <memory>
-#include "../serial.h"
+#include "../util/serial.h"
 
 /** 
  * Key of a key-value store which consists of a unique string name and

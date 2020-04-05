@@ -8,7 +8,7 @@
 #pragma once
 #include <iostream>
 #include <vector>
-#include "serial.h"
+#include "../util/serial.h"
 
 class IntColumnChunk;
 class BoolColumnChunk;

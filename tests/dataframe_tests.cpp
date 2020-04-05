@@ -9,7 +9,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
-#include "../src/dataframe.h"
+#include "../src/dataframe/dataframe.h"
 
 #define ASSERT_EXIT_ZERO(a) ASSERT_EXIT(a(), ::testing::ExitedWithCode(0), ".*")
 

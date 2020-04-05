@@ -1,14 +1,21 @@
 run:
 	./eau2
 
-build:
-	# cd tests; g++ -std=c++17 -Wall -o basic_example basic_example.cpp; ./basic_example
-	# cd tests; g++ -std=c++17 -Wall -o trivial_example trivial_example.cpp; ./trivial_example
-	cd tests; g++ -std=c++17 -Wall -o demo_example demo_example.cpp; ./demo_example
+m1:
+	cd examples; g++ -std=c++17 -Wall -o m1 m1.cpp; ./m1
+
+m2:
+	cd examples; g++ -std=c++17 -Wall -o m2 m2.cpp; ./m2
+
+m3:
+	cd examples; g++ -std=c++17 -Wall -o m3 m3.cpp; ./m3
+
+m4:
+	cd examples; g++ -std=c++17 -Wall -o m4 m4.cpp; ./m4
 
 test:
-	#cd ./tests; cmake .; make dataframe_tests && ./dataframe_tests;
-	#cd ./tests; cmake .; make serialization_tests && ./serialization_tests;
+	cd ./tests; cmake .; make dataframe_tests && ./dataframe_tests;
+	cd ./tests; cmake .; make serialization_tests && ./serialization_tests;
 	cd ./tests; cmake .; make kv_tests && ./kv_tests;
 
 valgrind:
@@ -21,10 +28,7 @@ valgrind:
 clean:
 	rm -f tests/kv_tests
 	rm -f tests/serialization_tests
-	rm -f tests/trivial_example
-	rm -f tests/demo_example
 	rm -f tests/CMakeCache.txt
-	rm -f tests/basic_example
 	rm -rf tests/CMakeFiles/
 	rm -rf tests/googletest-build/
 	rm -rf tests/googletest-download/
@@ -34,3 +38,6 @@ clean:
 	rm -f tests/dataframe_tests 
 	rm -f tests/Makefile
 	rm -rf tests/bin
+	rm -f examples/m1
+	rm -f examples/m2
+	rm -f examples/m3

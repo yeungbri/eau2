@@ -9,7 +9,7 @@
 #include <cassert>
 #include <string>
 #include <vector>
-#include "dataframe.h"
+#include "dataframe/dataframe.h"
 
 /**
  * A thread for this node that is responsible for monitoring the node's message

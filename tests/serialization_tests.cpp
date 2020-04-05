@@ -6,11 +6,11 @@
 // lang::Cpp
 
 #include <gtest/gtest.h>
-#include "../src/column.h"
+#include "../src/dataframe/column.h"
 #include "../src/network/message.h"
-#include "../src/schema.h"
-#include "../src/serial.h"
-#include "../src/dataframe.h"
+#include "../src/dataframe/schema.h"
+#include "../src/util/serial.h"
+#include "../src/dataframe/dataframe.h"
 
 #define ASSERT_EXIT_ZERO(a) \
   ASSERT_EXIT(a(), ::testing::ExitedWithCode(0), ".*");
