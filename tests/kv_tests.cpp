@@ -22,10 +22,19 @@ public:
   size_t idx_;
   std::shared_ptr<NetworkIfc> net_;
   MessageCheckerThread checker_;
+  std::vector<std::shared_ptr<Key>> keys;
 
 public:
   TestApp(size_t idx, std::shared_ptr<NetworkIfc> net)
-      : Application(idx, net), checker_(idx, kv, net) {}
+      : Application(idx, net), checker_(idx, kv, net) 
+  {
+    for (int i = 0; i < 10; ++i)
+    {
+      std::string name = std::to_string(i);
+      auto key = std::make_shared<Key>(name, 0);
+      keys.push_back(key);
+    }
+  }
 
   virtual ~TestApp() = default;
 
@@ -37,26 +46,17 @@ public:
       auto key = std::make_shared<Key>(name, 0);
       DataFrame::fromScalar(key, kv, i);
     }
-    std::cout << "Producer finished adding everything!" << std::endl;
   }
 
   void consumer()
   {
     for (int i = 0; i < 10; ++i)
     {
-      std::string name = std::to_string(i);
-      auto key = std::make_shared<Key>(name, 0); // TODO: bug, this uses the same pointer address every time?
-      std::cout << "About to request Key with address: " << key.get() << std::endl;
+      auto key = keys[i];
       Value val = kv->waitAndGet(*key);
-      if (val.data() != nullptr)
-      {
-        Deserializer dserVerify(val.data(), val.length());
-        auto result = DataFrame::deserialize(dserVerify);
-        assert(int(result->get_double(0, 0, kv)) == i);
-      } else
-      {
-        std::cout << "null test" << std::endl;
-      }
+      Deserializer dserVerify(val.data(), val.length());
+      auto result = DataFrame::deserialize(dserVerify);
+      assert(int(result->get_double(0, 0, kv)) == i);
     }
   }
 

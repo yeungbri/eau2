@@ -43,6 +43,7 @@ public:
   std::shared_ptr<NetworkIfc> net_;
   Lock lock_;
   size_t num_nodes_ = 1;
+  std::vector<std::shared_ptr<Value>> replies_;
 
   KVStore(size_t idx, std::shared_ptr<NetworkIfc> net) : idx_(idx), net_(net) {}
   ~KVStore() = default;
@@ -50,6 +51,29 @@ public:
   size_t num_nodes() { return num_nodes_; }
 
   void set_num_nodes(size_t num_nodes) { num_nodes_ = num_nodes; }
+
+  void handle_reply(Reply& reply)
+  {
+    lock_.lock();
+    auto value = std::make_shared<Value>(reply.data_, reply.len_);
+    replies_.push_back(value);
+    lock_.unlock();
+    lock_.notify_all();
+  }
+
+  std::shared_ptr<Value> wait_and_pop()
+  {
+    lock_.lock();
+    while (replies_.size() == 0)
+    {
+      lock_.wait();
+    }
+    auto result = replies_.back();
+    replies_.pop_back();
+    lock_.unlock();
+    lock_.notify_all();
+    return result;
+  }
 
   /** 
    * Retrieves the associated value given the key. If it does not exist, 
@@ -70,7 +94,6 @@ public:
       {
         auto ret = search->second;
         lock_.unlock();
-        //std::cout << "Got key!!!" << std::endl;
         return search->second;
       }
       Thread::sleep(100);
@@ -96,10 +119,8 @@ public:
       // ask cluster
       auto get_msg = std::make_shared<Get>(MsgKind::Get, idx_, target_idx, 0, k);
       net_->send_msg(get_msg);
-      //auto re_msg = std::dynamic_pointer_cast<Reply>(net_->recv_msg());
-      //auto res = std::make_shared<Value>(re_msg->data_, re_msg->len_);
-      Value val;
-      return val;
+      auto val = wait_and_pop();
+      return *val;
     }
   }
 

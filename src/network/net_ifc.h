@@ -74,4 +74,15 @@ public:
     size_t i = threads_.get(tid);
     return msg_queues_.at(i)->pop();
   }
+
+  virtual void print()
+  {
+    int i = 0;
+    for (auto queue : msg_queues_)
+    {
+      std::cout << "PRINTING MESSAGES FOR NODE " << i << std::endl;
+      queue->print();
+      ++i;
+    }
+  }
 };

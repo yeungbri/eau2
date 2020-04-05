@@ -19,6 +19,7 @@ valgrind:
 	#docker run -ti -v "$$(pwd)":/test memory-test:0.1 bash -c "cd ./test/tests; g++ -std=c++17 -Wall -g -o trivial_example trivial_example.cpp; valgrind --show-leak-kinds=all --leak-check=full ./trivial_example"
 
 clean:
+	rm -f tests/kv_tests
 	rm -f tests/serialization_tests
 	rm -f tests/trivial_example
 	rm -f tests/demo_example

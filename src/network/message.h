@@ -7,6 +7,7 @@
 
 #pragma once
 #include <netinet/in.h>
+#include <iostream>
 #include <string>
 #include <vector>
 #include "../kvstore/kv.h"
@@ -65,6 +66,8 @@ public:
     ser.write_size_t(id_);
   }
 
+  virtual void print() = 0;
+
   /** Each message subclass is responsible for implementing its own dser. */
   static std::shared_ptr<Message> deserialize(Deserializer &d);
 };
@@ -79,6 +82,11 @@ public:
       : Message(kind, sender, target, id){};
 
   Ack(Deserializer &d) : Message(d) {}
+
+  virtual void print()
+  {
+    std::cout << "[ACK] from " << sender_ << " to " << target_ << std::endl;
+  }
 };
 
 /**
@@ -103,6 +111,11 @@ public:
     k_.serialize(ser);
     v_.serialize(ser);
   }
+  
+  virtual void print()
+  {
+    std::cout << "[PUT] from " << sender_ << " to " << target_ << ", key name: " << k_.name_ << std::endl;
+  }
 };
 
 /**
@@ -122,6 +135,11 @@ public:
   {
     Message::serialize(ser);
     k_.serialize(ser);
+  }
+
+  virtual void print()
+  {
+    std::cout << "[GET] from " << sender_ << " to " << target_ << ", key name: " << k_.name_ << std::endl;
   }
 };
 
@@ -149,6 +167,11 @@ public:
     ser.write_size_t(len_);
     ser.write_chars(data_, len_);
   }
+
+  virtual void print()
+  {
+    std::cout << "[REPLY] from " << sender_ << " to " << target_ << std::endl;
+  }
 };
 
 /** 
@@ -173,6 +196,11 @@ public:
     Message::serialize(ser);
     ser.write_string(msg_);
   }
+
+  virtual void print()
+  {
+    std::cout << "[STATUS]" << std::endl;
+  }
 };
 
 /** 
@@ -191,6 +219,11 @@ public:
     client_ = client;
     port_ = port;
   };
+
+  virtual void print()
+  {
+    std::cout << "[REGISTER]" << std::endl;
+  }
 };
 
 /** 
@@ -212,6 +245,11 @@ public:
     ports_ = ports;
     addresses_ = addresses;
   };
+
+  virtual void print()
+  {
+    std::cout << "[DIRECTORY]" << std::endl;
+  }
 };
 
 /**

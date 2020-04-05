@@ -30,20 +30,18 @@ public:
   void handle_get(std::shared_ptr<Message> msg)
   {
     auto get_msg = std::dynamic_pointer_cast<Get>(msg);
-    std::cout << idx_ << " received a GET MESSAGE, key name: " << get_msg->k_.name_ << std::endl;
-    std::cout << "1" << std::endl;
+    std::cout << idx_ << " received a GET MESSAGE, key name: " << get_msg->k_.name_ << ", node: " << get_msg->k_.home_ << std::endl;
     auto val = store_->get(get_msg->k_);
-    std::cout << "2" << std::endl;
     auto reply_msg = std::make_shared<Reply>(
       MsgKind::Reply, idx_, get_msg->sender_, 0, val.data(), val.length());
-    std::cout << "3" << std::endl;
     std::cout << idx_ << " sent a reply to " << get_msg->sender_ << "!!!" << std::endl;
     net_->send_msg(reply_msg);
   }
 
   void handle_reply(std::shared_ptr<Message> msg)
   {
-    std::cout << "REPLY!!!!!!!!!!!!!" << std::endl;
+    auto reply = std::dynamic_pointer_cast<Reply>(msg);
+    store_->handle_reply(*reply);
   }
 
   virtual void run()
@@ -51,12 +49,10 @@ public:
     auto my_queue = std::dynamic_pointer_cast<NetworkPseudo>(net_)->msg_queues_.at(idx_);
     while (true)
     {
-      if (idx_ == 0){
-        std::cout << idx_ << "LOOPING!!" << std::endl;
-      }
       // check if there are any new messages
       if (my_queue->size() > 0)
       {
+        std::dynamic_pointer_cast<NetworkPseudo>(net_)->print();
         auto msg = my_queue->pop();
         switch (msg->kind_)
         {

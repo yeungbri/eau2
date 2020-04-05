@@ -33,11 +33,6 @@ public:
     {
       std::cout << "message from " << msg->sender_ << " to " << msg->target_ << " pushed onto queue!" << std::endl;
     }
-    std::cout << "All GET MESSAGES: " << std::endl;
-    for (auto m : queue_)
-    {
-      std::cout << std::dynamic_pointer_cast<Get>(m)->k_.name_ << std::endl;
-    }
     std::cout << "Size of message queue is now: " << queue_.size() << std::endl;
     lock_.unlock();
     lock_.notify_all();
@@ -60,6 +55,14 @@ public:
   size_t size()
   {
     return queue_.size();
+  }
+
+  void print()
+  {
+    for (auto m : queue_)
+    {
+      m->print();
+    }
   }
 };
 
