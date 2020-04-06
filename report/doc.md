@@ -60,9 +60,12 @@ More use cases will be added as this system is developed.
 * The network is fairly robust and can handle new client registration and teardown, as well as support direct messages between clients. The server is able to shut down and initiate a clean network teardown as well. 
 * The serializer is in good shape, and can reliably serialize various forms of data. Complex objects such as Columns, ColumnChunks, and Dataframes can all be serialized reliably.
 * The Key-Value store is able to store key-value pairs, and is able to handle simple queries.
+* The network is able to handle requests between nodes and exchange accurate data.
+* Data can be distributed evenly across the system, and data on different nodes can be accurately retrieved.
 
 ### TODO:
-* Improve the Key-Value store such that it is able to handle network queries, both in sending requested data and accessing data on other nodes.
+* Improve the Key-Value store's efficiency. Large numbers of chunks across multiple different nodes makes accessing data very, very slow.
+* Continue to implement a real network interface. Right now, we are still relying on the pseudo-network that involves imitating clients with threads.
 * Continue to test the network and test that data is reliable and available after being sent to other nodes.
 * Continue to test.
 
@@ -71,5 +74,6 @@ More use cases will be added as this system is developed.
 * Key implementation: 5 hours
 * Tests: 10 hours
 * General debugging: 20 hours
-* Network testing: 20 hours
-* TOTAL: 65 hours
+* Network implementation: 15
+* Network testing: 15 hours
+* TOTAL: 75 hours
