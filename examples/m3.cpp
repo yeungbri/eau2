@@ -11,7 +11,7 @@ class DemoThread : public Thread {
  public:
   Demo d_;
   
-  DemoThread(int node, std::shared_ptr<NetworkPseudo> net) : d_(node, net) {};
+  DemoThread(int node, std::shared_ptr<NetworkPseudo> net) : d_(node, net, 3) {};
   
   ~DemoThread() = default;
 

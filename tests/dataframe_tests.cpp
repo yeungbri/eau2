@@ -107,7 +107,7 @@ TEST(dataframe, testColumn)
 {
   // Create a column of bools
   std::vector<bool> bools = {0, 1, 0, 1};
-  auto store = std::make_shared<KVStore>(0, nullptr);
+  auto store = std::make_shared<KVStore>(0, nullptr, 1);
   BoolColumn bc;
   for (bool b : bools)
   {
@@ -214,7 +214,7 @@ TEST(dataframe, testGetSchema)
 TEST(dataframe, testAddColumnRow)
 {
   // Create a Dataframe with 4 columns, and verify the count.
-  auto store = std::make_shared<KVStore>(0, nullptr);
+  auto store = std::make_shared<KVStore>(0, nullptr, 1);
   Schema schema("DIBS");
   Schema schemaCopy("DIBSDIBS");
   DataFrame df(schema);
@@ -259,7 +259,7 @@ TEST(dataframe, testGetSet)
   auto icol = std::make_shared<IntColumn>();
   auto bcol = std::make_shared<BoolColumn>();
   auto scol = std::make_shared<StringColumn>();
-  auto store = std::make_shared<KVStore>(0, nullptr);
+  auto store = std::make_shared<KVStore>(0, nullptr, 1);
   df.add_column(fcol);
   df.add_column(icol);
   df.add_column(bcol);
@@ -300,7 +300,7 @@ TEST(dataframe, testFillRow)
   Schema schema("SIS");
   DataFrame df(schema);
   Row r(schema);
-  auto store = std::make_shared<KVStore>(0, nullptr);
+  auto store = std::make_shared<KVStore>(0, nullptr, 1);
 
   // Adds a row to the dataframe.
   r.set(0, s1);

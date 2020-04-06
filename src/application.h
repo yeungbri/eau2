@@ -27,14 +27,29 @@ public:
 
   virtual ~MessageCheckerThread() = default;
 
+  void handle_put(std::shared_ptr<Message> msg)
+  {
+    // std::cout << idx_ << " received a PUT MESSAGE!!!!" << std::endl;
+    auto put_msg = std::dynamic_pointer_cast<Put>(msg);
+    // std::cout << "About to put " << put_msg->k_.name_ << " from " << put_msg->k_.home_ << " into node " << idx_ << std::endl;
+    store_->put(put_msg->k_, put_msg->v_);
+  }
+
   void handle_get(std::shared_ptr<Message> msg)
   {
+    // std::cout << idx_ << " received a GET MESSAGE!!!!" << std::endl;
     auto get_msg = std::dynamic_pointer_cast<Get>(msg);
-    std::cout << idx_ << " received a GET MESSAGE, key name: " << get_msg->k_.name_ << ", node: " << get_msg->k_.home_ << std::endl;
-    auto val = store_->get(get_msg->k_);
+    Value val;
+    try 
+    {
+      val = store_->get(get_msg->k_);
+    } catch (std::runtime_error& ex)
+    {
+      val = Value(nullptr, 0);
+    }
+    // std::cout << "GET MESSAGE success! About to send reply!" << std::endl;
     auto reply_msg = std::make_shared<Reply>(
       MsgKind::Reply, idx_, get_msg->sender_, 0, val.data(), val.length());
-    std::cout << idx_ << " sent a reply to " << get_msg->sender_ << "!!!" << std::endl;
     net_->send_msg(reply_msg);
   }
 
@@ -52,19 +67,17 @@ public:
       // check if there are any new messages
       if (my_queue->size() > 0)
       {
-        std::dynamic_pointer_cast<NetworkPseudo>(net_)->print();
         auto msg = my_queue->pop();
         switch (msg->kind_)
         {
         case MsgKind::Put:
-          std::cout << idx_ << " received a PUT MESSAGE!!!!" << std::endl;
-          store_->put(std::dynamic_pointer_cast<Put>(msg)->k_, std::dynamic_pointer_cast<Put>(msg)->v_);
+          handle_put(msg);
           break;
         case MsgKind::Get:
           handle_get(msg);
           break;
         case MsgKind::Reply:
-          std::cout << idx_ << " received a REPLY MESSAGE!!!!" << std::endl;
+          // std::cout << idx_ << " received a REPLY MESSAGE!!!!" << std::endl;
           handle_reply(msg);
           break;
         default:
@@ -73,7 +86,7 @@ public:
       }
       else
       {
-        Thread::sleep(50);
+        Thread::sleep(1);
       }
     }
   }
@@ -90,9 +103,9 @@ public:
    * Creates an application with a KVStore, given its index (node #) and a
    * network interface to communicate with.
    */
-  Application(size_t idx, std::shared_ptr<NetworkIfc> net) : idx_(idx)
+  Application(size_t idx, std::shared_ptr<NetworkIfc> net, size_t num_nodes) : idx_(idx)
   {
-    kv = std::make_shared<KVStore>(idx, net);
+    kv = std::make_shared<KVStore>(idx, net, num_nodes);
   }
 
   ~Application() = default;
@@ -118,8 +131,10 @@ public:
   std::shared_ptr<Key> check = std::make_shared<Key>("ck", 0);
   MessageCheckerThread message_checker_;
 
-  Demo(size_t idx, std::shared_ptr<NetworkIfc> net)
-      : Application(idx, net), message_checker_(idx, kv, net) {}
+  int DF_TEST_SIZE = 1000;
+
+  Demo(size_t idx, std::shared_ptr<NetworkIfc> net, size_t num_nodes)
+      : Application(idx, net, num_nodes), message_checker_(idx, kv, net) {}
 
   virtual ~Demo()
   {
@@ -146,10 +161,9 @@ public:
   void producer()
   {
     std::cout << this_node() << ": Producer about to start..." << std::endl;
-    size_t SZ = 10;
     std::vector<double> vals;
     double sum = 0;
-    for (size_t i = 0; i < SZ; ++i)
+    for (size_t i = 0; i < DF_TEST_SIZE; ++i)
     {
       vals.push_back(i);
       sum += i;
@@ -166,9 +180,12 @@ public:
     std::cout << this_node() << ": Counter got value from main key!" << std::endl;
     Deserializer dser(val.data(), val.length());
     auto df = DataFrame::deserialize(dser);
+    std::cout << this_node() << ": Counter deserialized dataframe from value!" << std::endl;
     size_t sum = 0;
-    for (size_t i = 0; i < 100 * 1000; ++i)
+    for (size_t i = 0; i < DF_TEST_SIZE; ++i)
+    {
       sum += df->get_double(0, i, kv);
+    }
     std::cout << this_node() << ": The sum is  " << sum << "\n";
     DataFrame::fromScalar(verify, kv, sum);
     std::cout << this_node() << ": Counter is done" << std::endl;

@@ -103,7 +103,7 @@ TEST(serial, test_double) { ASSERT_EXIT_ZERO(test_double) }
 
 // Tests that bool columns can be serialized and deserialized properly.
 void test_bool_column() {
-  auto store = std::make_shared<KVStore>(0, nullptr);
+  auto store = std::make_shared<KVStore>(0, nullptr, 1);
   std::vector<bool> bv = {true, true, false, false, true, true, false, false};
   BoolColumn bc;
   for (bool b : bv)
@@ -127,7 +127,7 @@ TEST(serial, test_bool_column) { ASSERT_EXIT_ZERO(test_bool_column) }
 
 // Tests that int columns can be serialized and deserialized properly.
 void test_int_column() {
-  auto store = std::make_shared<KVStore>(0, nullptr);
+  auto store = std::make_shared<KVStore>(0, nullptr, 1);
   std::vector<int> iv = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
   IntColumn ic;
   for (int i : iv)
@@ -151,7 +151,7 @@ TEST(serial, test_int_column) { ASSERT_EXIT_ZERO(test_int_column) }
 
 // Tests that double columns can be serialized and deserialized properly.
 void test_double_column() {
-  auto store = std::make_shared<KVStore>(0, nullptr);
+  auto store = std::make_shared<KVStore>(0, nullptr, 1);
   std::vector<double> fv = {0.5, 1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5, 8.5, 9.5};
   DoubleColumn fc;
   for (double d : fv)
@@ -175,7 +175,7 @@ TEST(serial, test_double_column) { ASSERT_EXIT_ZERO(test_double_column) }
 
 // Tests that string columns can be serialized and deserialized properly.
 void test_string_column() {
-  auto store = std::make_shared<KVStore>(0, nullptr);
+  auto store = std::make_shared<KVStore>(0, nullptr, 1);
   std::vector<std::string> sv = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10"};
   StringColumn sc;
   for (auto s : sv)
@@ -220,7 +220,7 @@ TEST(serial, test_schema) { ASSERT_EXIT_ZERO(test_schema) }
 // Tests that a dataframe can be serialized and deserialized properly.
 void test_dataframe() {
   Schema s("D");
-  auto store = std::make_shared<KVStore>(0, nullptr);
+  auto store = std::make_shared<KVStore>(0, nullptr, 1);
 
   std::vector<double> fv = {0.1, 0.123, 1.80};
   std::shared_ptr<DoubleColumn> fc = std::make_shared<DoubleColumn>();

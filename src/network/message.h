@@ -96,8 +96,8 @@ public:
 class Put : public Message
 {
 public:
-  Key &k_;
-  Value &v_;
+  Key k_;
+  Value v_;
 
   Put(MsgKind kind, size_t sender, size_t target, size_t id, Key &k, Value &v)
       : Message(kind, sender, target, id), k_(k), v_(v){};
@@ -124,7 +124,7 @@ public:
 class Get : public Message
 {
 public:
-  Key &k_;
+  Key k_;
 
   Get(MsgKind kind, size_t sender, size_t target, size_t id, Key &k)
       : Message(kind, sender, target, id), k_(k){};

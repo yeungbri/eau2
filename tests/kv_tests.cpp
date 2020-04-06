@@ -26,7 +26,7 @@ public:
 
 public:
   TestApp(size_t idx, std::shared_ptr<NetworkIfc> net)
-      : Application(idx, net), checker_(idx, kv, net) 
+      : Application(idx, net, 2), checker_(idx, kv, net) 
   {
     for (int i = 0; i < 10; ++i)
     {
@@ -96,29 +96,11 @@ void testSimpleKV()
   auto net = std::make_shared<NetworkPseudo>(2);
 
   TestThread t1(0, net);
-  t1.start();
-
-  Thread::sleep(1000);
-  std::cout << "Testing that Thread 0 stored all KV Pairs correctly!" << std::endl;
-  for (int i = 0; i < 10; ++i)
-  {
-    Key k(std::to_string(i), 0);
-    auto v = t1.d_.kv->get(k);
-    Deserializer dser(v.data(), v.length());
-    auto result = DataFrame::deserialize(dser);
-    int actual = result->get_double(0, 0, t1.d_.kv);
-    if (actual != i)
-    {
-      std::cout << "Actual: " << actual << ", Expected: " << i << std::endl;
-    }
-  }
-
-  std::cout << "All KV Pairs stored successfully by Thread 0!" << std::endl;
-
   TestThread t2(1, net);
+  t1.start();
   t2.start();
 
-  Thread::sleep(10000);
+  Thread::sleep(3000);
   t1.join();
   t2.join();
   exit(0);

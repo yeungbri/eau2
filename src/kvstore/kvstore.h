@@ -44,8 +44,9 @@ public:
   Lock lock_;
   size_t num_nodes_ = 1;
   std::vector<std::shared_ptr<Value>> replies_;
+  size_t MAX_REPLY_SIZE = 1000;
 
-  KVStore(size_t idx, std::shared_ptr<NetworkIfc> net) : idx_(idx), net_(net) {}
+  KVStore(size_t idx, std::shared_ptr<NetworkIfc> net, size_t num_nodes) : idx_(idx), net_(net), num_nodes_(num_nodes) {}
   ~KVStore() = default;
 
   size_t num_nodes() { return num_nodes_; }
@@ -80,34 +81,48 @@ public:
    * this will print an error and return a nullptr value. This get is
    * non-blocking and assumes that the given key exists on this node.
    */
-  Value& get(Key &k)
+  Value& get(Key k)
   {
-    //std::cout << "INSIDE GET" << std::endl;
     int tries = 0;
     lock_.lock();
     while (tries < 5)
     {
-      //std::cout << "LOOPING....." << tries << std::endl;
-
       auto search = store_.find(k);
       if (search != store_.end())
       {
-        auto ret = search->second;
         lock_.unlock();
+        auto ret = search->second;
         return search->second;
       }
-      Thread::sleep(100);
+      Thread::sleep(1);
       tries += 1;
     }
-    std::cout << "Cannot get key " << k.name_ << "\n";
-    assert(false);
+    lock_.unlock();
+    throw std::runtime_error("Cannot find key!");
+  }
+
+  Value& wait_and_get_help(Key& k)
+  {
+    // ask cluster
+    while (true)
+    {
+      auto get_msg = std::make_shared<Get>(MsgKind::Get, idx_, k.home_, 0, k);
+      net_->send_msg(get_msg);
+      auto val = wait_and_pop();
+      if (val->length() != 0)
+      {
+        return *val;
+      }
+      // std::cout << "Key " << k.name_ << " doesn't exist yet, trying again" << std::endl;
+      Thread::sleep(1);
+    }
   }
 
   /** 
    * This calls the non-blocking value if the key exists on this node. Otherwise,
    * it queries another node for the value, and blocks until it returns. 
    */
-  Value& waitAndGet(Key &k)
+  Value& waitAndGet(Key k)
   {
     size_t target_idx = k.home_;
     if (target_idx == idx_)
@@ -116,11 +131,7 @@ public:
     }
     else
     {
-      // ask cluster
-      auto get_msg = std::make_shared<Get>(MsgKind::Get, idx_, target_idx, 0, k);
-      net_->send_msg(get_msg);
-      auto val = wait_and_pop();
-      return *val;
+      return wait_and_get_help(k);
     }
   }
 
@@ -131,7 +142,7 @@ public:
    * the other node know. It does not wait for an acknowledgement, so it is
    * non-blocking.
    */
-  void put(Key &k, Value &v)
+  void put(Key k, Value v)
   {
     size_t target_idx = k.home_;
     if (target_idx == idx_)
@@ -142,8 +153,9 @@ public:
     }
     else
     {
-      std::cout << "currently on node " << idx_ << " but message needs to go to node " << target_idx << std::endl;
+      // std::cout << "currently on node " << idx_ << " but message needs to go to node " << target_idx << std::endl;
       auto put_msg = std::make_shared<Put>(MsgKind::Put, idx_, target_idx, 0, k, v);
+      put_msg->print();
       net_->send_msg(put_msg);
     }
   }
