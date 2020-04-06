@@ -11,7 +11,7 @@ Authors: Zhichao Chen and Bryce Russell-Benoit
 #include <algorithm>
 #include <vector>
 #include <stdexcept>
-#include "../dataframe.h"
+#include "../dataframe/dataframe.h"
 
 using namespace std;
 

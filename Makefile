@@ -41,3 +41,4 @@ clean:
 	rm -f examples/m1
 	rm -f examples/m2
 	rm -f examples/m3
+	rm -f examples/m4

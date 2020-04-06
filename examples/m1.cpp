@@ -12,9 +12,9 @@ int main()
 {
     auto store = std::make_shared<KVStore>();
     auto df = getDataFrame("../data/test2.sor", store);
-    //df->print();
+    df->print(store);
     CounterRower countRower;
-    //df->map(countRower);
+    df->map(countRower, store);
 
     return 0;
 }
