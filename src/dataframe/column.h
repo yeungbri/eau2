@@ -19,7 +19,7 @@ class BoolColumn;
 class DoubleColumn;
 class StringColumn;
 
-const size_t MAX_CHUNK_SIZE = 3;
+const size_t MAX_CHUNK_SIZE = 100;
 
 /**************************************************************************
  * Column ::
@@ -305,13 +305,16 @@ public:
     assert(idx < sz_);
     size_t chunk_idx = idx / MAX_CHUNK_SIZE;
     size_t element_idx = idx % MAX_CHUNK_SIZE;
+    // std::cout << "Getting element from idx " << idx << ", on chunk number " << chunk_idx << ", relative idx " << element_idx << std::endl;
     if (chunk_idx == keys_.size())
     {
+      // std::cout << "Exists in cache... no problem" << std::endl;
       return cached_chunk_.at(element_idx);
     }
     else
     {
-      Value v = store->get(keys_.at(chunk_idx));
+      // std::cout << "Retrieving from chunk!" << std::endl;
+      Value v = store->waitAndGet(keys_.at(chunk_idx));
       Deserializer dser(v.data(), v.length());
       auto chunk = DoubleColumnChunk::deserialize(dser);
       return chunk->get(element_idx);
