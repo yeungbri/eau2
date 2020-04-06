@@ -36,6 +36,11 @@ public:
   virtual std::shared_ptr<Message> recv_msg() = 0;
 };
 
+class Network : public NetworkIfc {
+public:
+
+};
+
 /**
  * Communications layer between nodes represented by threads
  * 

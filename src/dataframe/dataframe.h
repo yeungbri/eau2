@@ -246,4 +246,12 @@ class DataFrame {
     store->put(*key, *value);
     return res;
   }
+
+  void local_map(Reader r) {
+
+  }
+
+  static std::shared_ptr<DataFrame> fromVisitor(std::shared_ptr<Key> key, std::shared_ptr<KVStore> store, std::string col_types, Writer count) {
+
+  }
 };
