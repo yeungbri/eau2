@@ -64,6 +64,7 @@ More use cases will be added as this system is developed.
 * Data can be distributed evenly across the system, and data on different nodes can be accurately retrieved.
 
 ### TODO:
+* Finish getting milestone 4 to work. We had a lot of tech debt leftover from milestone 3, and spent the majority of this past week absolving that debt.
 * Improve the Key-Value store's efficiency. Large numbers of chunks across multiple different nodes makes accessing data very, very slow.
 * Continue to implement a real network interface. Right now, we are still relying on the pseudo-network that involves imitating clients with threads.
 * Continue to test the network and test that data is reliable and available after being sent to other nodes.
