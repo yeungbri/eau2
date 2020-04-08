@@ -46,6 +46,9 @@ public:
       auto key = std::make_shared<Key>(name, 0);
       DataFrame::fromScalar(key, kv, i);
     }
+    std::vector<double> doubles = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+    auto key = std::make_shared<Key>("ArrayTest", 0);
+    DataFrame::fromArray(key, kv, doubles);
   }
 
   void consumer()
@@ -57,6 +60,14 @@ public:
       Deserializer dserVerify(val.data(), val.length());
       auto result = DataFrame::deserialize(dserVerify);
       assert(int(result->get_double(0, 0, kv)) == i);
+    }
+    auto key = std::make_shared<Key>("ArrayTest", 0);
+    Value val = kv->waitAndGet(*key);
+    Deserializer dserVerify(val.data(), val.length());
+    auto result = DataFrame::deserialize(dserVerify);
+    for (int i = 0; i < 10; ++i)
+    {
+      assert(int(result->get_double(0, i, kv)) == i);
     }
   }
 

@@ -19,7 +19,7 @@ class BoolColumn;
 class DoubleColumn;
 class StringColumn;
 
-const size_t MAX_CHUNK_SIZE = 100;
+const size_t MAX_CHUNK_SIZE = 10 * 1000;
 
 /**************************************************************************
  * Column ::
@@ -128,6 +128,9 @@ class BoolColumn : public Column
 {
 public:
   std::vector<bool> cached_chunk_;
+  // The most recently accessed column-chunk. Chunk_idx -> ColumnChunk
+  std::pair<int, std::shared_ptr<BoolColumnChunk>> external_cached_chunk_ =
+      std::make_pair<int, std::shared_ptr<BoolColumnChunk>>(-1, std::make_shared<BoolColumnChunk>());
 
 public:
   BoolColumn() = default;
@@ -154,11 +157,17 @@ public:
     {
       return cached_chunk_.at(element_idx);
     }
+    else if (chunk_idx == external_cached_chunk_.first)
+    {
+      return external_cached_chunk_.second->get(element_idx);
+    }
     else
     {
       Value v = store->get(keys_.at(chunk_idx));
       Deserializer dser(v.data(), v.length());
       auto bcc = BoolColumnChunk::deserialize(dser);
+      external_cached_chunk_ =
+          std::pair<int, std::shared_ptr<BoolColumnChunk>>(chunk_idx, bcc);
       auto ret = bcc->get(element_idx);
       return ret;
     }
@@ -206,6 +215,9 @@ class IntColumn : public Column
 {
 public:
   std::vector<int> cached_chunk_;
+  // The most recently accessed column-chunk. Chunk_idx -> ColumnChunk
+  std::pair<int, std::shared_ptr<IntColumnChunk>> external_cached_chunk_ =
+      std::make_pair<int, std::shared_ptr<IntColumnChunk>>(-1, std::make_shared<IntColumnChunk>());
 
 public:
   IntColumn() = default;
@@ -232,11 +244,17 @@ public:
     {
       return cached_chunk_.at(element_idx);
     }
+    else if (chunk_idx == external_cached_chunk_.first)
+    {
+      return external_cached_chunk_.second->get(element_idx);
+    }
     else
     {
       Value v = store->get(keys_.at(chunk_idx));
       Deserializer dser(v.data(), v.length());
       auto chunk = IntColumnChunk::deserialize(dser);
+      external_cached_chunk_ =
+          std::pair<int, std::shared_ptr<IntColumnChunk>>(chunk_idx, chunk);
       return chunk->get(element_idx);
     }
   }
@@ -283,6 +301,9 @@ class DoubleColumn : public Column
 {
 public:
   std::vector<double> cached_chunk_;
+  // The most recently accessed column-chunk. Chunk_idx -> ColumnChunk
+  std::pair<int, std::shared_ptr<DoubleColumnChunk>> external_cached_chunk_ =
+      std::make_pair<int, std::shared_ptr<DoubleColumnChunk>>(-1, std::make_shared<DoubleColumnChunk>());
 
 public:
   DoubleColumn() = default;
@@ -305,18 +326,21 @@ public:
     assert(idx < sz_);
     size_t chunk_idx = idx / MAX_CHUNK_SIZE;
     size_t element_idx = idx % MAX_CHUNK_SIZE;
-    // std::cout << "Getting element from idx " << idx << ", on chunk number " << chunk_idx << ", relative idx " << element_idx << std::endl;
     if (chunk_idx == keys_.size())
     {
-      // std::cout << "Exists in cache... no problem" << std::endl;
       return cached_chunk_.at(element_idx);
+    }
+    else if (chunk_idx == external_cached_chunk_.first)
+    {
+      return external_cached_chunk_.second->get(element_idx);
     }
     else
     {
-      // std::cout << "Retrieving from chunk!" << std::endl;
       Value v = store->waitAndGet(keys_.at(chunk_idx));
       Deserializer dser(v.data(), v.length());
       auto chunk = DoubleColumnChunk::deserialize(dser);
+      external_cached_chunk_ =
+          std::pair<int, std::shared_ptr<DoubleColumnChunk>>(chunk_idx, chunk);
       return chunk->get(element_idx);
     }
   }
@@ -364,6 +388,9 @@ class StringColumn : public Column
 {
 public:
   std::vector<std::string> cached_chunk_;
+  // The most recently accessed column-chunk. Chunk_idx -> ColumnChunk
+  std::pair<int, std::shared_ptr<StringColumnChunk>> external_cached_chunk_ =
+      std::make_pair<int, std::shared_ptr<StringColumnChunk>>(-1, std::make_shared<StringColumnChunk>());
 
 public:
   StringColumn() = default;
@@ -390,11 +417,17 @@ public:
     {
       return cached_chunk_.at(element_idx);
     }
+    else if (chunk_idx == external_cached_chunk_.first)
+    {
+      return external_cached_chunk_.second->get(element_idx);
+    }
     else
     {
       Value v = store->get(keys_.at(chunk_idx));
       Deserializer dser(v.data(), v.length());
       auto chunk = StringColumnChunk::deserialize(dser);
+      external_cached_chunk_ =
+          std::pair<int, std::shared_ptr<StringColumnChunk>>(chunk_idx, chunk);
       return chunk->get(element_idx);
     }
   }

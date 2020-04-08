@@ -18,7 +18,7 @@ public:
   std::shared_ptr<Key> check = std::make_shared<Key>("ck", 0);
   MessageCheckerThread message_checker_;
 
-  int DF_TEST_SIZE = 1000;
+  int DF_TEST_SIZE = 100 * 1000;
 
   Demo(size_t idx, std::shared_ptr<NetworkIfc> net, size_t num_nodes)
       : Application(idx, net, num_nodes), message_checker_(idx, kv, net) {}
