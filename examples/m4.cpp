@@ -36,8 +36,9 @@ class WordCount : public Application {
   /** The master nodes reads the input, then all of the nodes count. */
   void run_() override {
     if (idx_ == 0) {
-      FileReader fr("../data/wc.data");
-      DataFrame::fromVisitor(std::make_shared<Key>(in.name_, in.home_), kv, "S", fr);
+      FileReader fr("../data/100k.txt");
+      auto key = std::make_shared<Key>(in.name_, in.home_);
+      DataFrame::fromVisitor(key, kv, "S", fr);
     }
     local_count();
     reduce();
@@ -95,7 +96,9 @@ class WordCount : public Application {
  */
 int main()
 {
-  auto net = std::make_shared<NetworkPseudo>(3);
-  std::cout << "Word Count Demo not yet implemented..." << std::endl;
+  int num_nodes = 3;
+  auto net = std::make_shared<NetworkPseudo>(num_nodes);
+  WordCount word_counter(0, net, num_nodes);
+  word_counter.run_();
   return 0;
 }

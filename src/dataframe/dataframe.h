@@ -274,8 +274,20 @@ public:
   }
 
   static std::shared_ptr<DataFrame> fromVisitor(
-    std::shared_ptr<Key> key, std::shared_ptr<KVStore> store, std::string col_types, Writer count)
+    std::shared_ptr<Key> key, std::shared_ptr<KVStore> store, std::string col_types, Writer& count)
   {
-    return std::shared_ptr<DataFrame>();
+    Schema s(col_types.c_str());
+    auto res = std::make_shared<DataFrame>(s);
+    while (!count.done())
+    {
+      auto row = std::make_shared<Row>(s);
+      count.visit(*row);
+      res->add_row(*row, store);
+    }
+    Serializer ser;
+    res->serialize(ser);
+    auto value = std::make_shared<Value>(ser.data(), ser.length());
+    store->put(*key, *value);
+    return res;
   }
 };

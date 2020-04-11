@@ -155,7 +155,6 @@ public:
     {
       // std::cout << "currently on node " << idx_ << " but message needs to go to node " << target_idx << std::endl;
       auto put_msg = std::make_shared<Put>(MsgKind::Put, idx_, target_idx, 0, k, v);
-      put_msg->print();
       net_->send_msg(put_msg);
     }
   }

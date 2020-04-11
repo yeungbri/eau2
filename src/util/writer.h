@@ -17,6 +17,8 @@ public:
   Writer() = default;
   Writer(const Writer &other) = default;
   virtual ~Writer() = default;
+  virtual bool done() { return false; }
+  virtual void visit(Row& row) {}
 };
 
 /**
