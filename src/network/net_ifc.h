@@ -186,7 +186,8 @@ class NetworkIP : public NetworkIfc {
       rd += read(req, buf + rd, size - rd);
     }
     Deserializer dser(buf, size);
-    std::shared_ptr<Message> msg = Message::deserialize(dser, sender);
+    // std::shared_ptr<Message> msg = Message::deserialize(dser, sender); // why do we need sender?
+    std::shared_ptr<Message> msg = Message::deserialize(dser);
     return msg;
   }
 };

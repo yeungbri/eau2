@@ -85,6 +85,15 @@ public:
     write_chars(strdup(s.c_str()), s.length());
   }
 
+  void write_sockaddr_in(sockaddr_in si)
+  {
+    write_size_t(si.sin_len);
+    write_size_t(si.sin_family);
+    write_size_t(si.sin_port);
+    write_size_t(si.sin_addr.s_addr);
+    // write_chars(8, si.sin_zero);
+  }
+
   // Vectors of primitives
   void write_double_vector(std::vector<double> v)
   {
@@ -217,6 +226,19 @@ public:
     size_t len = read_size_t();
     char *chars = read_chars(len);
     std::string res = std::string(chars);
+    return res;
+  }
+
+  sockaddr_in read_sockaddr_in()
+  {
+    sockaddr_in res;
+    res.sin_len = (__uint8_t) read_size_t();
+    res.sin_family = (sa_family_t) read_size_t();
+    res.sin_port = (in_port_t) read_size_t();
+    struct in_addr ia;
+    ia.s_addr = (__uint32_t) read_size_t(); 
+    res.sin_addr = ia;
+    // res.sin_zero = read_chars(8);
     return res;
   }
 
