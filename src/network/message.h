@@ -198,9 +198,11 @@ class Register : public Message {
     port_ = d.read_size_t();
   }
 
-  Register(sockaddr_in client, size_t port) : port_(port), client_(client) {
-
-  }
+  // Assumes node 0 is server
+  Register(size_t sender, sockaddr_in client, size_t port)
+      : port_(port),
+        client_(client),
+        Message(MsgKind::Register, sender, 0, 1) {}
 
   Register(MsgKind kind, size_t sender, size_t target, size_t id,
            sockaddr_in client, size_t port)
@@ -233,15 +235,16 @@ class Directory : public Message {
     addresses_ = d.read_string_vector();
   }
 
-  Directory(std::vector<size_t> ports, std::vector<std::string> addrs)
-      : ports_(ports), addresses_(addrs) {
-    // TODO: implement
-  }
+  // Caller must modify target_ after creation
+  Directory(size_t sender, std::vector<size_t> ports,
+            std::vector<std::string> addrs)
+      : ports_(ports),
+        addresses_(addrs),
+        Message(MsgKind::Directory, sender, 0, 1) {}
 
   Directory(MsgKind kind, size_t sender, size_t target, size_t id,
-            // size_t client, 
-            std::vector<size_t> ports,
-            std::vector<std::string> addresses)
+            // size_t client,
+            std::vector<size_t> ports, std::vector<std::string> addresses)
       : Message(kind, sender, target, id) {
     // client_ = client;
     ports_ = ports;

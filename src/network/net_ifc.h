@@ -114,7 +114,7 @@ class NetworkIP : public NetworkIfc {
       addrs.push_back(inet_ntoa(nodes_.at(i + 1)->addr.sin_addr));
     }
     // send directory to nodes
-    Directory ipd(ports, addrs);
+    Directory ipd(this_node_, ports, addrs);
     for (size_t i = 1; i < num_nodes_; ++i) {
       ipd.target_ = i;
       send_m(&ipd);
@@ -134,7 +134,7 @@ class NetworkIP : public NetworkIfc {
     }
 
     // send register message
-    Register msg(nodes_.at(idx)->addr, port);
+    Register msg(this_node_, nodes_.at(idx)->addr, port);
     send_m(&msg);
 
     // receive directory and update node info
