@@ -65,6 +65,9 @@ class NetworkIP : public NetworkIfc {
   size_t this_node_;              // node index
   int sock_;                      // socket
   sockaddr_in ip_;                // ip address
+  size_t num_nodes_;
+
+  NetworkIP(size_t num_nodes) : num_nodes_(num_nodes) {}
 
   ~NetworkIP() { close(sock_); }
 
@@ -78,8 +81,8 @@ class NetworkIP : public NetworkIfc {
     ip_.sin_family = AF_INET;
     ip_.sin_addr.s_addr = INADDR_ANY;
     ip_.sin_port = htons(port);
-    assert(bind(sock_, (sockaddr*) &ip_, sizeof(ip_)) >= 0);
-    assert(listen(sock_, 100) >= 0); // 100 is connections queue size
+    assert(bind(sock_, (sockaddr*)&ip_, sizeof(ip_)) >= 0);
+    assert(listen(sock_, 100) >= 0);  // 100 is connections queue size
   }
 
   /** Initialize node 0 */
@@ -90,29 +93,29 @@ class NetworkIP : public NetworkIfc {
     // register all the nodes and send out directory to all nodes
 
     // initialize node infos for each node
-    for (size_t i = 0; i < arg.num_nodes; + i) {
+    for (size_t i = 0; i < num_nodes_; + i) {
       NodeInfo* n = new NodeInfo(0, ip_);
       nodes_.push_back(n);
     }
     // update node infos with info from register messages
-    for (size_t i = 2; i < arg.num_nodes;
-         ++i) {  // i = 2 since first client is on server node
+    // i = 2 since first client is on server node
+    for (size_t i = 2; i < num_nodes_; ++i) {
       Register* msg = dynamic_cast<Register*>(recv_m());
-      nodes_.at(msg->sender_)->id = msg->sender();
+      nodes_.at(msg->sender_)->id = msg->sender_;
       nodes_.at(msg->sender_)->addr.sin_family = AF_INET;
       nodes_.at(msg->sender_)->addr.sin_addr = msg->client_.sin_addr;
-      nodes_.at(msg->sender_)->addr.sin_port = htons(msg->port);
+      nodes_.at(msg->sender_)->addr.sin_port = htons(msg->port_);
     }
     // keep track of which address is at which port
     std::vector<size_t> ports;
     std::vector<std::string> addrs;
-    for (size_t i = 0; i < arg.num_nodes - 1; ++i) {
+    for (size_t i = 0; i < num_nodes_ - 1; ++i) {
       ports.push_back(ntohs(nodes_.at(i + 1)->addr.sin_port));
       addrs.push_back(inet_ntoa(nodes_.at(i + 1)->addr.sin_addr));
     }
     // send directory to nodes
     Directory ipd(ports, addrs);
-    for (size_t i = 1; i < arg.num_nodes; ++i) {
+    for (size_t i = 1; i < num_nodes_; ++i) {
       ipd.target_ = i;
       send_m(&ipd);
     }
@@ -131,12 +134,12 @@ class NetworkIP : public NetworkIfc {
     }
 
     // send register message
-    Register msg(idx, port);
+    Register msg(nodes_.at(idx)->addr, port);
     send_m(&msg);
 
     // receive directory and update node info
     Directory* ipd = dynamic_cast<Directory*>(recv_m());
-    std::vector<NodeInfo*> nodes(args.num_nodes);
+    std::vector<NodeInfo*> nodes(num_nodes_);
     nodes.push_back(nodes_.at(0));
     for (size_t i = 1; i < ipd->clients; ++i) {
       // TODO: i or i + 1?
@@ -152,16 +155,41 @@ class NetworkIP : public NetworkIfc {
     delete ipd;
   }
 
-  /** Based on the message target, creates new connection to the appropraite 
+  /** Based on the message target, creates new connection to the appropraite
    *  server and then serializes the message over the connection fd **/
   void send_m(Message* msg) {
     NodeInfo* tgt = nodes_.at(msg->target_);
-    int conn = 
+    int conn = socket(AF_INET, SOCK_STREAM, 0);
+    assert(conn >= 0 && "Unable to create client socket");
+    if (connect(conn, (sockaddr)tgt->addr, sizeof(tgt->addr)) < 0) {
+      std::cout << "Unable to connect to remote node" << std::endl;
+    }
+    Serializer ser;
+    msg->serialize(ser);
+    size_t size = ser.length();
+    send(conn, &size, sizeof(size_t), 0);
+    send(conn, ser.data(), size, 0);
   }
 
   /** Listens on the server socket. When a message becomes availble, reads its
    * data dserialize it and return the object **/
-  void recv_m() {}
+  std::shared_ptr<Message> recv_m() {
+    sockaddr_in sender;
+    socklen_t addrlen = sizeof(sender);
+    int req = accept(sock_, (sockaddr*)&sender, &addrlen);
+    size_t size = 0;
+    if (read(req, &size, sizeof(size_t)) == 0) {
+      std::cout << "Failed to read" << std::endl;
+    }
+    char* buf = new char[size];
+    int rd = 0;
+    while (rd != size) {
+      rd += read(req, buf + rd, size - rd);
+    }
+    Deserializer dser(buf, size);
+    std::shared_ptr<Message> msg = Message::deserialize(dser, sender);
+    return msg;
+  }
 };
 
 /**
