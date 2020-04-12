@@ -209,6 +209,12 @@ class Register : public Message {
     port_ = port;
   };
 
+  void serialize(Serializer &ser) {
+    Message::serialize(ser);
+    ser.write_sockaddr_in(client_);
+    ser.write_size_t(port_);
+  }
+
   virtual void print() { std::cout << "[REGISTER]" << std::endl; }
 };
 
@@ -242,12 +248,18 @@ class Directory : public Message {
     addresses_ = addresses;
   };
 
-  virtual void print() { std::cout << "[DIRECTORY]" << std::endl; }
+  void serialize(Serializer &ser) {
+    Message::serialize(ser);
+    ser.write_size_t_vector(ports_);
+    ser.write_string_vector(addresses_);
+  }
 
   size_t clients() {
     assert(ports_.size() == addresses_.size());
     return ports_.size();
   }
+
+  virtual void print() { std::cout << "[DIRECTORY]" << std::endl; }
 };
 
 /**

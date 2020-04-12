@@ -113,6 +113,15 @@ public:
     }
   }
 
+  void write_size_t_vector(std::vector<size_t> v)
+  {
+    write_size_t(v.size());
+    for (size_t i = 0; i < v.size(); i++)
+    {
+      write_size_t(v.at(i));
+    }
+  }
+
   void write_bool_vector(std::vector<bool> v)
   {
     write_size_t(v.size());
