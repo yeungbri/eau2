@@ -14,6 +14,7 @@
 #include "../src/util/writer.h"
 #include "../src/application.h"
 #include "../src/dataframe/dataframe.h"
+#include "../src/util/parser.h"
 
 /****************************************************************************
  * Calculate a word count for given file:

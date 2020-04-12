@@ -237,6 +237,10 @@ public:
   size_t *ports_;                      // owned
   std::vector<std::string> addresses_; // owned; strings owned
 
+  Directory(std::vector<size_t> ports, std::vector<std::string> addrs) {
+    // TODO: implement
+  }
+
   Directory(MsgKind kind, size_t sender, size_t target, size_t id,
             size_t client, size_t *ports, std::vector<std::string> addresses)
       : Message(kind, sender, target, id)
