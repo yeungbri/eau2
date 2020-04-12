@@ -193,6 +193,11 @@ class Register : public Message {
   sockaddr_in client_;
   size_t port_;
 
+  Register(Deserializer &d) : Message(d) {
+    client_ = d.read_sockaddr_in();
+    port_ = d.read_size_t();
+  }
+
   Register(sockaddr_in client, size_t port) : port_(port), client_(client) {
 
   }
@@ -216,6 +221,11 @@ class Directory : public Message {
   // size_t client_;                       // I think this is for num of clients
   std::vector<size_t> ports_;           // owned
   std::vector<std::string> addresses_;  // owned; strings owned
+
+  Directory(Deserializer &d) : Message(d) {
+    ports_ = d.read_size_t_vector();
+    addresses_ = d.read_string_vector();
+  }
 
   Directory(std::vector<size_t> ports, std::vector<std::string> addrs)
       : ports_(ports), addresses_(addrs) {
@@ -252,6 +262,10 @@ std::shared_ptr<Message> Message::deserialize(Deserializer &d) {
       return std::make_shared<Ack>(d);
     case MsgKind::Status:
       return std::make_shared<Status>(d);
+    case MsgKind::Directory:
+      return std::make_shared<Directory>(d);
+    case MsgKind::Register:
+      return std::make_shared<Register>(d);
     default:
       return nullptr;
   }

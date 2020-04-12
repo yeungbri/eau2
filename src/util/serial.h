@@ -232,6 +232,17 @@ public:
     return res;
   }
 
+  std::vector<size_t> read_size_t_vector()
+  {
+    size_t vector_size = read_size_t();
+    std::vector<size_t> res;
+    for (size_t i = 0; i < vector_size; i++)
+    {
+      res.push_back(read_size_t());
+    }
+    return res;
+  }
+
   std::vector<int> read_int_vector()
   {
     size_t vector_size = read_size_t();

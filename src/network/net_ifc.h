@@ -100,7 +100,7 @@ class NetworkIP : public NetworkIfc {
     // update node infos with info from register messages
     // i = 2 since first client is on server node
     for (size_t i = 2; i < num_nodes_; ++i) {
-      Register* msg = dynamic_cast<Register*>(recv_m());
+      std::shared_ptr<Register> msg = std::dynamic_pointer_cast<Register>(recv_m());
       nodes_.at(msg->sender_)->id = msg->sender_;
       nodes_.at(msg->sender_)->addr.sin_family = AF_INET;
       nodes_.at(msg->sender_)->addr.sin_addr = msg->client_.sin_addr;
@@ -138,7 +138,7 @@ class NetworkIP : public NetworkIfc {
     send_m(&msg);
 
     // receive directory and update node info
-    Directory* ipd = dynamic_cast<Directory*>(recv_m());
+    std::shared_ptr<Directory> ipd = std::dynamic_pointer_cast<Directory>(recv_m());
     std::vector<NodeInfo*> nodes(num_nodes_);
     nodes.push_back(nodes_.at(0));
     for (size_t i = 1; i < ipd->clients; ++i) {
@@ -152,7 +152,6 @@ class NetworkIP : public NetworkIfc {
     }
     nodes_.clear();
     nodes_ = nodes;
-    delete ipd;
   }
 
   /** Based on the message target, creates new connection to the appropraite
@@ -161,7 +160,7 @@ class NetworkIP : public NetworkIfc {
     NodeInfo* tgt = nodes_.at(msg->target_);
     int conn = socket(AF_INET, SOCK_STREAM, 0);
     assert(conn >= 0 && "Unable to create client socket");
-    if (connect(conn, (sockaddr)tgt->addr, sizeof(tgt->addr)) < 0) {
+    if (connect(conn, (sockaddr*)&tgt->addr, sizeof(tgt->addr)) < 0) {
       std::cout << "Unable to connect to remote node" << std::endl;
     }
     Serializer ser;
