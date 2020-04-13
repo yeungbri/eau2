@@ -93,7 +93,7 @@ class NetworkIP : public NetworkIfc {
     // register all the nodes and send out directory to all nodes
 
     // initialize node infos for each node
-    for (size_t i = 0; i < num_nodes_; + i) {
+    for (size_t i = 0; i < num_nodes_; ++i) {
       NodeInfo* n = new NodeInfo(0, ip_);
       nodes_.push_back(n);
     }
@@ -141,7 +141,7 @@ class NetworkIP : public NetworkIfc {
     std::shared_ptr<Directory> ipd = std::dynamic_pointer_cast<Directory>(recv_m());
     std::vector<NodeInfo*> nodes(num_nodes_);
     nodes.push_back(nodes_.at(0));
-    for (size_t i = 1; i < ipd->clients; ++i) {
+    for (size_t i = 1; i < ipd->clients(); ++i) {
       // TODO: i or i + 1?
       nodes.at(i)->id = i;
       nodes.at(i)->addr.sin_family = AF_INET;

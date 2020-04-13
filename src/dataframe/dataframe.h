@@ -26,7 +26,7 @@
 class DataFrame
 {
 public:
-  Schema &schema_;
+  Schema schema_;
   std::vector<std::shared_ptr<Column>> cols_;
   static const int THREAD_COUNT = 4;
 
@@ -38,7 +38,7 @@ public:
    * empty. */
   DataFrame(Schema &schema) : schema_(schema)
   {
-    for (size_t i = 0; i < ncols(); ++i)
+    for (size_t i = 0; i < schema.width(); ++i)
     {
       std::shared_ptr<Column> col;
       switch (schema.col_type(i))
@@ -172,6 +172,16 @@ public:
     }
   }
 
+  void local_map(Reader& r, std::shared_ptr<KVStore> store)
+  {
+    Row row(schema_);
+    for (size_t i = 0; i < nrows(); ++i)
+    {
+      fill_row(i, row, store);
+      r.visit(row);
+    }
+  }
+
   /** Print the dataframe in SoR format to standard output. */
   void print(std::shared_ptr<KVStore> store)
   {
@@ -267,10 +277,6 @@ public:
     auto value = std::make_shared<Value>(ser.data(), ser.length());
     store->put(*key, *value);
     return res;
-  }
-
-  void local_map(Reader r)
-  {
   }
 
   static std::shared_ptr<DataFrame> fromVisitor(

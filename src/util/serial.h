@@ -9,6 +9,7 @@
 #include <vector>
 #include <string>
 #include <cstring>
+#include "../network/util/network.h"
 
 /**
  * Serializer::

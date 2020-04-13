@@ -61,7 +61,7 @@ class WordCount : public Application {
     Adder add(map);
     Deserializer dser(words.data(), words.length());
     auto df = DataFrame::deserialize(dser);
-    df->local_map(add);
+    df->local_map(add, kv);
     Summer cnt(map);
     DataFrame::fromVisitor(mk_key(idx_), kv, "SI", cnt);
   }
@@ -88,7 +88,7 @@ class WordCount : public Application {
 
   void merge(std::shared_ptr<DataFrame> df, std::map<std::string, int> m) {
     Adder add(m);
-    df->local_map(add);
+    df->local_map(add, kv);
   }
 };  // WordcountDemo
 
@@ -97,8 +97,8 @@ class WordCount : public Application {
  */
 int main()
 {
-  int num_nodes = 3;
-  auto net = std::make_shared<NetworkPseudo>(num_nodes);
+  int num_nodes = 1;
+  auto net = std::make_shared<NetworkPseudo>(1);
   WordCount word_counter(0, net, num_nodes);
   word_counter.run_();
   return 0;

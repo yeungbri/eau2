@@ -17,6 +17,7 @@ public:
   Reader() = default;
   Reader(const Reader &other) = default;
   virtual ~Reader() = default;
+  virtual bool visit(Row& row) { return false; }
 };
 
 /****************************************************************************/
@@ -51,7 +52,10 @@ public:
       int num = search->second;
       num++;
       map_.insert_or_assign(word, num);
+    } else
+    {
+      map_.insert_or_assign(word, 0);
     }
-    return false;
+    return true;
   }
 };

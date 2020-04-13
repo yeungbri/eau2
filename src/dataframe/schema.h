@@ -28,12 +28,9 @@ public:
   /** Copying constructor */
   Schema(Schema &from)
   {
-    if (this != &from)
+    for (auto s : from._types)
     {
-      for (auto s : from._types)
-      {
-        _types.push_back(s);
-      }
+      _types.push_back(s);
     }
     nrows_ = from.nrows_;
   }
