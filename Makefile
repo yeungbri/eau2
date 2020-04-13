@@ -13,6 +13,9 @@ m3:
 m4:
 	cd examples; g++ -std=c++17 -Wall -o m4 m4.cpp; ./m4
 
+m5:
+	cd examples; g++ -std=c++17 -Wall -o m5 m5.cpp; ./m5
+
 test:
 	cd ./tests; cmake .; make dataframe_tests && ./dataframe_tests;
 	cd ./tests; cmake .; make serialization_tests && ./serialization_tests;

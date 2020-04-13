@@ -172,6 +172,10 @@ public:
     }
   }
 
+  void map(Reader& reader) {
+    // TODO for m5
+  }
+
   void local_map(Reader& r, std::shared_ptr<KVStore> store)
   {
     Row row(schema_);
@@ -263,12 +267,28 @@ public:
     return res;
   }
 
-  /** Returns a dataframe with a single scalar value */
+  /** Returns a dataframe with a single scalar double */
   static std::shared_ptr<DataFrame> fromScalar(std::shared_ptr<Key> key, std::shared_ptr<KVStore> store, double val)
   {
     Schema s;
     auto res = std::make_shared<DataFrame>(s);
     auto dc = std::make_shared<DoubleColumn>();
+    dc->push_back(val, store);
+    res->add_column(dc);
+
+    Serializer ser;
+    res->serialize(ser);
+    auto value = std::make_shared<Value>(ser.data(), ser.length());
+    store->put(*key, *value);
+    return res;
+  }
+
+  /** Returns a dataframe with a single scalar int */
+  static std::shared_ptr<DataFrame> fromScalarInt(std::shared_ptr<Key> key, std::shared_ptr<KVStore> store, int val)
+  {
+    Schema s;
+    auto res = std::make_shared<DataFrame>(s);
+    auto dc = std::make_shared<IntColumn>();
     dc->push_back(val, store);
     res->add_column(dc);
 
@@ -295,5 +315,10 @@ public:
     auto value = std::make_shared<Value>(ser.data(), ser.length());
     store->put(*key, *value);
     return res;
+  }
+
+  static std::shared_ptr<DataFrame> fromFile(std::string file, std::shared_ptr<Key> key, std::shared_ptr<KVStore> store)
+  {
+    return std::make_shared<DataFrame>();
   }
 };

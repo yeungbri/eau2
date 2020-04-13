@@ -30,8 +30,8 @@ class WordCount : public Application {
   std::map<std::string, int> all;
 
   WordCount(size_t idx, std::shared_ptr<NetworkIfc> net, int num_nodes)
-      : Application(idx, net, num_nodes), in("data", 0) {
-    kbuf.push_back(std::make_shared<Key>("wc-map-", 0));
+      : Application(idx, net, num_nodes), in("data", idx) {
+    kbuf.push_back(std::make_shared<Key>("wc-map-", idx));
   }
 
   /** The master nodes reads the input, then all of the nodes count. */
@@ -98,7 +98,7 @@ class WordCount : public Application {
 int main()
 {
   int num_nodes = 1;
-  auto net = std::make_shared<NetworkPseudo>(1);
+  auto net = std::make_shared<NetworkPseudo>(num_nodes);
   WordCount word_counter(0, net, num_nodes);
   word_counter.run_();
   return 0;

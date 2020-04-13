@@ -18,7 +18,7 @@ public:
   Writer(const Writer &other) = default;
   virtual ~Writer() = default;
   virtual bool done() { return false; }
-  virtual void visit(Row& row) {}
+  virtual void visit(Row &row) {}
 };
 
 /**
@@ -130,8 +130,8 @@ public:
 class Summer : public Writer
 {
 public:
-  std::map<std::string, int> map_;  // Stores words -> word counts
-  size_t idx = 0;                   // Remembers which pair was written last
+  std::map<std::string, int> map_; // Stores words -> word counts
+  size_t idx = 0;                  // Remembers which pair was written last
 
   Summer(std::map<std::string, int> map) : map_(map) {}
   virtual ~Summer() = default;
@@ -152,7 +152,8 @@ public:
       size_t value = it->second;
       r.set(0, key);
       r.set(1, (int)value);
-    } else
+    }
+    else
     {
       std::cout << "Exceeded end of map!" << std::endl;
     }
