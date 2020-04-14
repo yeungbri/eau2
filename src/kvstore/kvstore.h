@@ -46,6 +46,7 @@ public:
   std::vector<std::shared_ptr<Value>> replies_;
   size_t MAX_REPLY_SIZE = 1000;
 
+  KVStore() = default;
   KVStore(size_t idx, std::shared_ptr<NetworkIfc> net, size_t num_nodes) : idx_(idx), net_(net), num_nodes_(num_nodes) {}
   ~KVStore() = default;
 

@@ -6,6 +6,7 @@
 // lang::Cpp
 
 #pragma once
+#include "../dataframe/row.h"
 
 /**
  * Generic Reader class that can be overridden;

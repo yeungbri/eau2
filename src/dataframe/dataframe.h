@@ -30,6 +30,11 @@ public:
   std::vector<std::shared_ptr<Column>> cols_;
   static const int THREAD_COUNT = 4;
 
+  /**
+   * Default constructor
+   */
+  DataFrame() = default;
+
   /** Create a data frame with the same columns as the given df but with no rows
    * or rownames */
   DataFrame(DataFrame &df) : schema_(df.get_schema()) {}

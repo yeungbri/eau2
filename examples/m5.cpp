@@ -229,11 +229,11 @@ public:
    *  Linus. **/
   void readInput()
   {
-    auto pK = std::make_shared<Key>("projs", 0);
-    auto uK = std::make_shared<Key>("usrs", 0);
-    auto cK = std::make_shared<Key>("comts", 0);
-    auto linusKey = std::make_shared<Key>("users-0-0", 0);
-    if (index == 0)
+    auto pK = std::make_shared<Key>("projs", idx_);
+    auto uK = std::make_shared<Key>("usrs", idx_);
+    auto cK = std::make_shared<Key>("comts", idx_);
+    auto linusKey = std::make_shared<Key>("users-0-0", idx_);
+    if (idx_ == 0)
     {
       std::cout << "Reading..." << std::endl;
       projects = DataFrame::fromFile(PROJ, pK, kv);
@@ -275,7 +275,7 @@ public:
     std::string uK_name = "users-";
     uK_name += std::to_string(stage);
     uK_name += "-0";
-    auto uK = std::make_shared<Key>(uK_name, 0);
+    auto uK = std::make_shared<Key>(uK_name, idx_);
 
     // A df with all the users added on the previous round
     Value df_val = kv->waitAndGet(*uK);
@@ -305,36 +305,55 @@ public:
    * 'users' or 'projects', stage is the degree of separation being
    * computed.
    */
-  void merge(Set &set, char const *name, int stage)
+  void merge(Set &set, std::string name, int stage)
   {
-    // TODO: Make this compile! Not enough time for this to finish compiling with our m4 code.
-    // if (this_node() == 0)
-    // {
-    //   for (size_t i = 1; i < num_nodes_; ++i)
-    //   {
-    //     Key nK(StrBuff(name).c(stage).c("-").c(i).get());
-    //     DataFrame *delta = dynamic_cast<DataFrame *>(kv.waitAndGet(nK));
-    //     p("    received delta of ").p(delta->nrows()).p(" elements from node ").pln(i);
-    //     SetUpdater upd(set);
-    //     delta->map(upd);
-    //   }
-    //   p("    storing ").p(set.size()).pln(" merged elements");
-    //   SetWriter writer(set);
-    //   Key k(StrBuff(name).c(stage).c("-0").get());
-    //   DataFrame::fromVisitor(&k, &kv, "I", writer);
-    // }
-    // else
-    // {
-    //   p("    sending ").p(set.size()).pln(" elements to master node");
-    //   SetWriter writer(set);
-    //   Key k(StrBuff(name).c(stage).c("-").c(index).get());
-    //   DataFrame::fromVisitor(&k, &kv, "I", writer);
-    //   Key mK(StrBuff(name).c(stage).c("-0").get());
-    //   DataFrame *merged = dynamic_cast<DataFrame *>(kv.waitAndGet(mK));
-    //   p("    receiving ").p(merged->nrows()).pln(" merged elements");
-    //   SetUpdater upd(set);
-    //   merged->map(upd);
-    // }
+    if (this_node() == 0)
+    {
+      for (size_t i = 1; i < num_nodes_; ++i)
+      {
+        std::string nK_name = name;
+        nK_name += std::to_string(stage);
+        nK_name += "-";
+        nK_name += std::to_string(i);
+        auto nK = std::make_shared<Key>(nK_name, idx_);
+        Value delta_val = kv->waitAndGet(*nK);
+        Deserializer dser(delta_val.data(), delta_val.length());
+        auto delta = DataFrame::deserialize(dser);
+        std::cout << "    received delta of " << delta->nrows() << " elements from node " << i << std::endl;;
+        SetUpdater upd(set);
+        delta->map(upd);
+      }
+      std::cout << "    storing " << set.size() << " merged elements" << std::endl;;
+      SetWriter writer(set);
+
+      std::string k_name = name;
+      k_name += std::to_string(stage);
+      k_name += "-0";
+      auto k = std::make_shared<Key>(k_name, idx_);
+      DataFrame::fromVisitor(k, kv, "I", writer);
+    }
+    else
+    {
+      std::cout << "    sending " << set.size() << " elements to master node" << std::endl;;
+      SetWriter writer(set);
+      std::string k_name = name;
+      k_name += std::to_string(stage);
+      k_name += "-";
+      k_name += std::to_string(idx_);
+      auto k = std::make_shared<Key>(k_name, idx_);
+      DataFrame::fromVisitor(k, kv, "I", writer);
+      std::string mK_name = name;
+      mK_name += std::to_string(stage);
+      mK_name += "-0";
+      auto mK = std::make_shared<Key>(mK_name, idx_);
+
+      Value merged_val = kv->waitAndGet(*mK);
+      Deserializer dser(merged_val.data(), merged_val.length());
+      auto merged = DataFrame::deserialize(dser);
+      std::cout << "    receiving " << merged->nrows() << " merged elements" << std::endl;;
+      SetUpdater upd(set);
+      merged->map(upd);
+    }
   }
 }; // Linus
 
