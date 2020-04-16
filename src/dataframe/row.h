@@ -11,6 +11,7 @@
 #include <vector>
 #include "schema.h"
 #include "fielder.h"
+#include "wrapper.h"
 
 /*************************************************************************
  * Row::
@@ -23,9 +24,7 @@
 class Row
 {
 public:
-  Schema _schema; // External Schema
-  size_t _idx;    // Not our responsibility
-  std::string _name;
+  Schema _schema;
 
   // Attribution: https://stackoverflow.com/a/18577481/12602247 at 2/11 7:52PM
   struct Data
@@ -70,7 +69,6 @@ public:
   Row(Row &row)
   {
     _schema = row._schema;
-    _idx = row._idx;
     for (size_t i = 0; i < _schema.width(); ++i)
     {
       auto element = std::make_shared<Data>();
@@ -87,51 +85,61 @@ public:
 
   /** Setters: set the given column with the given value. Setting a column with
     * a value of the wrong type is undefined. */
-  void set(size_t col, int val)
+  void set(size_t col, Int val)
   {
     if (_schema.col_type(col) == 'I')
     {
-      _elements[col]->type = Data::is_int;
-      _elements[col]->val.ival = val;
+      if (val.is_missing())
+      {
+        _elements[col]->type = Data::is_missing;
+      } else
+      {
+        _elements[col]->type = Data::is_int;
+        _elements[col]->val.ival = val.val();;
+      }
     }
   }
-  void set(size_t col, double val)
+  void set(size_t col, Double val)
   {
     if (_schema.col_type(col) == 'D')
     {
-      _elements[col]->type = Data::is_double;
-      _elements[col]->val.fval = val;
+      if (val.is_missing())
+      {
+        _elements[col]->type = Data::is_missing;
+      } else
+      {
+        _elements[col]->type = Data::is_double;
+        _elements[col]->val.fval = val.val();
+      }
     }
   }
-  void set(size_t col, bool val)
+  void set(size_t col, Bool val)
   {
     if (_schema.col_type(col) == 'B')
     {
-      _elements[col]->type = Data::is_bool;
-      _elements[col]->val.bval = val;
+      if (val.is_missing())
+      {
+        _elements[col]->type = Data::is_missing;
+      } else
+      {
+        _elements[col]->type = Data::is_bool;
+        _elements[col]->val.bval = val.val();
+      }
     }
   }
-
-  /** Acquire ownership of the string. */
-  void set(size_t col, std::string val)
+  void set(size_t col, String val)
   {
     if (_schema.col_type(col) == 'S')
     {
-      _elements[col]->type = Data::is_string;
-      _elements[col]->val.sval = strdup(val.c_str());
+      if (val.is_missing())
+      {
+        _elements[col]->type = Data::is_missing;
+      } else
+      {
+        _elements[col]->type = Data::is_string;
+        _elements[col]->val.sval = strdup(val.val().c_str());
+      }
     }
-  }
-
-  /** Set/get the index of this row (ie. its position in the dataframe. This is
-   *  only used for informational purposes, unused otherwise */
-  void set_idx(size_t idx)
-  {
-    _idx = idx;
-  }
-
-  size_t get_idx()
-  {
-    return _idx;
   }
 
   /** Getters: get the value at the given column. If the column is not
@@ -222,49 +230,11 @@ public:
     }
   }
 
-  // void set_missing(int idx)
-  // {
-  //   std::cout << _elements[idx]->type << std::endl;
-  //   std::cout << Data::is_missing << std::endl;
-  //   _elements[idx]->type = Data::is_missing;
-  // }
-
   /**
-   * Caller of this method is responsible for updating this schema
-   * If _elements is not big enough, make it bigger
-   * Add this item to _elements
+   * Marks the element at the specified index as missing.
    */
-  void push_back(bool b)
+  void set_missing(int idx)
   {
-    auto element = std::make_shared<Data>();
-    element->type = Data::is_bool;
-    element->val.bval = b;
-    _elements.push_back(element);
-  }
-
-  void push_back(int i)
-  {
-    auto element = std::make_shared<Data>();
-    element->type = Data::is_int;
-    element->val.ival = i;
-    _elements.push_back(element);
-    ;
-  }
-
-  void push_back(double f)
-  {
-    auto element = std::make_shared<Data>();
-    element->type = Data::is_double;
-    element->val.fval = f;
-    _elements.push_back(element);
-  }
-
-  void push_back(std::string s)
-  {
-    auto element = std::make_shared<Data>();
-    element->type = Data::is_string;
-    element->val.sval = strdup(s.c_str());
-    _elements.push_back(element);
-    ;
+    _elements[idx]->type = Data::is_missing;
   }
 };

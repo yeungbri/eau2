@@ -7,6 +7,7 @@
 #include <cctype>
 #include <string>
 #include "../src/dataframe/dataframe.h"
+#include "../src/dataframe/wrapper.h"
 #include "../src/application.h"
 
 /**************************************************************************
@@ -101,7 +102,10 @@ public:
     return i_ == set_.size();
   }
 
-  void visit(Row &row) { row.set(0, i_++); }
+  void visit(Row &row) {
+    Int i(i_++);
+    row.set(0, i);
+  }
 };
 
 

@@ -150,8 +150,8 @@ public:
       }
       std::string key = it->first;
       size_t value = it->second;
-      r.set(0, key);
-      r.set(1, (int)value);
+      r.set(0, String(key));
+      r.set(1, Int((int)value));
     }
     else
     {

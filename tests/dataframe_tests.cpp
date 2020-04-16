@@ -10,6 +10,7 @@
 #include <string>
 #include <vector>
 #include "../src/dataframe/dataframe.h"
+#include "../src/dataframe/wrapper.h"
 
 #define ASSERT_EXIT_ZERO(a) ASSERT_EXIT(a(), ::testing::ExitedWithCode(0), ".*")
 
@@ -37,14 +38,14 @@ std::vector<std::shared_ptr<Row>> generateTenRowsFIBSFIBS()
   {
     std::string name = std::to_string(i);
     auto row = std::make_shared<Row>(fibsfibs);
-    row->set(0, double(1.0));
-    row->set(1, int(2));
-    row->set(2, true);
-    row->set(3, s1);
-    row->set(4, double(69.0));
-    row->set(5, int(420));
-    row->set(6, false);
-    row->set(7, s2);
+    row->set(0, Double(double(1.0)));
+    row->set(1, Int(int(2)));
+    row->set(2, Bool(true));
+    row->set(3, String(s1));
+    row->set(4, Double(double(69.0)));
+    row->set(5, Int(int(420)));
+    row->set(6, Bool(false));
+    row->set(7, String(s2));
     rows.push_back(row);
   }
   return rows;
@@ -60,10 +61,10 @@ std::vector<std::shared_ptr<Row>> generateTenRowsFIBS()
   {
     std::string name = std::to_string(i);
     auto row = std::make_shared<Row>(fibs);
-    row->set(0, double(0.5 + i * 1.0));
-    row->set(1, int(i * 2));
-    row->set(2, i % 2 == 0);
-    row->set(3, s1);
+    row->set(0, Double(double(0.5 + i * 1.0)));
+    row->set(1, Int(int(i * 2)));
+    row->set(2, Bool(i % 2 == 0));
+    row->set(3, String(s1));
     rows.push_back(row);
   }
   return rows;
@@ -303,9 +304,9 @@ TEST(dataframe, testFillRow)
   auto store = std::make_shared<KVStore>(0, nullptr, 1);
 
   // Adds a row to the dataframe.
-  r.set(0, s1);
-  r.set(1, 1);
-  r.set(2, s2);
+  r.set(0, String(s1));
+  r.set(1, Int(1));
+  r.set(2, String(s2));
   df.add_row(r, store);
 
   // Verify that the row was added correctly.
@@ -316,9 +317,9 @@ TEST(dataframe, testFillRow)
 
   // Add another row to the dataframe.
   Row r2(schema);
-  r2.set(0, apple);
-  r2.set(1, 2);
-  r2.set(2, apple);
+  r2.set(0, String(apple));
+  r2.set(1, Int(2));
+  r2.set(2, String(apple));
   df.add_row(r2, store);
 
   // Verify the second row was added correctly as well.

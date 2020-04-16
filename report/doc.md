@@ -51,9 +51,6 @@ auto val = kv.get(k);
 ```
 More use cases will be added as this system is developed.
 
-# Open Questions
-* None at this moment.
-
 # Status
 ### Done so far:
 * The Dataframe can be read in and internally constructed from any Schema-on-read (sor) file. 

@@ -13,6 +13,7 @@
 #include "row.h"
 #include "rower.h"
 #include "schema.h"
+#include "wrapper.h"
 #include "../util/reader.h"
 #include "../util/writer.h"
 
@@ -147,16 +148,16 @@ public:
       switch (col->get_type())
       {
       case 'B':
-        row.set(i, col->as_bool()->get(idx, store));
+        row.set(i, Bool(col->as_bool()->get(idx, store)));
         break;
       case 'I':
-        row.set(i, col->as_int()->get(idx, store));
+        row.set(i, Int(col->as_int()->get(idx, store)));
         break;
       case 'D':
-        row.set(i, col->as_double()->get(idx, store));
+        row.set(i, Double(col->as_double()->get(idx, store)));
         break;
       case 'S':
-        row.set(i, col->as_string()->get(idx, store));
+        row.set(i, String(col->as_string()->get(idx, store)));
         break;
       }
     }
