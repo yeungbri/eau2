@@ -29,12 +29,12 @@ const size_t MAX_CHUNK_SIZE = 10 * 1000;
  * equality. */
 class Column
 {
-public:       
+public:
   // Keys to the values that contain this column's chunks
   std::vector<Key> keys_;
   // number of elements in this column
   size_t sz_;
-  // Vector of indices that contain missing values attempting to access a value 
+  // Vector of indices that contain missing values attempting to access a value
   // at an index here has undefined behavior
   std::vector<size_t> missing_; // TODO: serialize this
 

@@ -20,7 +20,7 @@ public:
   std::string name_; // name to refer to key
   size_t home_;      // index of home node
   Key(std::string name, size_t home) : name_(name), home_(home) {}
-  Key(const Key& other)
+  Key(const Key &other)
   {
     name_ = other.name_;
     home_ = other.home_;
@@ -56,7 +56,7 @@ public:
   char *data_;    // serialized data
   size_t length_; // length of serialized data
 
-  Value() 
+  Value()
   {
     data_ = nullptr;
     length_ = 0;
@@ -68,7 +68,7 @@ public:
     memcpy(data_, data, length);
   }
 
-  Value(const Value& other)
+  Value(const Value &other)
   {
     length_ = other.length_;
     data_ = new char[length_];

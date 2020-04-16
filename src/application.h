@@ -43,15 +43,16 @@ public:
   {
     auto get_msg = std::dynamic_pointer_cast<Get>(msg);
     Value val;
-    try 
+    try
     {
       val = store_->get(get_msg->k_);
-    } catch (std::runtime_error& ex)
+    }
+    catch (std::runtime_error &ex)
     {
       val = Value(nullptr, 0);
     }
     auto reply_msg = std::make_shared<Reply>(
-      MsgKind::Reply, idx_, get_msg->sender_, 0, val.data(), val.length());
+        MsgKind::Reply, idx_, get_msg->sender_, 0, val.data(), val.length());
     net_->send_msg(reply_msg);
   }
 

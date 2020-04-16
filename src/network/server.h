@@ -20,13 +20,13 @@
 class Server
 {
 private:
-  std::vector<int> _clients;        // sockets of connected clients
-  std::vector<std::string> _client_adr;  // addresses of connected clients as "IP:PORT"
-  int _server;              // this own server's socket
-  struct pollfd _fds[1024]; // file descriptors. supports 1024 clients connecting to this server
-  int _nfds = 0;            // number of file descriptors (clients)
-  Network _n;               // contains network helper functions    
-  bool _teardown = false;   // if true, tear this server down
+  std::vector<int> _clients;            // sockets of connected clients
+  std::vector<std::string> _client_adr; // addresses of connected clients as "IP:PORT"
+  int _server;                          // this own server's socket
+  struct pollfd _fds[1024];             // file descriptors. supports 1024 clients connecting to this server
+  int _nfds = 0;                        // number of file descriptors (clients)
+  Network _n;                           // contains network helper functions
+  bool _teardown = false;               // if true, tear this server down
 
 public:
   /**
@@ -39,7 +39,7 @@ public:
    */
   Server(const char *ip, int port)
   {
-    _server = _n.bindToSocket(ip ,port);
+    _server = _n.bindToSocket(ip, port);
   }
 
   /**
@@ -69,7 +69,7 @@ public:
       close(_server);
     }
   }
-  
+
   /**
    * Given that tokens is a tokenized REGISTER message, process it and broadcast
    */
@@ -209,7 +209,7 @@ public:
       msg += "\n";
       msg += tokens[2];
       _n.sendMsg(sock, msg.c_str(), msg.length() + 1); // +1 to account for null
-    } 
+    }
     else
     {
       printf("Server can't send to requested address because it does not exist.\n");

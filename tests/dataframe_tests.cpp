@@ -112,7 +112,7 @@ TEST(dataframe, testColumn)
   {
     bc.push_back(b, store);
   }
-  // Verify that each element was pushed back correctly. 
+  // Verify that each element was pushed back correctly.
   EXPECT_EQ(bc.get(0, store), 0);
   EXPECT_EQ(bc.get(1, store), 1);
   EXPECT_EQ(bc.get(2, store), 0);
@@ -133,7 +133,7 @@ TEST(dataframe, testColumn)
   {
     ic.push_back(i, store);
   }
-  // Verify that each element was pushed back correctly. 
+  // Verify that each element was pushed back correctly.
   EXPECT_EQ(ic.get(0, store), 1);
   EXPECT_EQ(ic.get(1, store), 2);
   EXPECT_EQ(ic.get(2, store), 3);
@@ -154,7 +154,7 @@ TEST(dataframe, testColumn)
   {
     fc.push_back(d, store);
   }
-  // Verify that each element was pushed back correctly. 
+  // Verify that each element was pushed back correctly.
   ASSERT_FLOAT_EQ(fc.get(0, store), 0.234);
   ASSERT_FLOAT_EQ(fc.get(1, store), -0.678);
   ASSERT_FLOAT_EQ(fc.get(2, store), 123.123);
@@ -176,7 +176,7 @@ TEST(dataframe, testColumn)
   {
     sc.push_back(s, store);
   }
-  // Verify that each element was pushed back correctly. 
+  // Verify that each element was pushed back correctly.
   EXPECT_EQ(sc.get(0, store), s1);
   EXPECT_EQ(sc.get(1, store), s2);
   EXPECT_EQ(sc.get(2, store), s3);
@@ -194,7 +194,7 @@ TEST(dataframe, testColumn)
 // Test Dataframe's constructor given a schema.
 TEST(dataframe, testGetSchema)
 {
-  // Create a dataframe with a schema, and verify that all elements of the 
+  // Create a dataframe with a schema, and verify that all elements of the
   // schema are present in the dataframe.
   Schema schema("DIBS");
   DataFrame df(schema);
@@ -354,7 +354,7 @@ TEST(dataframe, testMap)
   for (int i = 0; i < 1000; i++)
   {
     r.set(0, Int(i));
-    r.set(1, Int(i+1));
+    r.set(1, Int(i + 1));
     df.add_row(r, store);
   }
 

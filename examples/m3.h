@@ -92,12 +92,13 @@ public:
 /**
  * Runs the application on the specified thread.
  */
-class DemoThread : public Thread {
- public:
+class DemoThread : public Thread
+{
+public:
   Demo d_;
-  
-  DemoThread(int node, std::shared_ptr<NetworkPseudo> net) : d_(node, net, 3) {};
-  
+
+  DemoThread(int node, std::shared_ptr<NetworkPseudo> net) : d_(node, net, 3){};
+
   ~DemoThread() = default;
 
   void run() { d_.run_(); }
@@ -111,11 +112,12 @@ class DemoThread : public Thread {
 class Milestone3
 {
 public:
-  static void run() {
+  static void run()
+  {
     auto net = std::make_shared<NetworkPseudo>(3);
 
     DemoThread t1(0, net);
-    DemoThread t2(1, net); 
+    DemoThread t2(1, net);
     DemoThread t3(2, net);
 
     t1.start();

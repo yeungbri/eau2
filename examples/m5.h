@@ -19,7 +19,7 @@
 class Set
 {
 public:
-  std::vector<bool> vals_;  // owned; data
+  std::vector<bool> vals_; // owned; data
 
   /** Creates a set of the same size as the dataframe. */
   Set(std::shared_ptr<DataFrame> df) {}
@@ -59,7 +59,6 @@ public:
   }
 };
 
-
 /*******************************************************************************
  * A SetUpdater is a reader that gets the first column of the data frame and
  * sets the corresponding value in the given set.
@@ -81,7 +80,6 @@ public:
   }
 };
 
-
 /*****************************************************************************
  * A SetWriter copies all the values present in the set into a one-column
  * dataframe. The data contains all the values in the set. The dataframe has
@@ -90,7 +88,7 @@ public:
 class SetWriter : public Writer
 {
 public:
-  Set &set_;  // set to read from
+  Set &set_;     // set to read from
   size_t i_ = 0; // position in set
 
   SetWriter(Set &set) : set_(set) {}
@@ -103,14 +101,12 @@ public:
     return i_ == set_.size();
   }
 
-  void visit(Row &row) {
+  void visit(Row &row)
+  {
     Int i(i_++);
     row.set(0, i);
   }
 };
-
-
-
 
 /***************************************************************************
  * The ProjectTagger is a reader that is mapped over commits, and marks all
@@ -203,8 +199,8 @@ public:
 class Linus : public Application
 {
 public:
-  size_t DEGREES = 4;  // How many degrees of separation form linus?
-  int LINUS = 4967; // The uid of Linus (offset in the user df)
+  size_t DEGREES = 4; // How many degrees of separation form linus?
+  int LINUS = 4967;   // The uid of Linus (offset in the user df)
   std::string PROJ = "datasets/projects.ltgt";
   std::string USER = "datasets/users.ltgt";
   std::string COMM = "datasets/commits.ltgt";
@@ -324,11 +320,13 @@ public:
         Value delta_val = kv->waitAndGet(*nK);
         Deserializer dser(delta_val.data(), delta_val.length());
         auto delta = DataFrame::deserialize(dser);
-        std::cout << "    received delta of " << delta->nrows() << " elements from node " << i << std::endl;;
+        std::cout << "    received delta of " << delta->nrows() << " elements from node " << i << std::endl;
+        ;
         SetUpdater upd(set);
         delta->map(upd);
       }
-      std::cout << "    storing " << set.size() << " merged elements" << std::endl;;
+      std::cout << "    storing " << set.size() << " merged elements" << std::endl;
+      ;
       SetWriter writer(set);
 
       std::string k_name = name;
@@ -339,7 +337,8 @@ public:
     }
     else
     {
-      std::cout << "    sending " << set.size() << " elements to master node" << std::endl;;
+      std::cout << "    sending " << set.size() << " elements to master node" << std::endl;
+      ;
       SetWriter writer(set);
       std::string k_name = name;
       k_name += std::to_string(stage);
@@ -355,7 +354,8 @@ public:
       Value merged_val = kv->waitAndGet(*mK);
       Deserializer dser(merged_val.data(), merged_val.length());
       auto merged = DataFrame::deserialize(dser);
-      std::cout << "    receiving " << merged->nrows() << " merged elements" << std::endl;;
+      std::cout << "    receiving " << merged->nrows() << " merged elements" << std::endl;
+      ;
       SetUpdater upd(set);
       merged->map(upd);
     }

@@ -54,7 +54,7 @@ public:
 
   void set_num_nodes(size_t num_nodes) { num_nodes_ = num_nodes; }
 
-  void handle_reply(Reply& reply)
+  void handle_reply(Reply &reply)
   {
     lock_.lock();
     auto value = std::make_shared<Value>(reply.data_, reply.len_);
@@ -82,7 +82,7 @@ public:
    * this will print an error and return a nullptr value. This get is
    * non-blocking and assumes that the given key exists on this node.
    */
-  Value& get(Key k)
+  Value &get(Key k)
   {
     int tries = 0;
     lock_.lock();
@@ -102,7 +102,7 @@ public:
     throw std::runtime_error("Cannot find key!");
   }
 
-  Value& wait_and_get_help(Key& k)
+  Value &wait_and_get_help(Key &k)
   {
     // ask cluster
     while (true)
@@ -122,7 +122,7 @@ public:
    * This calls the non-blocking value if the key exists on this node. Otherwise,
    * it queries another node for the value, and blocks until it returns. 
    */
-  Value& waitAndGet(Key k)
+  Value &waitAndGet(Key k)
   {
     size_t target_idx = k.home_;
     if (target_idx == idx_)

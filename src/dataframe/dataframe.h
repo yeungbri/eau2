@@ -153,7 +153,8 @@ public:
       if (col->is_missing(idx))
       {
         row.set_missing(i);
-      } else
+      }
+      else
       {
         switch (col->get_type())
         {
@@ -181,19 +182,22 @@ public:
   size_t ncols() { return schema_.width(); }
 
   /** Visit rows in order */
-  void map(Rower &r, std::shared_ptr<KVStore> store) {
-    for (size_t i = 0; i < nrows(); ++i) {
+  void map(Rower &r, std::shared_ptr<KVStore> store)
+  {
+    for (size_t i = 0; i < nrows(); ++i)
+    {
       Row row(schema_);
       fill_row(i, row, store);
       r.accept(row);
     }
   }
 
-  void map(Reader& reader) {
+  void map(Reader &reader)
+  {
     // TODO for m5
   }
 
-  void local_map(Reader& r, std::shared_ptr<KVStore> store)
+  void local_map(Reader &r, std::shared_ptr<KVStore> store)
   {
     Row row(schema_);
     for (size_t i = 0; i < nrows(); ++i)
@@ -317,7 +321,7 @@ public:
   }
 
   static std::shared_ptr<DataFrame> fromVisitor(
-    std::shared_ptr<Key> key, std::shared_ptr<KVStore> store, std::string col_types, Writer& count)
+      std::shared_ptr<Key> key, std::shared_ptr<KVStore> store, std::string col_types, Writer &count)
   {
     Schema s(col_types.c_str());
     auto res = std::make_shared<DataFrame>(s);

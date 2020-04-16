@@ -23,21 +23,25 @@
  *   2) produce word counts per homed chunks, in parallel
  *   3) combine the results
  **********************************************************author: pmaj ****/
-class WordCount : public Application {
- public:
+class WordCount : public Application
+{
+public:
   static const size_t BUFSIZE = 1024;
   Key in;
   std::vector<std::shared_ptr<Key>> kbuf;
   std::map<std::string, int> all;
 
   WordCount(size_t idx, std::shared_ptr<NetworkIfc> net, int num_nodes)
-      : Application(idx, net, num_nodes), in("data", idx) {
+      : Application(idx, net, num_nodes), in("data", idx)
+  {
     kbuf.push_back(std::make_shared<Key>("wc-map-", idx));
   }
 
   /** The master nodes reads the input, then all of the nodes count. */
-  void run_() override {
-    if (idx_ == 0) {
+  void run_() override
+  {
+    if (idx_ == 0)
+    {
       FileReader fr("../data/100k.txt");
       auto key = std::make_shared<Key>(in.name_, in.home_);
       DataFrame::fromVisitor(key, kv, "S", fr);
@@ -48,14 +52,16 @@ class WordCount : public Application {
 
   /** Returns a key for given node.  These keys are homed on master node
    *  which then joins them one by one. */
-  std::shared_ptr<Key> mk_key(size_t idx) {
+  std::shared_ptr<Key> mk_key(size_t idx)
+  {
     std::shared_ptr<Key> k = kbuf.at(idx);
     std::cout << "Created key " << k->name_;
     return k;
   }
 
   /** Compute word counts on the local node and build a data frame. */
-  void local_count() {
+  void local_count()
+  {
     Value words = kv->waitAndGet(in);
     std::cout << "Node " << idx_ << ": starting local count..." << std::endl;
     std::map<std::string, int> map;
@@ -68,8 +74,10 @@ class WordCount : public Application {
   }
 
   /** Merge the data frames of all nodes */
-  void reduce() {
-    if (idx_ != 0) return;
+  void reduce()
+  {
+    if (idx_ != 0)
+      return;
     std::cout << "Node 0: reducing counts..." << std::endl;
     std::map<std::string, int> map;
     std::shared_ptr<Key> own = mk_key(0);
@@ -77,7 +85,8 @@ class WordCount : public Application {
     Deserializer dser(val.data(), val.length());
     auto df1 = DataFrame::deserialize(dser);
     merge(df1, map);
-    for (size_t i = 1; i < kv->num_nodes(); ++i) {  // merge other nodes
+    for (size_t i = 1; i < kv->num_nodes(); ++i)
+    { // merge other nodes
       std::shared_ptr<Key> ok = mk_key(i);
       Value val = kv->waitAndGet(*ok);
       Deserializer dser(val.data(), val.length());
@@ -87,11 +96,12 @@ class WordCount : public Application {
     std::cout << "Different words: " << map.size() << std::endl;
   }
 
-  void merge(std::shared_ptr<DataFrame> df, std::map<std::string, int> m) {
+  void merge(std::shared_ptr<DataFrame> df, std::map<std::string, int> m)
+  {
     Adder add(m);
     df->local_map(add, kv);
   }
-};  // WordcountDemo
+}; // WordcountDemo
 
 /**
  * Runs the Milestone 4 Demo.

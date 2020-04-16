@@ -92,10 +92,12 @@ public:
       if (val.is_missing())
       {
         _elements[col]->type = Data::is_missing;
-      } else
+      }
+      else
       {
         _elements[col]->type = Data::is_int;
-        _elements[col]->val.ival = val.val();;
+        _elements[col]->val.ival = val.val();
+        ;
       }
     }
   }
@@ -106,7 +108,8 @@ public:
       if (val.is_missing())
       {
         _elements[col]->type = Data::is_missing;
-      } else
+      }
+      else
       {
         _elements[col]->type = Data::is_double;
         _elements[col]->val.fval = val.val();
@@ -120,7 +123,8 @@ public:
       if (val.is_missing())
       {
         _elements[col]->type = Data::is_missing;
-      } else
+      }
+      else
       {
         _elements[col]->type = Data::is_bool;
         _elements[col]->val.bval = val.val();
@@ -134,7 +138,8 @@ public:
       if (val.is_missing())
       {
         _elements[col]->type = Data::is_missing;
-      } else
+      }
+      else
       {
         _elements[col]->type = Data::is_string;
         _elements[col]->val.sval = strdup(val.val().c_str());
@@ -166,7 +171,8 @@ public:
     if (val)
     {
       return val;
-    } else
+    }
+    else
     {
       return "";
     }

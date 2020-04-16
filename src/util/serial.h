@@ -243,10 +243,10 @@ public:
   {
     sockaddr_in res;
     //res.sin_len = (__uint8_t) read_size_t();
-    res.sin_family = (sa_family_t) read_size_t();
-    res.sin_port = (in_port_t) read_size_t();
+    res.sin_family = (sa_family_t)read_size_t();
+    res.sin_port = (in_port_t)read_size_t();
     struct in_addr ia;
-    ia.s_addr = (__uint32_t) read_size_t(); 
+    ia.s_addr = (__uint32_t)read_size_t();
     res.sin_addr = ia;
     // res.sin_zero = read_chars(8);
     return res;

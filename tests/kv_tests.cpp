@@ -26,7 +26,7 @@ public:
 
 public:
   TestApp(size_t idx, std::shared_ptr<NetworkIfc> net)
-      : Application(idx, net, 2), checker_(idx, kv, net) 
+      : Application(idx, net, 2), checker_(idx, kv, net)
   {
     for (int i = 0; i < 10; ++i)
     {
