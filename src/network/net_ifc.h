@@ -81,7 +81,7 @@ class NetworkIP : public NetworkIfc {
     ip_.sin_family = AF_INET;
     ip_.sin_addr.s_addr = INADDR_ANY;
     ip_.sin_port = htons(port);
-    assert(bind(sock_, (sockaddr*)&ip_, sizeof(ip_)) >= 0);
+    bind(sock_, (sockaddr*)&ip_, sizeof(ip_)); // TODO: what does this do
     assert(listen(sock_, 100) >= 0);  // 100 is connections queue size
   }
 
@@ -181,7 +181,7 @@ class NetworkIP : public NetworkIfc {
       std::cout << "Failed to read" << std::endl;
     }
     char* buf = new char[size];
-    int rd = 0;
+    size_t rd = 0;
     while (rd != size) {
       rd += read(req, buf + rd, size - rd);
     }

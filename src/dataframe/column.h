@@ -36,7 +36,7 @@ public:
   size_t sz_;
   // Vector of indices that contain missing values attempting to access a value 
   // at an index here has undefined behavior
-  std::vector<size_t> missing_;
+  std::vector<size_t> missing_; // TODO: serialize this
 
   Column() { sz_ = 0; }
 
@@ -158,6 +158,7 @@ class BoolColumn : public Column
 public:
   std::vector<bool> cached_chunk_;
   // The most recently accessed column-chunk. Chunk_idx -> ColumnChunk
+  // TODO: Serialize this
   std::pair<int, std::shared_ptr<BoolColumnChunk>> external_cached_chunk_ =
       std::make_pair<int, std::shared_ptr<BoolColumnChunk>>(-1, std::make_shared<BoolColumnChunk>());
 
@@ -186,7 +187,7 @@ public:
     {
       return cached_chunk_.at(element_idx);
     }
-    else if (chunk_idx == external_cached_chunk_.first)
+    else if ((int)chunk_idx == external_cached_chunk_.first)
     {
       return external_cached_chunk_.second->get(element_idx);
     }
@@ -273,7 +274,7 @@ public:
     {
       return cached_chunk_.at(element_idx);
     }
-    else if (chunk_idx == external_cached_chunk_.first)
+    else if ((int)chunk_idx == external_cached_chunk_.first)
     {
       return external_cached_chunk_.second->get(element_idx);
     }
@@ -359,7 +360,7 @@ public:
     {
       return cached_chunk_.at(element_idx);
     }
-    else if (chunk_idx == external_cached_chunk_.first)
+    else if ((int)chunk_idx == external_cached_chunk_.first)
     {
       return external_cached_chunk_.second->get(element_idx);
     }
@@ -446,7 +447,7 @@ public:
     {
       return cached_chunk_.at(element_idx);
     }
-    else if (chunk_idx == external_cached_chunk_.first)
+    else if (int(chunk_idx) == external_cached_chunk_.first)
     {
       return external_cached_chunk_.second->get(element_idx);
     }

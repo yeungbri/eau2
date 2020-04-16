@@ -12,8 +12,6 @@
 #include "../src/dataframe/dataframe.h"
 #include "../src/dataframe/wrapper.h"
 
-#define ASSERT_EXIT_ZERO(a) ASSERT_EXIT(a(), ::testing::ExitedWithCode(0), ".*")
-
 /**
  * Strings we will use in our tests.
  */
@@ -344,32 +342,28 @@ TEST(dataframe, testFillRow)
   EXPECT_EQ(filledR2.get_string(2), apple);
 }
 
-/*
-// Commented out because the map may no longer be required for our impl. of
-// the dataframe - however, we will not remove it in case we end up needing it.
-
 // Tests the dataframe's map functionality
 TEST(dataframe, testMap)
 {
   Schema s("II");
+  auto store = std::make_shared<KVStore>(0, nullptr, 1);
   DataFrame df(s);
   CounterRower countRower;
   IntSumRower intRower;
   Row r(df.get_schema());
   for (int i = 0; i < 1000; i++)
   {
-    r.set(0, i);
-    r.set(1, i+1);
-    df.add_row(r);
+    r.set(0, Int(i));
+    r.set(1, Int(i+1));
+    df.add_row(r, store);
   }
 
-  df.map(countRower);
+  df.map(countRower, store);
   EXPECT_EQ(countRower._count, 2000);
 
-  df.map(intRower);
+  df.map(intRower, store);
   EXPECT_EQ(intRower._sum, 1000000);
 }
-*/
 
 // Runs all of the tests.
 int main(int argc, char **argv)

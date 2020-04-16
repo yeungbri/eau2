@@ -65,8 +65,14 @@ public:
   Value(char *data, size_t length) : length_(length)
   {
     data_ = new char[length];
-    // Data is not guaranteed to be available i.e. across network
     memcpy(data_, data, length);
+  }
+
+  Value(const Value& other)
+  {
+    length_ = other.length_;
+    data_ = new char[length_];
+    memcpy(data_, other.data_, length_);
   }
 
   /**

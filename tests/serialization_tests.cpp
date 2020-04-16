@@ -12,11 +12,8 @@
 #include "../src/util/serial.h"
 #include "../src/dataframe/dataframe.h"
 
-#define ASSERT_EXIT_ZERO(a) \
-  ASSERT_EXIT(a(), ::testing::ExitedWithCode(0), ".*");
-
 // Tests that ack messages can be serialized and deserialized properly.
-void test_ackmsg() {
+TEST(serial, test_ackmsg) {
   Ack ackmsg(MsgKind::Ack, 1, 2, 0);
   Serializer ser;
   ackmsg.serialize(ser);
@@ -26,13 +23,10 @@ void test_ackmsg() {
   ASSERT_TRUE(ackmsg.sender_ == d_ackmsg->sender_);
   ASSERT_TRUE(ackmsg.target_ == d_ackmsg->target_);
   ASSERT_TRUE(ackmsg.id_ == d_ackmsg->id_);
-  exit(0);
 }
 
-TEST(serial, test_ackmsg) { ASSERT_EXIT_ZERO(test_ackmsg) }
-
 // Tests that strings can be serialized and deserialized properly.
-void test_string() {
+TEST(serial, test_string) {
   std::string s1 = "hello";
   std::string s2 = "goodbye";
   std::string s3 = "bye";
@@ -48,13 +42,10 @@ void test_string() {
   ASSERT_TRUE(s1 == d1);
   ASSERT_TRUE(s2 == d2);
   ASSERT_TRUE(s3 == d3);
-  exit(0);
 }
 
-TEST(serial, test_string) { ASSERT_EXIT_ZERO(test_string) }
-
 // Tests that vectors of strings can be serialized and deserialized properly.
-void test_string_vector() {
+TEST(serial, test_string_vector) {
   std::vector<std::string> vs = {"hello", "goodbye", "bye"};
   std::vector<std::string> vs2 = {"apple", "orange", "pear"};
   Serializer ser;
@@ -73,13 +64,10 @@ void test_string_vector() {
   for (int i = 0; i < vs.size(); i++) {
     ASSERT_TRUE(vs2.at(i) == dvs2.at(i));
   }
-  exit(0);
 }
 
-TEST(serial, test_string_vector) { ASSERT_EXIT_ZERO(test_string_vector) }
-
 // Tests that doubles can be serialized and deserialized properly.
-void test_double() {
+TEST(serial, test_double) {
   double f1 = 0.123;
   double f2 = 8.123;
   double f3 = 0;
@@ -95,14 +83,10 @@ void test_double() {
   double df3 = dser.read_double();
 
   ASSERT_TRUE(f1 = df1);
-
-  exit(0);
 }
 
-TEST(serial, test_double) { ASSERT_EXIT_ZERO(test_double) }
-
 // Tests that bool columns can be serialized and deserialized properly.
-void test_bool_column() {
+TEST(serial, test_bool_column) {
   auto store = std::make_shared<KVStore>(0, nullptr, 1);
   std::vector<bool> bv = {true, true, false, false, true, true, false, false};
   BoolColumn bc;
@@ -120,13 +104,10 @@ void test_bool_column() {
   for (int i = 0; i < bv.size(); i++) {
     ASSERT_TRUE(bc.get(i, store) == bc2->get(i, store));
   }
-  exit(0);
 }
 
-TEST(serial, test_bool_column) { ASSERT_EXIT_ZERO(test_bool_column) }
-
 // Tests that int columns can be serialized and deserialized properly.
-void test_int_column() {
+TEST(serial, test_int_column) {
   auto store = std::make_shared<KVStore>(0, nullptr, 1);
   std::vector<int> iv = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
   IntColumn ic;
@@ -144,13 +125,10 @@ void test_int_column() {
   for (int i = 0; i < iv.size(); i++) {
     ASSERT_TRUE(ic.get(i, store) == ic2->get(i, store));
   }
-  exit(0);
 }
 
-TEST(serial, test_int_column) { ASSERT_EXIT_ZERO(test_int_column) }
-
 // Tests that double columns can be serialized and deserialized properly.
-void test_double_column() {
+TEST(serial, test_double_column) {
   auto store = std::make_shared<KVStore>(0, nullptr, 1);
   std::vector<double> fv = {0.5, 1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5, 8.5, 9.5};
   DoubleColumn fc;
@@ -168,13 +146,10 @@ void test_double_column() {
   for (int i = 0; i < fv.size(); i++) {
     ASSERT_TRUE(fc.get(i, store) == fc2->get(i, store));
   }
-  exit(0);
 }
 
-TEST(serial, test_double_column) { ASSERT_EXIT_ZERO(test_double_column) }
-
 // Tests that string columns can be serialized and deserialized properly.
-void test_string_column() {
+TEST(serial, test_string_column) {
   auto store = std::make_shared<KVStore>(0, nullptr, 1);
   std::vector<std::string> sv = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10"};
   StringColumn sc;
@@ -192,13 +167,10 @@ void test_string_column() {
   for (int i = 0; i < sv.size(); i++) {
     ASSERT_TRUE(sc.get(i, store) == sc2->get(i, store));
   }
-  exit(0);
 }
 
-TEST(serial, test_string_column) { ASSERT_EXIT_ZERO(test_string_column) }
-
 // Tests that schemas can be serialized and deserialized properly.
-void test_schema() {
+TEST(serial, test_schema) {
   Schema s("DDD");
   Serializer ser;
   s.serialize(ser);
@@ -212,13 +184,10 @@ void test_schema() {
     ASSERT_TRUE(s._types.at(i) == "D");
     ASSERT_TRUE(s2->_types.at(i) == "D");
   }
-  exit(0);
 }
 
-TEST(serial, test_schema) { ASSERT_EXIT_ZERO(test_schema) }
-
 // Tests that a dataframe can be serialized and deserialized properly.
-void test_dataframe() {
+TEST(serial, test_dataframe) {
   Schema s("D");
   auto store = std::make_shared<KVStore>(0, nullptr, 1);
 
@@ -270,11 +239,7 @@ void test_dataframe() {
   ASSERT_EQ(df.get_bool(3, 0, store), bv[0]);
 
   ASSERT_EQ(df.get_string(4, 0, store), sv[0]);
-  
-  exit(0);
 }
-
-TEST(serial, test_dataframe) { ASSERT_EXIT_ZERO(test_dataframe) }
 
 // Runs all tests.
 int main(int argc, char **argv) {

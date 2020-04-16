@@ -62,7 +62,7 @@ int count_element(string line)
   int count = 0;
   int leftBrackets = 0;
 
-  for (int i = 0; i < line.length(); i++)
+  for (size_t i = 0; i < line.length(); i++)
   {
     if (line.at(i) == '<')
     {
@@ -98,7 +98,7 @@ int compute_type(string input)
   bool hasDecimalPoint = false;
 
   char firstChar = input.at(0);
-  int index = firstChar == '+' || firstChar == '-' ? 1 : 0;
+  size_t index = firstChar == '+' || firstChar == '-' ? 1 : 0;
   while (index < input.length())
   {
     char c = input.at(index);
@@ -144,7 +144,7 @@ vector<string> parse_line(string line)
   int quotation = 0;
   int spaceIndex = -1;
 
-  for (int i = 0; i < line.length(); i++)
+  for (size_t i = 0; i < line.length(); i++)
   {
     char character = line.at(i);
     if (character == '<')
@@ -230,7 +230,7 @@ vector<int> parse_type(string line)
   // store types for given line
   vector<int> types;
   vector<string> wordList = parse_line(line);
-  for (int i = 0; i < wordList.size(); i++)
+  for (size_t i = 0; i < wordList.size(); i++)
   {
     types.push_back(compute_type(wordList[i]));
   }
@@ -239,7 +239,7 @@ vector<int> parse_type(string line)
 
 // return a list of values of the given line, if the value does
 // not match its type, return ""
-vector<string> parse_line(string input, vector<int> *types, int columns)
+vector<string> parse_line(string input, vector<int> *types, size_t columns)
 {
 
   vector<string> wordList = parse_line(input);
@@ -251,7 +251,7 @@ vector<string> parse_line(string input, vector<int> *types, int columns)
     wordList.erase(wordList.begin() + columns, wordList.end());
   }
 
-  for (int i = 0; i < wordList.size(); i++)
+  for (size_t i = 0; i < wordList.size(); i++)
   {
     int type = compute_type(wordList[i]);
     // invalid type (i.e. a string value for desired type int)
@@ -381,7 +381,7 @@ std::shared_ptr<DataFrame> getDataFrame(std::string filePath, std::shared_ptr<KV
   while (getline(file, line, '\n'))
   {
     // if exceed reading length, break
-    if (file.tellg() > (len + from))
+    if (file.tellg() > (int)(len + from))
     {
       break;
     }

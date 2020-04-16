@@ -52,7 +52,7 @@ public:
    */
   int readMsg(int sock, char *buf, size_t len, bool &teardown)
   {
-    int bytesRead = 0;
+    size_t bytesRead = 0;
     int result = 0;
     while (bytesRead < len)
     {
@@ -82,7 +82,7 @@ public:
   void readForLength(int sock, size_t *length, bool &teardown)
   {
     size_t toRead = sizeof(size_t);
-    int bytesRead = 0;
+    size_t bytesRead = 0;
     int result = 0;
     while (bytesRead < toRead)
     {
@@ -137,11 +137,7 @@ public:
     adr.sin_family = AF_INET;
     assert(inet_pton(AF_INET, ip.c_str(), &adr.sin_addr) > 0);
     adr.sin_port = htons(port);
-    if (bind(server_fd, (struct sockaddr *)&adr, sizeof(adr)) < 0)
-    {
-      printf("Bind failed, error: %s\n", strerror(errno));
-      assert(false);
-    }
+    bind(server_fd, (struct sockaddr *)&adr, sizeof(adr));
     return server_fd;
   }
 };

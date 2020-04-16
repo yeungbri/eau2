@@ -91,7 +91,7 @@ class SetWriter : public Writer
 {
 public:
   Set &set_;  // set to read from
-  int i_ = 0; // position in set
+  size_t i_ = 0; // position in set
 
   SetWriter(Set &set) : set_(set) {}
 
@@ -203,7 +203,7 @@ public:
 class Linus : public Application
 {
 public:
-  int DEGREES = 4;  // How many degrees of separation form linus?
+  size_t DEGREES = 4;  // How many degrees of separation form linus?
   int LINUS = 4967; // The uid of Linus (offset in the user df)
   std::string PROJ = "datasets/projects.ltgt";
   std::string USER = "datasets/users.ltgt";

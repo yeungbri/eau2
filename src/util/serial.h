@@ -88,7 +88,7 @@ public:
 
   void write_sockaddr_in(sockaddr_in si)
   {
-    write_size_t(si.sin_len);
+    // write_size_t(si.sin_len);
     write_size_t(si.sin_family);
     write_size_t(si.sin_port);
     write_size_t(si.sin_addr.s_addr);
@@ -242,7 +242,7 @@ public:
   sockaddr_in read_sockaddr_in()
   {
     sockaddr_in res;
-    res.sin_len = (__uint8_t) read_size_t();
+    //res.sin_len = (__uint8_t) read_size_t();
     res.sin_family = (sa_family_t) read_size_t();
     res.sin_port = (in_port_t) read_size_t();
     struct in_addr ia;
