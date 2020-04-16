@@ -96,7 +96,7 @@ public:
     schema_.add_row();
     for (size_t i = 0; i < ncols(); ++i)
     {
-      switch (row.col_type(i))
+      switch (schema_.col_type(i))
       {
       case 'B':
         cols_.at(i)->push_back(row.get_bool(i), store);
@@ -110,6 +110,11 @@ public:
       case 'S':
         cols_.at(i)->push_back(row.get_string(i), store);
         break;
+      }
+      if (row.is_missing(i))
+      {
+        size_t row_idx = nrows() - 1;
+        cols_.at(i)->mark_missing(row_idx);
       }
     }
   }
@@ -145,20 +150,26 @@ public:
     for (size_t i = 0; i < ncols(); i++)
     {
       auto col = cols_.at(i);
-      switch (col->get_type())
+      if (col->is_missing(idx))
       {
-      case 'B':
-        row.set(i, Bool(col->as_bool()->get(idx, store)));
-        break;
-      case 'I':
-        row.set(i, Int(col->as_int()->get(idx, store)));
-        break;
-      case 'D':
-        row.set(i, Double(col->as_double()->get(idx, store)));
-        break;
-      case 'S':
-        row.set(i, String(col->as_string()->get(idx, store)));
-        break;
+        row.set_missing(i);
+      } else
+      {
+        switch (col->get_type())
+        {
+        case 'B':
+          row.set(i, Bool(col->as_bool()->get(idx, store)));
+          break;
+        case 'I':
+          row.set(i, Int(col->as_int()->get(idx, store)));
+          break;
+        case 'D':
+          row.set(i, Double(col->as_double()->get(idx, store)));
+          break;
+        case 'S':
+          row.set(i, String(col->as_string()->get(idx, store)));
+          break;
+        }
       }
     }
   }

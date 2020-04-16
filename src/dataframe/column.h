@@ -29,9 +29,14 @@ const size_t MAX_CHUNK_SIZE = 10 * 1000;
  * equality. */
 class Column
 {
-public:
-  std::vector<Key> keys_; // Keys to the values that contain this column's chunks
-  size_t sz_;             // number of elements in this column
+public:       
+  // Keys to the values that contain this column's chunks
+  std::vector<Key> keys_;
+  // number of elements in this column
+  size_t sz_;
+  // Vector of indices that contain missing values attempting to access a value 
+  // at an index here has undefined behavior
+  std::vector<size_t> missing_;
 
   Column() { sz_ = 0; }
 
@@ -117,6 +122,30 @@ public:
       arr.push_back(*Key::deserialize(dser));
     }
     return arr;
+  }
+
+  /**
+   * Marks the given index as containing a missing value. The value at this index
+   * is garbage from here on out.
+   */
+  virtual void mark_missing(size_t idx)
+  {
+    missing_.push_back(idx);
+  }
+
+  /**
+   * Checks if the given index is a missing value, returning true if so.
+   */
+  virtual bool is_missing(size_t idx)
+  {
+    for (size_t i = 0; i < missing_.size(); ++i)
+    {
+      if (idx == missing_[i])
+      {
+        return true;
+      }
+    }
+    return false;
   }
 };
 

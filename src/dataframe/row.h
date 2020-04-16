@@ -161,7 +161,15 @@ public:
 
   std::string get_string(size_t col)
   {
-    return _elements[col]->val.sval;
+    // there is a chance that sval is a nullptr, because it's a char* type
+    auto val = _elements[col]->val.sval;
+    if (val)
+    {
+      return val;
+    } else
+    {
+      return "";
+    }
   }
 
   /** Number of fields in the row. */
@@ -232,9 +240,22 @@ public:
 
   /**
    * Marks the element at the specified index as missing.
+   * Adds gibberish values.
    */
   void set_missing(int idx)
   {
     _elements[idx]->type = Data::is_missing;
+    _elements[idx]->val.bval = false;
+    _elements[idx]->val.ival = 0;
+    _elements[idx]->val.fval = 0;
+    _elements[idx]->val.sval = nullptr;
+  }
+
+  /**
+   * Returns true if the value at the given index is missing, false otherwise.
+   */
+  bool is_missing(int idx)
+  {
+    return _elements[idx]->type == Data::is_missing;
   }
 };

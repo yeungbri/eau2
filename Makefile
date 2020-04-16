@@ -45,3 +45,4 @@ clean:
 	rm -f examples/m2
 	rm -f examples/m3
 	rm -f examples/m4
+	rm -f examples/m5

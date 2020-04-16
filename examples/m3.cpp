@@ -58,6 +58,9 @@ public:
     DataFrame::fromArray(main, kv, vals);
     DataFrame::fromScalar(check, kv, sum);
     std::cout << this_node() << ": Producer is done" << std::endl;
+
+    Thread::sleep(2000);
+    exit(0);
   }
 
   void counter()
@@ -76,6 +79,9 @@ public:
     std::cout << this_node() << ": The sum is  " << sum << "\n";
     DataFrame::fromScalar(verify, kv, sum);
     std::cout << this_node() << ": Counter is done" << std::endl;
+
+    Thread::sleep(2000);
+    exit(0);
   }
 
   void summarizer()
@@ -91,6 +97,7 @@ public:
     auto expected = DataFrame::deserialize(dserCheck);
 
     std::cout << (expected->get_double(0, 0, kv) == result->get_double(0, 0, kv) ? "SUCCESS" : "FAILURE") << "\n";
+    exit(0);
   }
 };
 

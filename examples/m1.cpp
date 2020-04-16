@@ -15,6 +15,7 @@ int main()
     df->print(store);
     CounterRower countRower;
     df->map(countRower, store);
+    std::cout << "Number of elements (counted by CountRower):" << countRower._count << std::endl;
 
     return 0;
 }
