@@ -2,6 +2,9 @@
  * Authors: gao.d@husky.neu.edu and yeung.bri@husky.neu.edu
  */
 
+// Lang::Cpp
+
+#pragma once
 #include "../src/application.h"
 
 /** Trival application to test serialization on a single node */
@@ -41,11 +44,13 @@ class Trivial : public Application {
  * Trivial example from Milestone 2 that demonstrates the dataframe's 
  * ability to read integrate with a KV store.
  */
-int main()
+class Milestone2
 {
-  auto net = std::make_shared<NetworkPseudo>(1);
-  Trivial t(0, net);
-  t.run_();
-
-  return 0;
-}
+public:
+  static void run()
+  {
+    auto net = std::make_shared<NetworkPseudo>(1);
+    Trivial t(0, net);
+    t.run_();
+  }
+};

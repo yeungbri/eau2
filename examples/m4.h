@@ -5,6 +5,7 @@
 
 // lang::Cpp
 
+#pragma once
 #include <cassert>
 #include <map>
 #include <string>
@@ -95,11 +96,15 @@ class WordCount : public Application {
 /**
  * Runs the Milestone 4 Demo.
  */
-int main()
+class Milestone4
 {
-  int num_nodes = 1;
-  auto net = std::make_shared<NetworkPseudo>(num_nodes);
-  WordCount word_counter(0, net, num_nodes);
-  word_counter.run_();
-  return 0;
-}
+public:
+  static void run()
+  {
+    int num_nodes = 1;
+    auto net = std::make_shared<NetworkPseudo>(num_nodes);
+    WordCount word_counter(0, net, num_nodes);
+    word_counter.run_();
+    std::cout << "SUCCESS" << std::endl;
+  }
+};

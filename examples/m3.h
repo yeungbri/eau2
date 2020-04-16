@@ -2,6 +2,9 @@
  * Authors: gao.d@husky.neu.edu and yeung.bri@husky.neu.edu
  */
 
+// Lang::Cpp
+
+#pragma once
 #include "../src/application.h"
 
 /**
@@ -25,6 +28,7 @@ public:
 
   virtual ~Demo()
   {
+    message_checker_.terminate();
     message_checker_.join();
   }
 
@@ -47,7 +51,6 @@ public:
 
   void producer()
   {
-    std::cout << this_node() << ": Producer about to start..." << std::endl;
     std::vector<double> vals;
     double sum = 0;
     for (size_t i = 0; i < DF_TEST_SIZE; ++i)
@@ -57,38 +60,24 @@ public:
     }
     DataFrame::fromArray(main, kv, vals);
     DataFrame::fromScalar(check, kv, sum);
-    std::cout << this_node() << ": Producer is done" << std::endl;
-
-    Thread::sleep(2000);
-    exit(0);
   }
 
   void counter()
   {
-    std::cout << this_node() << ": Counter about to start..." << std::endl;
     Value val = kv->waitAndGet(*main);
-    std::cout << this_node() << ": Counter got value from main key!" << std::endl;
     Deserializer dser(val.data(), val.length());
     auto df = DataFrame::deserialize(dser);
-    std::cout << this_node() << ": Counter deserialized dataframe from value!" << std::endl;
     size_t sum = 0;
     for (size_t i = 0; i < DF_TEST_SIZE; ++i)
     {
       sum += df->get_double(0, i, kv);
     }
-    std::cout << this_node() << ": The sum is  " << sum << "\n";
     DataFrame::fromScalar(verify, kv, sum);
-    std::cout << this_node() << ": Counter is done" << std::endl;
-
-    Thread::sleep(2000);
-    exit(0);
   }
 
   void summarizer()
   {
-    std::cout << this_node() << ": Summarizer is about to start.." << std::endl;
     Value val = kv->waitAndGet(*verify);
-    std::cout << this_node() << ": Summarizer got value from verify key!" << std::endl;
     Deserializer dserVerify(val.data(), val.length());
     auto result = DataFrame::deserialize(dserVerify);
 
@@ -97,7 +86,6 @@ public:
     auto expected = DataFrame::deserialize(dserCheck);
 
     std::cout << (expected->get_double(0, 0, kv) == result->get_double(0, 0, kv) ? "SUCCESS" : "FAILURE") << "\n";
-    exit(0);
   }
 };
 
@@ -120,20 +108,22 @@ class DemoThread : public Thread {
  * each of the application's tasks, and tests the dataframe's ability to 
  * distribute the load across 3 separate "nodes".
  */
-int main() {
-  auto net = std::make_shared<NetworkPseudo>(3);
+class Milestone3
+{
+public:
+  static void run() {
+    auto net = std::make_shared<NetworkPseudo>(3);
 
-  DemoThread t1(0, net);
-  DemoThread t2(1, net); 
-  DemoThread t3(2, net);
+    DemoThread t1(0, net);
+    DemoThread t2(1, net); 
+    DemoThread t3(2, net);
 
-  t1.start();
-  t2.start();
-  t3.start();
+    t1.start();
+    t2.start();
+    t3.start();
 
-  t1.join();
-  t2.join();
-  t3.join();
-
-  return 0;
-}
+    t1.join();
+    t2.join();
+    t3.join();
+  }
+};

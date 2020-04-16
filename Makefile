@@ -1,20 +1,5 @@
-run:
-	./eau2
-
-m1:
-	cd examples; g++ -std=c++17 -Wall -o m1 m1.cpp; ./m1
-
-m2:
-	cd examples; g++ -std=c++17 -Wall -o m2 m2.cpp; ./m2
-
-m3:
-	cd examples; g++ -std=c++17 -Wall -o m3 m3.cpp; ./m3
-
-m4:
-	cd examples; g++ -std=c++17 -Wall -o m4 m4.cpp; ./m4
-
-m5:
-	cd examples; g++ -std=c++17 -Wall -o m5 m5.cpp; ./m5
+milestones:
+	cd examples; g++ -std=c++17 -Wall -o milestones milestones.cpp; ./milestones
 
 test:
 	cd ./tests; cmake .; make dataframe_tests && ./dataframe_tests;
@@ -41,8 +26,4 @@ clean:
 	rm -f tests/dataframe_tests 
 	rm -f tests/Makefile
 	rm -rf tests/bin
-	rm -f examples/m1
-	rm -f examples/m2
-	rm -f examples/m3
-	rm -f examples/m4
-	rm -f examples/m5
+	rm -f examples/milestones

@@ -26,17 +26,6 @@ public:
   {
     lock_.lock();
     queue_.push_back(msg);
-    if (msg->kind_ == MsgKind::Get)
-    {
-      // std::cout << "GET message pushed, key name is: " << std::dynamic_pointer_cast<Get>(msg)->k_.name_ << std::endl;
-    } else if (msg->kind_ == MsgKind::Reply)
-    {
-      // std::cout << "REPLY from " << msg->sender_ << " to " << msg->target_ << " pushed onto queue!" << std::endl;
-    } else if (msg->kind_ == MsgKind::Put)
-    {
-      // std::cout << "PUT from " << msg->sender_ << " to " << msg->target_ << " pushed onto queue!" << std::endl;
-    }
-    // std::cout << "Size of message queue (node " << msg->target_ << ") now: " << queue_.size() << std::endl;
     lock_.unlock();
     lock_.notify_all();
   }

@@ -4,6 +4,7 @@
 
 // lang::Cpp
 
+#pragma once
 #include <cctype>
 #include <string>
 #include "../src/dataframe/dataframe.h"
@@ -364,12 +365,15 @@ public:
 /**
  * Runs the Milestone 5 Demo.
  */
-int main()
+class Milestone5
 {
-  int num_nodes = 1;
-  auto net = std::make_shared<NetworkPseudo>(num_nodes);
-  Linus linus(0, net, num_nodes);
-  //linus.run_();
-  std::cout << "linus not yet implemented... sorry" << std::endl;
-  return 0;
-}
+public:
+  static void run()
+  {
+    int num_nodes = 1;
+    auto net = std::make_shared<NetworkPseudo>(num_nodes);
+    Linus linus(0, net, num_nodes);
+    //linus.run_();
+    std::cout << "linus not yet implemented... sorry" << std::endl;
+  }
+};
