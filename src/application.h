@@ -6,100 +6,121 @@
 // lang::Cpp
 
 #pragma once
-#include <assert.h>
-
+#include <cassert>
 #include <string>
 #include <vector>
+#include "dataframe/dataframe.h"
 
-#include "dataframe.h"
-#include "kvstore.h"
+/**
+ * A thread for this node that is responsible for monitoring the node's message
+ * queue. If a message appears on this queue, this thread will query the KVStore
+ * and return the appropriate response.
+ */
+class MessageCheckerThread : public Thread
+{
+public:
+  size_t idx_;
+  bool terminate_ = false;
+  std::shared_ptr<KVStore> store_;
+  std::shared_ptr<NetworkIfc> net_;
+  MessageCheckerThread(size_t idx, std::shared_ptr<KVStore> store, std::shared_ptr<NetworkIfc> net)
+      : idx_(idx), store_(store), net_(net) {}
 
-/** An application runs on a node and owns one local kvstore */
-class Application {
- public:
-  size_t idx_;             // index of node it is running on
-  KVStore kv = KVStore();  // local kvstore
+  virtual ~MessageCheckerThread() = default;
 
-  Application(size_t idx) : idx_(idx) {}
+  /**
+   * Handler of this thread calls this method to end the forever-while-loop
+   */
+  void terminate()
+  {
+    terminate_ = true;
+  }
 
-  /** Invoke to run the application */
-  virtual void run_() {}
+  /**
+   * Upon receiving a put message, this thread 
+   */
+  void handle_put(std::shared_ptr<Message> msg)
+  {
+    auto put_msg = std::dynamic_pointer_cast<Put>(msg);
+    store_->put(put_msg->k_, put_msg->v_);
+  }
 
-  size_t this_node() { return idx_; }
-};
-
-/** Trival application to test serialization on a single node */
-class Trivial : public Application {
- public:
-  Trivial(size_t idx) : Application(idx) {}
-
-  /** Creates a dataframe from all the numbers from 1 - 999999 and
-   * stores it onto the local kvstore. Then retrieves the stored 
-   * value and checks all values are there */
-  void run_() {
-    size_t SZ = 1000 * 1000;
-    std::vector<double> vals;
-    double sum = 0;
-    for (size_t i = 0; i < SZ; ++i) {
-      vals.push_back(i);
-      sum += i;
+  void handle_get(std::shared_ptr<Message> msg)
+  {
+    auto get_msg = std::dynamic_pointer_cast<Get>(msg);
+    Value val;
+    try
+    {
+      val = store_->get(get_msg->k_);
     }
-    Key key("triv", 0);
-    DataFrame* df = DataFrame::fromArray(&key, &kv, vals);
-    assert(df->get_double(0, 1) == 1);
-
-    Value val = kv.get(key);
-    Deserializer dser(val.data());
-    DataFrame* df2 = DataFrame::deserialize(dser);
-    for (size_t i = 0; i < SZ; ++i) {
-      assert(df2->get_double(0, i) == i);
-      sum -= df2->get_double(0, i);
+    catch (std::runtime_error &ex)
+    {
+      val = Value(nullptr, 0);
     }
-    assert(sum == 0);
-    std::cout << "SUCCESS" << std::endl;
+    auto reply_msg = std::make_shared<Reply>(
+        MsgKind::Reply, idx_, get_msg->sender_, 0, val.data(), val.length());
+    net_->send_msg(reply_msg);
+  }
 
-    delete df;
-    delete df2;
+  void handle_reply(std::shared_ptr<Message> msg)
+  {
+    auto reply = std::dynamic_pointer_cast<Reply>(msg);
+    store_->handle_reply(*reply);
+  }
+
+  virtual void run()
+  {
+    auto my_queue = std::dynamic_pointer_cast<NetworkPseudo>(net_)->msg_queues_.at(idx_);
+    while (!terminate_)
+    {
+      // check if there are any new messages
+      if (my_queue->size() > 0)
+      {
+        auto msg = my_queue->pop();
+        switch (msg->kind_)
+        {
+        case MsgKind::Put:
+          handle_put(msg);
+          break;
+        case MsgKind::Get:
+          handle_get(msg);
+          break;
+        case MsgKind::Reply:
+          handle_reply(msg);
+          break;
+        default:
+          std::cout << "Unknown message type!" << std::endl;
+        }
+      }
+      else
+      {
+        Thread::sleep(1);
+      }
+    }
   }
 };
 
-// class Demo : public Application {
-// public:
-//   Key main = Key("main", 0);
-//   Key verify = Key("verif", 0);
-//   Key check = Key("ck", 0);
+/** An application runs on a node and owns one local kvstore */
+class Application
+{
+public:
+  size_t idx_;                 // index of node it is running on
+  std::shared_ptr<KVStore> kv; // local kvstore
 
-//   Demo(size_t idx): Application(idx) { }
+  /**
+   * Creates an application with a KVStore, given its index (node #) and a
+   * network interface to communicate with.
+   */
+  Application(size_t idx, std::shared_ptr<NetworkIfc> net, size_t num_nodes) : idx_(idx)
+  {
+    kv = std::make_shared<KVStore>(idx, net, num_nodes);
+  }
 
-//   void run_() override {
-//     switch(this_node()) {
-//       case 0:   producer();     break;
-//       case 1:   counter();      break;
-//       case 2:   summarizer();
-//     }
-//   }
+  ~Application() = default;
 
-//   void producer() {
-//     size_t SZ = 100*1000;
-//     double* vals = new double[SZ];
-//     double sum = 0;
-//     for (size_t i = 0; i < SZ; ++i) sum += vals[i] = i;
-//     DataFrame::fromArray(&main, &kv, SZ, vals);
-//     DataFrame::fromScalar(&check, &kv, sum);
-//   }
+  /** Invoke to run the application. Application subclasses implement this. */
+  virtual void run_() {}
 
-//   void counter() {
-//     DataFrame* v = kv.waitAndGet(main);
-//     size_t sum = 0;
-//     for (size_t i = 0; i < 100*1000; ++i) sum += v->get_double(0,i);
-//     std::cout << "The sum is  " << sum << "\n";
-//     DataFrame::fromScalar(&verify, &kv, sum);
-//   }
-
-//   void summarizer() {
-//     DataFrame* result = kv.waitAndGet(verify);
-//     DataFrame* expected = kv.waitAndGet(check);
-//     std::cout << (expected->get_double(0,0)==result->get_double(0,0) ?
-//     "SUCCESS":"FAILURE") << "\n";
-//   }
-// };
+  /** Returns this application's home node. */
+  size_t this_node() { return idx_; }
+};

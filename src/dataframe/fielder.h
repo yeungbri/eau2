@@ -3,11 +3,9 @@
  * Emails: yeung.bri@husky.neu.edu, gao.d@husky.neu.edu
  */
 
-//lang::Cpp
+// lang::Cpp
 
 #pragma once
-
-#include "helper.h"
 #include <string>
 
 /*****************************************************************************
@@ -17,8 +15,8 @@
 class Fielder
 {
 public:
-  virtual ~Fielder() { }
-  
+  virtual ~Fielder() {}
+
   /** Called before visiting a row, the argument is the row offset in the
     dataframe. */
   virtual void start(size_t r) = 0;
@@ -33,43 +31,44 @@ public:
   virtual void done() = 0;
 };
 
+/**
+ * Fielder for printing a dataframe. 
+ */
 class PrintFielder : public Fielder
 {
 public:
-  Sys _sys;
-
-  PrintFielder() : _sys() {}
+  PrintFielder() = default;
 
   virtual ~PrintFielder() = default;
 
   virtual void start(size_t r)
   {
-    _sys.p("<");
+    std::cout << "<";
   }
 
   virtual void accept(bool b)
   {
-    _sys.p(b);
+    std::cout << b;
   }
 
   virtual void accept(double f)
   {
-    _sys.p(f);
+    std::cout << f;
   }
 
   virtual void accept(int i)
   {
-    _sys.p(i);
+    std::cout << i;
   }
 
   virtual void accept(std::string s)
   {
 
-    _sys.p(s.c_str());
+    std::cout << s;
   }
 
   virtual void done()
   {
-    _sys.p(">");
+    std::cout << ">";
   }
 };

@@ -3,13 +3,12 @@
  * Emails: yeung.bri@husky.neu.edu, gao.d@husky.neu.edu
  */
 
-//lang::Cpp
+// lang::Cpp
 
 #pragma once
 #include <iostream>
 #include "row.h"
 #include "fielder.h"
-#include "helper.h"
 
 /*******************************************************************************
  *  Rower::
@@ -20,7 +19,7 @@
 class Rower
 {
 public:
-  virtual ~Rower() { }
+  virtual ~Rower() {}
 
   /** This method is called once per row. The row object is on loan and
       should not be retained as it is likely going to be reused in the next
@@ -35,34 +34,34 @@ public:
       split off will be joined.  There will be one join per split. The
       original object will be the last to be called join on. The join method
       is reponsible for cleaning up memory. */
-  virtual void join_delete(Rower *other)
+  virtual void join_delete(std::shared_ptr<Rower> other)
   {
     return;
   }
 
-  virtual Rower* clone() {
+  virtual std::shared_ptr<Rower> clone()
+  {
     return nullptr;
   }
 };
 
+/** Print rower for a dataframe */
 class PrintRower : public Rower
 {
 public:
-  Fielder* _fielder;
-  Sys _sys;
+  std::shared_ptr<Fielder> _fielder;
 
-  PrintRower() : _sys() {
-    _fielder = new PrintFielder();
+  PrintRower()
+  {
+    _fielder = std::make_shared<PrintFielder>();
   }
 
-  virtual ~PrintRower() {
-    delete _fielder;
-  }
+  virtual ~PrintRower() = default;
 
-  virtual bool accept(Row& r)
+  virtual bool accept(Row &r)
   {
     r.visit(*_fielder);
-    _sys.p("\n");
+    std::cout << "\n";
     return true;
   }
 };
@@ -72,20 +71,22 @@ class StringSearchRower : public Rower
 {
 public:
   std::string _search_str;
-  Sys _sys;
 
-  StringSearchRower(const char* search_str) : _sys() {
+  StringSearchRower(const char *search_str)
+  {
     _search_str = std::string(search_str);
   }
 
-  virtual ~StringSearchRower() { }
+  virtual ~StringSearchRower() {}
 
-  virtual bool accept(Row& r)
+  virtual bool accept(Row &r)
   {
     for (size_t i = 0; i < r.width(); ++i)
     {
-      if (r.col_type(i) == 'S') {
-        if (r.get_string(i) == _search_str) {
+      if (r.col_type(i) == 'S')
+      {
+        if (r.get_string(i) == _search_str)
+        {
           return true;
         }
       }
@@ -99,34 +100,34 @@ class IntSumRower : public Rower
 {
 public:
   size_t _sum;
-  Sys _sys;
 
-  IntSumRower() : _sys() {
+  IntSumRower()
+  {
     _sum = 0;
   }
 
   virtual ~IntSumRower() = default;
 
-  virtual bool accept(Row& r)
+  virtual bool accept(Row &r)
   {
     for (size_t i = 0; i < r.width(); ++i)
     {
-      if (r.col_type(i) == 'I') {
+      if (r.col_type(i) == 'I')
+      {
         _sum += r.get_int(i);
       }
     }
     return true;
   }
 
-  virtual IntSumRower* clone()
+  virtual std::shared_ptr<Rower> clone()
   {
-    return new IntSumRower();
+    return std::make_shared<IntSumRower>();
   }
 
-  virtual void join_delete(Rower* other)
+  virtual void join_delete(std::shared_ptr<Rower> other)
   {
-    _sum = _sum + dynamic_cast<IntSumRower*>(other)->_sum;
-    delete other;
+    _sum = _sum + std::dynamic_pointer_cast<IntSumRower>(other)->_sum;
   }
 };
 
@@ -135,27 +136,25 @@ class CounterRower : public Rower
 {
 public:
   size_t _count = 0;
-  Sys _sys;
 
-  CounterRower() : _sys() {}
+  CounterRower() = default;
 
   virtual ~CounterRower() = default;
 
-  virtual bool accept(Row& r)
+  virtual bool accept(Row &r)
   {
     _count += r.width();
     return true;
   }
 
-  virtual CounterRower* clone()
+  virtual std::shared_ptr<Rower> clone()
   {
-    return new CounterRower();
+    return std::make_shared<CounterRower>();
   }
 
-  virtual void join_delete(Rower* other)
+  virtual void join_delete(std::shared_ptr<Rower> other)
   {
-    _count += dynamic_cast<CounterRower*>(other)->_count;
-    delete other;
+    _count += std::dynamic_pointer_cast<CounterRower>(other)->_count;
   }
 };
 
@@ -165,24 +164,28 @@ class CharCountRower : public Rower
 public:
   char _search_char;
   size_t _count;
-  Sys _sys;
 
-  CharCountRower(char search_char) : _sys() {
+  CharCountRower(char search_char)
+  {
     _search_char = search_char;
     _count = 0;
   }
 
-  virtual ~CharCountRower() {
+  virtual ~CharCountRower()
+  {
   }
 
-  virtual bool accept(Row& r)
+  virtual bool accept(Row &r)
   {
     for (size_t i = 0; i < r.width(); ++i)
     {
-      if (r.col_type(i) == 'S') {
+      if (r.col_type(i) == 'S')
+      {
         std::string str = r.get_string(i);
-        for (size_t j=0; j<str.length(); j++) {
-          if (str[j] == _search_char) {
+        for (size_t j = 0; j < str.length(); j++)
+        {
+          if (str[j] == _search_char)
+          {
             _count++;
           }
         }
@@ -191,14 +194,13 @@ public:
     return true;
   }
 
-  virtual CharCountRower* clone()
+  virtual std::shared_ptr<Rower> clone()
   {
-    return new CharCountRower(_search_char);
+    return std::make_shared<CharCountRower>(_search_char);
   }
 
-  virtual void join_delete(Rower* other)
+  virtual void join_delete(std::shared_ptr<Rower> other)
   {
-    _count += dynamic_cast<CharCountRower*>(other)->_count;
-    delete other;
+    _count += std::dynamic_pointer_cast<CharCountRower>(other)->_count;
   }
 };

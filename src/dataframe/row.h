@@ -3,13 +3,15 @@
  * Emails: yeung.bri@husky.neu.edu, gao.d@husky.neu.edu
  */
 
-//lang::Cpp
+// lang::Cpp
 
 #pragma once
+#include <string>
+#include <cstring>
+#include <vector>
 #include "schema.h"
 #include "fielder.h"
-#include <string>
-#include <vector>
+#include "wrapper.h"
 
 /*************************************************************************
  * Row::
@@ -22,9 +24,7 @@
 class Row
 {
 public:
-  Schema _schema; // External Schema
-  size_t _idx;    // Not our responsibility
-  std::string _name;
+  Schema _schema;
 
   // Attribution: https://stackoverflow.com/a/18577481/12602247 at 2/11 7:52PM
   struct Data
@@ -41,38 +41,37 @@ public:
       int ival;
       double fval;
       bool bval;
-      char* sval;
-      char* mval;
+      char *sval;
+      char *mval;
     } val;
   };
 
-  std::vector<struct Data *> _elements;
+  std::vector<std::shared_ptr<Data>> _elements;
 
-  /** Build a row following a schema. */
-  Row(Schema &scm, std::string name) : Row(scm)
-  {
-    _name = name;
-  }
-
+  /**
+   * Constructs a row given a schema. All elements are missing at initialization.
+   */
   Row(Schema &scm)
   {
     _schema = scm;
     for (size_t i = 0; i < _schema.width(); i++)
     {
-      struct Data* element = new struct Data();
+      auto element = std::make_shared<Data>();
       element->type = Data::is_missing;
       element->val.mval = new char[0];
       _elements.push_back(element);
     }
   }
 
+  /**
+   * Row copy constructor. Fills in the values from the old row.
+   */
   Row(Row &row)
   {
     _schema = row._schema;
-    _idx = row._idx;
     for (size_t i = 0; i < _schema.width(); ++i)
     {
-      struct Data *element = new struct Data();
+      auto element = std::make_shared<Data>();
       element->type = row._elements[i]->type;
       element->val = row._elements[i]->val;
       _elements.push_back(element);
@@ -81,63 +80,71 @@ public:
 
   virtual ~Row()
   {
-    for (auto field : _elements)
-    {
-      //delete field->val.sval;
-      //delete field->val.mval;
-      delete field;
-    }
     _elements.clear();
   }
 
   /** Setters: set the given column with the given value. Setting a column with
     * a value of the wrong type is undefined. */
-  void set(size_t col, int val)
+  void set(size_t col, Int val)
   {
     if (_schema.col_type(col) == 'I')
     {
-      _elements[col]->type = Data::is_int;
-      _elements[col]->val.ival = val;
+      if (val.is_missing())
+      {
+        _elements[col]->type = Data::is_missing;
+      }
+      else
+      {
+        _elements[col]->type = Data::is_int;
+        _elements[col]->val.ival = val.val();
+        ;
+      }
     }
   }
-  void set(size_t col, double val)
+  void set(size_t col, Double val)
   {
     if (_schema.col_type(col) == 'D')
     {
-      _elements[col]->type = Data::is_double;
-      _elements[col]->val.fval = val;
+      if (val.is_missing())
+      {
+        _elements[col]->type = Data::is_missing;
+      }
+      else
+      {
+        _elements[col]->type = Data::is_double;
+        _elements[col]->val.fval = val.val();
+      }
     }
   }
-  void set(size_t col, bool val)
+  void set(size_t col, Bool val)
   {
     if (_schema.col_type(col) == 'B')
     {
-      _elements[col]->type = Data::is_bool;
-      _elements[col]->val.bval = val;
+      if (val.is_missing())
+      {
+        _elements[col]->type = Data::is_missing;
+      }
+      else
+      {
+        _elements[col]->type = Data::is_bool;
+        _elements[col]->val.bval = val.val();
+      }
     }
   }
-
-  /** Acquire ownership of the string. */
-  void set(size_t col, std::string val)
+  void set(size_t col, String val)
   {
     if (_schema.col_type(col) == 'S')
     {
-      _elements[col]->type = Data::is_string;
-      //delete _elements[col]->val.sval;
-      _elements[col]->val.sval = strdup(val.c_str());
+      if (val.is_missing())
+      {
+        _elements[col]->type = Data::is_missing;
+      }
+      else
+      {
+        _elements[col]->type = Data::is_string;
+        _elements[col]->val.sval = strdup(val.val().c_str());
+      }
     }
-  }
-
-  /** Set/get the index of this row (ie. its position in the dataframe. This is
-   *  only used for informational purposes, unused otherwise */
-  void set_idx(size_t idx)
-  {
-    _idx = idx;
-  }
-
-  size_t get_idx()
-  {
-    return _idx;
   }
 
   /** Getters: get the value at the given column. If the column is not
@@ -159,7 +166,16 @@ public:
 
   std::string get_string(size_t col)
   {
-    return _elements[col]->val.sval;
+    // there is a chance that sval is a nullptr, because it's a char* type
+    auto val = _elements[col]->val.sval;
+    if (val)
+    {
+      return val;
+    }
+    else
+    {
+      return "";
+    }
   }
 
   /** Number of fields in the row. */
@@ -228,47 +244,24 @@ public:
     }
   }
 
-  // void set_missing(int idx)
-  // {
-  //   std::cout << _elements[idx]->type << std::endl;
-  //   std::cout << Data::is_missing << std::endl;
-  //   _elements[idx]->type = Data::is_missing;
-  // }
+  /**
+   * Marks the element at the specified index as missing.
+   * Adds gibberish values.
+   */
+  void set_missing(int idx)
+  {
+    _elements[idx]->type = Data::is_missing;
+    _elements[idx]->val.bval = false;
+    _elements[idx]->val.ival = 0;
+    _elements[idx]->val.fval = 0;
+    _elements[idx]->val.sval = nullptr;
+  }
 
   /**
-   * Caller of this method is responsible for updating this schema
-   * If _elements is not big enough, make it bigger
-   * Add this item to _elements
+   * Returns true if the value at the given index is missing, false otherwise.
    */
-  void push_back(bool b)
+  bool is_missing(int idx)
   {
-    struct Data *element = new struct Data();
-    element->type = Data::is_bool;
-    element->val.bval = b;
-    _elements.push_back(element);
-  }
-
-  void push_back(int i)
-  {
-    struct Data *element = new struct Data();
-    element->type = Data::is_int;
-    element->val.ival = i;
-    _elements.push_back(element);;
-  }
-
-  void push_back(double f)
-  {
-    struct Data *element = new struct Data();
-    element->type = Data::is_double;
-    element->val.fval = f;
-    _elements.push_back(element);
-  }
-
-  void push_back(std::string s)
-  {
-    struct Data *element = new struct Data();
-    element->type = Data::is_string;
-    element->val.sval = strdup(s.c_str());
-    _elements.push_back(element);;
+    return _elements[idx]->type == Data::is_missing;
   }
 };
