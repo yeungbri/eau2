@@ -31,6 +31,12 @@ public:
   std::vector<std::shared_ptr<Key>> kbuf;
   std::map<std::string, int> all;
 
+  /**
+   * Create a word counter given:
+   * @param idx the node index of this application instance
+   * @param net a network interface to send and recv messages
+   * @param num_nodes how many nodes are running in total (must be more than 1)
+   */
   WordCount(size_t idx, std::shared_ptr<NetworkIfc> net, int num_nodes)
       : Application(idx, net, num_nodes), in("data", idx)
   {
@@ -101,10 +107,16 @@ public:
     Adder add(m);
     df->local_map(add, kv);
   }
-}; // WordcountDemo
+};
 
 /**
  * Runs the Milestone 4 Demo.
+ * 
+ * NOTE: This demo only works on one node. We have not yet implemented multi-
+ * node word-counting for this milestone.
+ * 
+ * However, Milestone3 demonstrates that multiple nodes can correctly work 
+ * together. This is something we will implement in the future.
  */
 class Milestone4
 {

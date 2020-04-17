@@ -41,6 +41,8 @@ class NetworkIfc {
 
 /**
  * Each node is identified by node idx and its socket address
+ * 
+ * NOTE: Not yet implemented - will be implemented along with NetworkIP
  *
  * author: vitekj@me.com
  */
@@ -56,6 +58,9 @@ class NodeInfo {
  * IP based network communications layer. Each node has an index between 0
  * and num_nodes - 1. The NodeInfo directory is ordered by node index. Each
  * node has a socket and an ip address
+ * 
+ * NOTE: This is not yet implemented. We are still using NetworkPseudo - this
+ * comment will be updated once we start using a real network.
  *
  * author: vitekj@me.com
  */
@@ -170,7 +175,7 @@ class NetworkIP : public NetworkIfc {
     send(conn, ser.data(), size, 0);
   }
 
-  /** Listens on the server socket. When a message becomes availble, reads its
+  /** Listens on the server socket. When a message becomes available, reads its
    * data dserialize it and return the object **/
   std::shared_ptr<Message> recv_m() {
     sockaddr_in sender;

@@ -12,7 +12,15 @@
 #include "m5.h"
 
 /**
- * Runs each of the 5 milestones in succession.
+ * Runs each of the 5 milestones in succession. Exits upon completion.
+ * 
+ * Status of milestones:
+ * 
+ * 1: COMPLETE
+ * 2: COMPLETE
+ * 3: COMPLETE
+ * 4: MOSTLY COMPLETE
+ * 5: PENDING
  */
 int main()
 {

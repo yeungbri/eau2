@@ -28,11 +28,17 @@ public:
 
   virtual ~MessageCheckerThread() = default;
 
+  /**
+   * Handler of this thread calls this method to end the forever-while-loop
+   */
   void terminate()
   {
     terminate_ = true;
   }
 
+  /**
+   * Upon receiving a put message, this thread 
+   */
   void handle_put(std::shared_ptr<Message> msg)
   {
     auto put_msg = std::dynamic_pointer_cast<Put>(msg);

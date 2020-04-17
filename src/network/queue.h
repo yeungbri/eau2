@@ -22,6 +22,9 @@ public:
 
   MessageQueue() {}
 
+  /**
+   * Pushes message on to queue
+   */
   void push(std::shared_ptr<Message> msg)
   {
     lock_.lock();
@@ -30,6 +33,9 @@ public:
     lock_.notify_all();
   }
 
+  /**
+   * Removes and returns the first message in the queue
+   */
   std::shared_ptr<Message> pop()
   {
     lock_.lock();
@@ -44,11 +50,17 @@ public:
     return result;
   }
 
+  /**
+   * Returns size of queue
+   */
   size_t size()
   {
     return queue_.size();
   }
 
+  /**
+   * Prints the contents of this queue
+   */
   void print()
   {
     for (auto m : queue_)

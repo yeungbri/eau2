@@ -364,6 +364,11 @@ public:
 
 /**
  * Runs the Milestone 5 Demo.
+ * 
+ * NOTE: This milestone is not implemented yet, at all. It only has the provided
+ * starter code integrated insofar as it compiles with our original code.
+ * 
+ * This is something that will be implemented in the future.
  */
 class Milestone5
 {

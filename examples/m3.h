@@ -21,17 +21,33 @@ public:
   std::shared_ptr<Key> check = std::make_shared<Key>("ck", 0);
   MessageCheckerThread message_checker_;
 
-  size_t DF_TEST_SIZE = 100 * 1000;
+  size_t DF_TEST_SIZE = 100 * 1000;   // The number of elements we are storing. 
 
+  /**
+   * Create an instance of the application given:
+   * @param idx the node number
+   * @param net a network interface to send and receive messages
+   * @param num_nodes how many nodes are running, total (must be at least 1)
+   */
   Demo(size_t idx, std::shared_ptr<NetworkIfc> net, size_t num_nodes)
       : Application(idx, net, num_nodes), message_checker_(idx, kv, net) {}
 
+  /**
+   * Kills the message checker thread by breaking its loop and joining.
+   */
   virtual ~Demo()
   {
     message_checker_.terminate();
     message_checker_.join();
   }
 
+  /**
+   * Starts the instance of this application. Depending on what node (of 3 nodes)
+   * this one is, it will either:
+   * - Produce a dataframe with a bunch of numbers and sum them
+   * - Count a dataframe of numbers
+   * - Verify that the count and the original sum match
+   */
   void run_() override
   {
     kv->register_node();
@@ -49,6 +65,10 @@ public:
     }
   }
 
+  /**
+   * Sums up a bunch of doubles, and stores the list of numbers in the KVStore.
+   * It also stores the sum, to be double-checked against later.
+   */
   void producer()
   {
     std::vector<double> vals;
@@ -62,6 +82,10 @@ public:
     DataFrame::fromScalar(check, kv, sum);
   }
 
+  /**
+   * Retrieves the dataframe of numbers from the KVStore, and sums each number.
+   * The elements on the KVStore are stored across all 3 nodes.
+   */
   void counter()
   {
     Value val = kv->waitAndGet(*main);
@@ -75,6 +99,10 @@ public:
     DataFrame::fromScalar(verify, kv, sum);
   }
 
+  /**
+   * Verifies that the counted sum and the original sum are the same.
+   * If SUCCESS is printed, then this works properly.
+   */
   void summarizer()
   {
     Value val = kv->waitAndGet(*verify);
